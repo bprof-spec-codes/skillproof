@@ -1,1 +1,56 @@
-<p>jobupload works!</p>
+<header class="navbar">
+    <div class="logo">
+        <span class="logo-text">MERIT</span>
+    </div>
+    <div class="nav-links">
+        <a href="#" class="nav-link">Saved jobs</a>
+        <div class="profile-icon"></div>
+    </div>
+</header>
+
+<main class="container">
+    <div class="back-link">
+        <a href="#">&larr; Back to Dashboard</a>
+    </div>
+
+    <div class="form-card">
+        <h1 class="form-title">Post a new job advertisement</h1>
+        <p class="form-subtitle">Fill out the details below so our AI can match you with the perfect candidates.</p>
+
+        <form class="job-form">
+            
+            <div class="form-group">
+                <label for="job-title">Job Title</label>
+                <input type="text" id="job-title" name="job-title" placeholder="e.g. Product designer" required>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="location">Location</label>
+                    <input type="text" id="location" name="location" placeholder="e.g. Budapest XI. or Remote" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="employment-type">Employment Type</label>
+                    <select id="employment-type" name="employment-type">
+                        <option value="full-time">Full-time</option>
+                        <option value="part-time">Part-time</option>
+                        <option value="contract">Contract</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="salary">Salary / Payment (Optional)</label>
+                <input type="text" id="salary" name="salary" placeholder="e.g. 600 000 Ft / month">
+            </div>
+
+            <div class="form-group">
+                <label for="description">Job Description</label>
+                <textarea id="description" name="description" rows="6" placeholder="Describe the role, responsibilities, and requirements..." required></textarea>
+            </div>
+
+            <button type="submit" class="submit-btn">Post Advertisement</button>
+        </form>
+    </div>
+</main>
