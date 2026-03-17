@@ -15,6 +15,9 @@ namespace SkillProof.Entities.Models
         [Key]
         public string Id { get; set; } = Guid.NewGuid().ToString();
 
+        [ForeignKey("Company")]
+        public string CompanyId { get; set; }
+
         [Required]
         public string Title { get; set; }
 

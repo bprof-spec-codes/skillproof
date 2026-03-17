@@ -21,6 +21,8 @@ namespace SkillProof.Entities.Models
         [Required]
         public string LastName { get; set; }
 
+        public string? ProfilePictureUrl { get; set; }
+
         public string Headline { get; set; }
         public string Bio { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

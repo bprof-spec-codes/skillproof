@@ -43,6 +43,7 @@ namespace SkillProof.Entities.Models
 
         public bool IsActive { get; set; } = true;
 
+        public virtual ICollection<TestAnswers> TestAnswers { get; set; }
         public virtual MultipleChoiceQuestions? MultipleChoiceQuestion { get; set; }
         public virtual CodeCompletionQuestions? CodeCompletionQuestion { get; set; }
     }

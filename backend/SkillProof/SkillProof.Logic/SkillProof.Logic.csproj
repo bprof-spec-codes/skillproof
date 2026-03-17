@@ -6,4 +6,9 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\SkillProof.Data\SkillProof.Data.csproj" />
+    <ProjectReference Include="..\SkillProof.Entities\SkillProof.Entities.csproj" />
+  </ItemGroup>
+
 </Project>
