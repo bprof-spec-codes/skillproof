@@ -28,7 +28,8 @@ namespace SkillProof.Entities.Configurations
                     .IsRequired()
                     .HasMaxLength(100);
              builder.Property(j => j.Tags)
-                    .HasMaxLength(500);
+                    .HasMaxLength(500)
+                    .IsRequired();
         }
     }
 }

@@ -18,7 +18,8 @@ namespace SkillProof.Entities.Configurations
                 .IsRequired()
                 .HasMaxLength(100);
             builder.Property(c => c.Description)
-                .HasMaxLength(1000);
+                .HasMaxLength(1000)
+                .IsRequired();
             builder.HasMany(c => c.Users)
                .WithMany(u => u.Companies);
         }

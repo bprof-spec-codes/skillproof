@@ -23,9 +23,10 @@ namespace SkillProof.Entities.Configurations
                 .HasForeignKey(ja => ja.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
             builder.HasOne(ja => ja.Test)
-                .WithOne(t => t.JobApplication)
-                .HasForeignKey<Tests>(t => t.Id)
-                .OnDelete(DeleteBehavior.Cascade);
+               .WithOne(t => t.JobApplication)
+               .HasForeignKey<JobApplications>(ja => ja.TestId)
+               .IsRequired(false)
+               .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

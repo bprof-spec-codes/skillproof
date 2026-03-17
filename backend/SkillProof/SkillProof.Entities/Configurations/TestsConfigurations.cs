@@ -16,6 +16,8 @@ namespace SkillProof.Entities.Configurations
             builder.HasKey(t => t.Id);
             builder.HasOne(t => t.User)
                 .WithMany(u => u.Tests)
+                .HasForeignKey(t => t.UserId)
+                .IsRequired(false)
                 .OnDelete(DeleteBehavior.Cascade);
         }
     }

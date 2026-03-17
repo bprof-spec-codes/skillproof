@@ -15,9 +15,11 @@ namespace SkillProof.Entities.Configurations
         {
             builder.HasKey(ta => ta.Id);
             builder.Property(ta => ta.FreeTextResponse)
-                .HasMaxLength(500);
+                .HasMaxLength(500)
+                .IsRequired();
             builder.Property(ta => ta.AiFeedback)
-                .HasMaxLength(500);
+                .HasMaxLength(500)
+                .IsRequired();
             builder.HasOne(ta => ta.Question)
                 .WithMany(q => q.TestAnswers)
                 .HasForeignKey(ta => ta.QuestionId)

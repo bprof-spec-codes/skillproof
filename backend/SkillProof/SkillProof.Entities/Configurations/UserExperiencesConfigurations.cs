@@ -15,9 +15,11 @@ namespace SkillProof.Entities.Configurations
         {
             builder.HasKey(ue => ue.Id);
             builder.Property(ue => ue.JobTitle)
-                .HasMaxLength(100);
+                .HasMaxLength(100)
+                .IsRequired();
             builder.Property(ue => ue.CompanyName)
-                .HasMaxLength(100);
+                .HasMaxLength(100)
+                .IsRequired();
             builder.HasOne(ue => ue.User)
                 .WithMany(u => u.UserExperiences)
                 .HasForeignKey(ue => ue.UserId)

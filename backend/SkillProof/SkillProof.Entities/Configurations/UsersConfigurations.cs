@@ -13,11 +13,11 @@ namespace SkillProof.Entities.Configurations
     {
         public void Configure(EntityTypeBuilder<Users> builder)
         {
-            builder.HasKey(u => u.Id);
             builder.Property(u => u.FirstName).IsRequired().HasMaxLength(50);
             builder.Property(u => u.LastName).IsRequired().HasMaxLength(50);
             builder.Property(u => u.Email).IsRequired().HasMaxLength(50);
-            
+            builder.Property(u => u.Headline).HasMaxLength(100);
+            builder.Property(u => u.Bio).HasMaxLength(500);
         }
     }
 }

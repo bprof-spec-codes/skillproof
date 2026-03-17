@@ -1,3 +1,8 @@
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using SkillProof.Data;
+using SkillProof.Entities.Models;
+
 namespace SkillProof.Api
 {
     public class Program
@@ -9,6 +14,13 @@ namespace SkillProof.Api
             // Add services to the container.
 
             builder.Services.AddControllers();
+
+            builder.Services.AddDbContext<SkillProofDbContext>(options =>
+                options.UseSqlServer(builder.Configuration["db:conn"]));
+
+            builder.Services.AddIdentity<Users, IdentityRole>()
+                .AddEntityFrameworkStores<SkillProofDbContext>()
+                .AddDefaultTokenProviders();
 
             var app = builder.Build();
 

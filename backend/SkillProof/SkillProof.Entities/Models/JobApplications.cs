@@ -21,6 +21,9 @@ namespace SkillProof.Entities.Models
         [ForeignKey("User")]
         public string UserId { get; set; }
 
+        [ForeignKey("Test")]
+        public string? TestId { get; set; }
+
         [Required]
         public JobApplicationStatus Status { get; set; }
 
