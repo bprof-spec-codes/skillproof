@@ -1,17 +1,18 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
-using SkillProof.Entities.Models;
-using SkillProof.Entities.Dtos.Users;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using SkillProof.Entities.Dtos.Users;
+using SkillProof.Entities.Helper;
+using SkillProof.Entities.Models;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Options;
-using System.Text;
 
 namespace SkillProof.Api.Controllers
 {
@@ -22,13 +23,15 @@ namespace SkillProof.Api.Controllers
         private readonly IWebHostEnvironment env;
         UserManager<Users> userManager;
         RoleManager<IdentityRole> roleManager;
+        private readonly JwtSettings jwtSettings;
 
-        public UserController(UserManager<Users> userManager, IWebHostEnvironment env, RoleManager<IdentityRole> roleManager)
+        public UserController(UserManager<Users> userManager, IWebHostEnvironment env, RoleManager<IdentityRole> roleManager, IOptions<JwtSettings> jwtSettings)
         {
             this.userManager = userManager;
             this.env = env;
             this.roleManager = roleManager;
-        }
+            this.jwtSettings = jwtSettings.Value;
+        }   
 
         [HttpPost("Register")]
         public async Task RegiterUser(RegisterUser dto)
@@ -124,21 +127,16 @@ namespace SkillProof.Api.Controllers
         }
 
         [HttpPost("Login")]
-        public async Task<IActionResult> Login(AppUserLoginDto dto)
+        public async Task<IActionResult> Login(LoginUser dto)
         {
             var user = await userManager.FindByEmailAsync(dto.Email);
+
             if (user == null)
             {
                 return BadRequest(new { message = "Incorrect Email" });
             }
 
-            // Check if user is banned
-            if (user.IsBanned)
-            {
-                return Unauthorized(new { message = "Your account has been banned. Please contact support." });
-            }
-            else
-            {
+            
                 var result = await userManager.CheckPasswordAsync(user, dto.Password);
                 if (!result)
                 {
@@ -166,7 +164,6 @@ namespace SkillProof.Api.Controllers
                     });
 
                 }
-            }
         }
 
 
@@ -174,6 +171,20 @@ namespace SkillProof.Api.Controllers
         {
             string pattern = @"^[^@\s]+@[^@\s]+\.[^@\s]+$";
             return Regex.IsMatch(email, pattern, RegexOptions.IgnoreCase);
+        }
+
+        private JwtSecurityToken GenerateAccessToken(IEnumerable<Claim>? claims, int expiryInMinutes)
+        {
+            var signinKey = new SymmetricSecurityKey(
+                  Encoding.UTF8.GetBytes(jwtSettings.Key));
+
+            return new JwtSecurityToken(
+                  issuer: jwtSettings.Issuer,
+                  audience: jwtSettings.Issuer,
+                  claims: claims?.ToArray(),
+                  expires: DateTime.Now.AddMinutes(expiryInMinutes),
+                  signingCredentials: new SigningCredentials(signinKey, SecurityAlgorithms.HmacSha256)
+            );
         }
 
     }
