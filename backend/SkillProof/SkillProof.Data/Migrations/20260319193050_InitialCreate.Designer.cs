@@ -12,7 +12,7 @@ using SkillProof.Data;
 namespace SkillProof.Data.Migrations
 {
     [DbContext(typeof(SkillProofDbContext))]
-    [Migration("20260317012311_InitialCreate")]
+    [Migration("20260319193050_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -255,11 +255,11 @@ namespace SkillProof.Data.Migrations
 
                     b.Property<string>("AcceptedAnswers")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("CodeSnippet")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("QuestionId");
 
@@ -291,6 +291,23 @@ namespace SkillProof.Data.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Companies");
+                });
+
+            modelBuilder.Entity("SkillProof.Entities.Models.FillInTheBlankQuestions", b =>
+                {
+                    b.Property<string>("QuestionId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Answer")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("manualFeedback")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("QuestionId");
+
+                    b.ToTable("FillInTheBlankQuestions");
                 });
 
             modelBuilder.Entity("SkillProof.Entities.Models.JobApplications", b =>
@@ -356,7 +373,7 @@ namespace SkillProof.Data.Migrations
                     b.Property<string>("Tags")
                         .IsRequired()
                         .HasMaxLength(500)
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("Title")
                         .IsRequired()
@@ -417,7 +434,7 @@ namespace SkillProof.Data.Migrations
 
                     b.Property<string>("QuestionText")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Title")
                         .IsRequired()
@@ -642,6 +659,17 @@ namespace SkillProof.Data.Migrations
                     b.Navigation("Question");
                 });
 
+            modelBuilder.Entity("SkillProof.Entities.Models.FillInTheBlankQuestions", b =>
+                {
+                    b.HasOne("SkillProof.Entities.Models.Questions", "Question")
+                        .WithOne("FillInTheBlankQuestions")
+                        .HasForeignKey("SkillProof.Entities.Models.FillInTheBlankQuestions", "QuestionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Question");
+                });
+
             modelBuilder.Entity("SkillProof.Entities.Models.JobApplications", b =>
                 {
                     b.HasOne("SkillProof.Entities.Models.Jobs", "Job")
@@ -653,7 +681,7 @@ namespace SkillProof.Data.Migrations
                     b.HasOne("SkillProof.Entities.Models.Tests", "Test")
                         .WithOne("JobApplication")
                         .HasForeignKey("SkillProof.Entities.Models.JobApplications", "TestId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("SkillProof.Entities.Models.Users", "User")
                         .WithMany("JobApplications")
@@ -743,6 +771,8 @@ namespace SkillProof.Data.Migrations
             modelBuilder.Entity("SkillProof.Entities.Models.Questions", b =>
                 {
                     b.Navigation("CodeCompletionQuestion");
+
+                    b.Navigation("FillInTheBlankQuestions");
 
                     b.Navigation("MultipleChoiceQuestion");
 

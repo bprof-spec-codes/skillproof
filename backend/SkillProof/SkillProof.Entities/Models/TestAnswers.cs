@@ -12,7 +12,7 @@ namespace SkillProof.Entities.Models
     public class TestAnswers: IIdentity
     {
         [Key]
-        public string Id { get; set; }
+        public string Id { get; set; } = Guid.NewGuid().ToString();
 
         [ForeignKey("Question")]
         public string QuestionId { get; set; }

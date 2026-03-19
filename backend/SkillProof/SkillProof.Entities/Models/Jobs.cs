@@ -27,7 +27,6 @@ namespace SkillProof.Entities.Models
         [Required]
         public string Location { get; set; }
 
-        [Column(TypeName = "nvarchar(max)")]
         public string Tags { get; set; } // Json array of strings
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

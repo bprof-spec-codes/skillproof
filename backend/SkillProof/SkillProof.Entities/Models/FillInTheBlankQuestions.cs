@@ -1,5 +1,4 @@
-﻿using SkillProof.Entities.Helper;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -9,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace SkillProof.Entities.Models
 {
-    public class MultipleChoiceQuestions: IIdentity
+    public class FillInTheBlankQuestions
     {
         [Key]
         [ForeignKey("Question")]
@@ -21,15 +20,10 @@ namespace SkillProof.Entities.Models
             get => QuestionId;
             set => QuestionId = value;
         }
-
         [Required]
-        public string Options { get; set; } // JSON array of AnswerOption
-
-        [Required]
-        public string CorrectAnswerIds { get; set; } // JSON array of strings
-
-        public bool AllowMultipleSelection { get; set; } = false;
-
+        public string Answer { get; set; }
+        // Ai feedback is in the testAnswers table
+        public string? manualFeedback { get; set; }
         public virtual Questions Question { get; set; }
     }
 }

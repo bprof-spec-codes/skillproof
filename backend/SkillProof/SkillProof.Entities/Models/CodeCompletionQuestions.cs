@@ -22,10 +22,8 @@ namespace SkillProof.Entities.Models
             set => QuestionId = value;
         }
 
-        [Column(TypeName = "text")]
         public string CodeSnippet { get; set; }
 
-        [Column(TypeName = "text")]
         public string AcceptedAnswers { get; set; } // JSON array of strings
 
 

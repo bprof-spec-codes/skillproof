@@ -31,7 +31,6 @@ namespace SkillProof.Entities.Models
         public string Title { get; set; }
 
         [Required]
-        [Column(TypeName = "text")]
         public string QuestionText { get; set; }
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
@@ -45,6 +44,7 @@ namespace SkillProof.Entities.Models
 
         public virtual ICollection<TestAnswers> TestAnswers { get; set; }
         public virtual MultipleChoiceQuestions? MultipleChoiceQuestion { get; set; }
+        public virtual FillInTheBlankQuestions? FillInTheBlankQuestions { get; set; }
         public virtual CodeCompletionQuestions? CodeCompletionQuestion { get; set; }
     }
 }

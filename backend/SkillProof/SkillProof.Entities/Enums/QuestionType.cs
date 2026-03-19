@@ -10,6 +10,7 @@ namespace SkillProof.Entities.Enums
     {
         MultipleChoice,
         CodeCompletion,
-        TrueFalse
+        TrueFalse,
+        FillInTheBlank
     }
 }
