@@ -166,6 +166,52 @@ namespace SkillProof.Api.Controllers
                 }
         }
 
+        [HttpGet("GrantAdmin/{userId}")]
+        //[Authorize] Admin
+        public async Task GrantAdminRole(string userId)
+        {
+            var user = await userManager.FindByIdAsync(userId);
+            if (user == null)
+                throw new ArgumentException("User not found");
+
+            var roles = await userManager.GetRolesAsync(user);
+
+            if (roles.FirstOrDefault() == "Admin")
+            {
+                throw new ArgumentException("User already has admin role");
+            }
+        
+            await userManager.AddToRoleAsync(user, "Admin");
+        }
+
+        [HttpGet("RevokeRole/{userId}")]
+        //[Authorize] Admin
+        public async Task RevokeRole(string userId)
+        {
+
+            var user = await userManager.FindByIdAsync(userId);
+            if (user == null)
+                throw new ArgumentException("User not found");
+
+            var roles = await userManager.GetRolesAsync(user);
+
+            if (roles.Contains("Admin"))
+            {
+                var admins = await userManager.GetUsersInRoleAsync("Admin");
+
+                if (admins.Count <= 1) throw new ArgumentException("You cannot remove the last remaining Admin user");
+            }
+
+            if (roles is null)
+            {
+                throw new ArgumentException("User has no roles");
+            }
+
+            await userManager.RemoveFromRolesAsync(user, roles);
+        }
+
+
+
 
         private bool IsValidEmail(string email)
         {
