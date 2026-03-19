@@ -17,7 +17,7 @@ namespace SkillProof.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class UserController
+    public class UserController:ControllerBase
     {
         private readonly IWebHostEnvironment env;
         UserManager<Users> userManager;
@@ -71,21 +71,44 @@ namespace SkillProof.Api.Controllers
 
             foreach (var user in users)
             {
-                var roles = await userManager.GetRolesAsync(user);
-
                 result.Add(new ViewUser
                 {
                     Id = user.Id,
                     Email = user.Email,
                     FullName = user.FirstName + " " + user.LastName,                            
-                    Image = Convert.ToBase64String(user.ProfilePicture),
-                    Role = roles.FirstOrDefault(),
+                    Image = Convert.ToBase64String(user.ProfilePicture),              
                     Headline = user.Headline,
                     Bio = user.Bio
                 });
             }
 
             return result;
+        }
+
+        [HttpGet("{id}")]
+        public async Task<ActionResult<ViewUser>> GetUserById(string id)
+        {
+            var user = await userManager.FindByIdAsync(id);
+
+            if (user is null) return NotFound("User not found");
+
+            var userView = new ViewUser
+            {
+                Id = user.Id,
+                FullName = $"{user.FirstName} {user.LastName}",
+                Email = user.Email,
+                Image = Convert.ToBase64String(user.ProfilePicture),
+                Bio = user.Bio,
+                Headline = user.Headline,            
+            };
+
+            return userView;
+        }
+
+        [HttpPut("{id}")]
+        public async Task UpdateUser(string id, [FromBody])
+        {
+
         }
 
 
