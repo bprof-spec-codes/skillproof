@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using SkillProof.Data;
+using SkillProof.Data.Repositorys;
 using SkillProof.Entities.Helper;
 using SkillProof.Entities.Models;
 using System.Text;
@@ -32,9 +33,11 @@ namespace SkillProof.Api
             var jwtKey = jwtSettings!.Key;
 
             //Cors configuration from json file
-            var frontendUrl = builder.Configuration["settings:frontend"];        
+            var frontendUrl = builder.Configuration["settings:frontend"];
 
             // Add services to the container.
+
+            builder.Services.AddTransient(typeof(Repository<>));
 
             builder.Services.AddCors(option =>
             {
