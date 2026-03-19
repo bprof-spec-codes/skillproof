@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
@@ -6,10 +6,26 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
+	<ItemGroup>
+		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.0" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.0">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.0" />
+
+		<PackageReference Include="Swashbuckle.AspNetCore" Version="7.2.0" />
+	</ItemGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\SkillProof.Data\SkillProof.Data.csproj" />
     <ProjectReference Include="..\SkillProof.Entities\SkillProof.Entities.csproj" />
     <ProjectReference Include="..\SkillProof.Logic\SkillProof.Logic.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Controllers\" />
   </ItemGroup>
 
 </Project>
