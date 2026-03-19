@@ -63,31 +63,25 @@ namespace SkillProof.Api.Controllers
         }
 
         [HttpGet("GetAllUsers")]
-        public async Task<IEnumerable<AppUserShortViewDto>> GetAllUsers()
+        public async Task<IEnumerable<ViewUser>> GetAllUsers()
         {
-            var users = await userManager.Users //összes user listázása
-                .Include(u => u.Image)  //include a navigation property miatt kell hogy az is benne legyen
-                .ToListAsync();
+            var users = await userManager.Users.ToListAsync();
 
-            var result = new List<AppUserShortViewDto>();
+            var result = new List<ViewUser>();
 
             foreach (var user in users)
             {
                 var roles = await userManager.GetRolesAsync(user);
 
-                result.Add(new AppUserShortViewDto
+                result.Add(new ViewUser
                 {
                     Id = user.Id,
                     Email = user.Email,
-                    FullName = user.FirstName + " " + user.LastName,
-                    IsWarned = user.IsWarned,
-                    IsBanned = user.IsBanned,
+                    FullName = user.FirstName + " " + user.LastName,                            
+                    Image = Convert.ToBase64String(user.ProfilePicture),
                     Role = roles.FirstOrDefault(),
-                    Image = new ContentViewDto(
-                        user.Image.Id,
-                        user.Image.FileName,
-                        Convert.ToBase64String(user.Image.File)
-                    )
+                    Headline = user.Headline,
+                    Bio = user.Bio
                 });
             }
 
