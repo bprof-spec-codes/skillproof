@@ -22,6 +22,8 @@ namespace SkillProof.Data
         public DbSet<TestAnswers> TestAnswers { get; set; }
         public DbSet<MultipleChoiceQuestions> MultipleChoiceQuestion { get; set; }
         public DbSet<CodeCompletionQuestions> CodeCompletionQuestions { get; set; }
+        public DbSet<FillInTheBlankQuestions> FillInTheBlankQuestions { get; set; }
+        public DbSet<TrueFalseQuestions> TrueFalseQuestions { get; set; }
         public SkillProofDbContext(DbContextOptions<SkillProofDbContext> options) : base(options)
         {
         }
@@ -34,8 +36,10 @@ namespace SkillProof.Data
             modelBuilder.ApplyConfiguration(new JobsConfigurations());
             modelBuilder.ApplyConfiguration(new MultipleChoiceQuestionsConfigurations());
             modelBuilder.ApplyConfiguration(new QuestionsConfigurations());
+            modelBuilder.ApplyConfiguration(new FillInTheBlankQuestionsConfigurations());
             modelBuilder.ApplyConfiguration(new TestAnswersConfigurations());
             modelBuilder.ApplyConfiguration(new TestsConfigurations());
+            modelBuilder.ApplyConfiguration(new TrueFalseQuestionsConfigurations());
             modelBuilder.ApplyConfiguration(new UserExperiencesConfigurations());
             modelBuilder.ApplyConfiguration(new UsersConfigurations());
         }

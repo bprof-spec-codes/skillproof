@@ -1,15 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+using SkillProof.Entities.Helper;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using SkillProof.Entities.Helper;
 
 namespace SkillProof.Entities.Models
 {
-    public class FillInTheBlankQuestions : IIdentity
+    public class TrueFalseQuestions : IIdentity
     {
         [Key]
         [ForeignKey("Question")]
@@ -21,10 +16,12 @@ namespace SkillProof.Entities.Models
             get => QuestionId;
             set => QuestionId = value;
         }
+
         [Required]
-        public string Answer { get; set; }
-        // Ai feedback is in the testAnswers table
-        public string? manualFeedback { get; set; }
+        public bool CorrectAnswer { get; set; }
+
+        public string? Explanation { get; set; }
+
         public virtual Questions Question { get; set; }
     }
 }

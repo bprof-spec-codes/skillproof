@@ -46,5 +46,6 @@ namespace SkillProof.Entities.Models
         public virtual MultipleChoiceQuestions? MultipleChoiceQuestion { get; set; }
         public virtual FillInTheBlankQuestions? FillInTheBlankQuestions { get; set; }
         public virtual CodeCompletionQuestions? CodeCompletionQuestion { get; set; }
+        public virtual TrueFalseQuestions? TrueFalseQuestion { get; set; }
     }
 }
