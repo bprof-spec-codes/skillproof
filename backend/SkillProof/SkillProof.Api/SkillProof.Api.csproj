@@ -6,4 +6,10 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\SkillProof.Data\SkillProof.Data.csproj" />
+    <ProjectReference Include="..\SkillProof.Entities\SkillProof.Entities.csproj" />
+    <ProjectReference Include="..\SkillProof.Logic\SkillProof.Logic.csproj" />
+  </ItemGroup>
+
 </Project>
