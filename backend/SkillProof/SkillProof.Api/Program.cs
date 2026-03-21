@@ -100,7 +100,7 @@ namespace SkillProof.Api
 
             builder.Services.AddSwaggerGen(option =>
             {
-                option.SwaggerDoc("v1", new OpenApiInfo { Title = "Edushare API", Version = "v1" });
+                option.SwaggerDoc("v1", new OpenApiInfo { Title = "SkillProof API", Version = "v1" });
                 option.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
                 {
                     In = ParameterLocation.Header,
