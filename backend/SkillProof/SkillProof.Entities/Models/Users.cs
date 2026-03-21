@@ -21,15 +21,21 @@ namespace SkillProof.Entities.Models
         [Required]
         public string LastName { get; set; }
 
-        public string? ProfilePictureUrl { get; set; }
+        public byte[] ProfilePicture { get; set; }
 
         public string Headline { get; set; }
         public string Bio { get; set; }
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime CreatedAt { get; set; }
 
         public virtual ICollection<Companies>? Companies { get; set; }
         public virtual ICollection<UserExperiences>? UserExperiences { get; set; }
         public virtual ICollection<Tests>? Tests { get; set; }
         public virtual ICollection<JobApplications>? JobApplications { get; set; }
+
+        public Users()
+        {
+            Id = Guid.NewGuid().ToString();
+            CreatedAt = DateTime.UtcNow;
+        }
     }
 }

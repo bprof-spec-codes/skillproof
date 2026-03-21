@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SkillProof.Data;
 
@@ -11,9 +12,11 @@ using SkillProof.Data;
 namespace SkillProof.Data.Migrations
 {
     [DbContext(typeof(SkillProofDbContext))]
-    partial class SkillProofDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260319214710_update1")]
+    partial class update1
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -511,22 +514,6 @@ namespace SkillProof.Data.Migrations
                     b.ToTable("Tests");
                 });
 
-            modelBuilder.Entity("SkillProof.Entities.Models.TrueFalseQuestions", b =>
-                {
-                    b.Property<string>("QuestionId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<bool>("CorrectAnswer")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Explanation")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("QuestionId");
-
-                    b.ToTable("TrueFalseQuestions");
-                });
-
             modelBuilder.Entity("SkillProof.Entities.Models.UserExperiences", b =>
                 {
                     b.Property<string>("Id")
@@ -761,17 +748,6 @@ namespace SkillProof.Data.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("SkillProof.Entities.Models.TrueFalseQuestions", b =>
-                {
-                    b.HasOne("SkillProof.Entities.Models.Questions", "Question")
-                        .WithOne("TrueFalseQuestion")
-                        .HasForeignKey("SkillProof.Entities.Models.TrueFalseQuestions", "QuestionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Question");
-                });
-
             modelBuilder.Entity("SkillProof.Entities.Models.UserExperiences", b =>
                 {
                     b.HasOne("SkillProof.Entities.Models.Users", "User")
@@ -802,8 +778,6 @@ namespace SkillProof.Data.Migrations
                     b.Navigation("MultipleChoiceQuestion");
 
                     b.Navigation("TestAnswers");
-
-                    b.Navigation("TrueFalseQuestion");
                 });
 
             modelBuilder.Entity("SkillProof.Entities.Models.Tests", b =>
