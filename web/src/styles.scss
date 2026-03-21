@@ -1,1 +1,199 @@
-/* You can add global styles to this file, and also import other style files */
+//Colors:
+$background: #FDF0D5;
+$background-darkened: #F1DFBA;
+$primary-btn-color: #003049;
+$secondary-btn-color: #C1121F;
+$card-color: #FFFFFF;
+$job-badge-color: #EDEDED;
+$junior-badge-color: #669BBC;
+$menior-badge-color: #A359C0;
+$senior-badge-color: #C1121F;
+//Font:
+$primary: 'Open Sans', sans-serif;
+$font-weight-semibold: 700;
+$primary-color: #003049;
+
+html, body {
+  font-family: $primary;
+  font-weight: $font-weight-semibold;
+  color: $primary-color;
+  
+}
+
+.background {
+    background-color: $background;
+}
+
+//Header:
+header {
+  backdrop-filter: none;
+}
+
+.header-font {
+    color: $primary-color;
+    font-family: $primary;
+    font-weight: $font-weight-semibold;
+}
+
+.header-font:hover{
+    color: #669BBC;
+}
+
+.divider {
+  border-left: 1px solid #003049;
+  border-width: 2px;
+}
+
+.logo {
+    height: 60px;
+}
+
+.header-icon {
+  font-size: 23px;
+  line-height: 1;
+  vertical-align: -2.5px;
+  font-weight: 700;
+}
+
+//Home page
+
+.home {
+  background: #fdf0d5;
+  min-height: calc(100vh - 92px);
+}
+
+.hero-wrap {
+  max-width: 1080px;
+}
+
+.hero-title {
+  color: #003049;
+  font-weight: 700;
+  font-size: clamp(1.55rem, 2.5vw, 2.2rem);
+  line-height: 1.2;
+}
+
+.hero-sub {
+  color: #003049;
+  opacity: 0.9;
+  font-weight: 500;
+}
+
+.search-shell {
+  border: 2px solid #003049;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.search-part {
+  min-height: 58px;
+  background: #fff;
+}
+
+.search-part + .search-part {
+  border-left: 1px solid #003049;
+}
+
+.search-part-location {
+  width: 34%;
+  min-width: 220px;
+}
+
+.search-input {
+  font-size: 1rem;
+  color: #003049;
+  background: transparent;
+}
+
+.search-input::placeholder {
+  color: #5f7484;
+}
+
+.search-icon {
+  color: #003049;
+  font-size: 1.1rem;
+}
+
+.search-btn {
+  background: #003049;
+  color: #fff;
+  font-weight: 700;
+  min-width: 140px;
+}
+
+.search-btn:hover {
+  background: #0a3d5d;
+  color: #fff;
+}
+
+.promo-card {
+  background: #f1dfba;
+  border-radius: 12px;
+}
+
+.promo-title {
+  color: $primary-color;
+  font-weight: 700;
+  font-size: clamp(1.3rem, 2vw, 1.9rem);
+  line-height: 1.3;
+}
+
+.offer-icon {
+  color: #c1121f;
+  font-size: 20px;
+}
+
+.offer-title {
+  color: #c1121f;
+  font-size: 1.45rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.offer-text {
+  color: #202020;
+  font-weight: 500;
+}
+
+.create-btn {
+  background: #c1121f;
+  color: #fff;
+  border: 0;
+  font-weight: 700;
+  border-radius: 8px;
+  height: 60px;
+  font-family: $primary;
+}
+
+.create-btn:hover {
+  background: #a00f1a;
+  color: #fff;
+}
+
+.phone-preview {
+  max-height: 450px;
+  object-fit: contain;
+}
+
+@media (max-width: 991.98px) {
+  .search-part + .search-part {
+    border-left: 0;
+    border-top: 1px solid #003049;
+  }
+
+  .search-part-location {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .search-btn {
+    width: 100%;
+  }
+}
+
+@media (min-width: 992px) {
+  .promo-pad-lg {
+    padding: 2rem !important;
+  }
+}
+
