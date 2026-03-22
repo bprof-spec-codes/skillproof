@@ -1,16 +1,11 @@
 ﻿using SkillProof.Entities.Enums;
 using SkillProof.Entities.Helper;
-using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SkillProof.Entities.Models
 {
-    public class JobApplications: IIdentity
+    public class JobApplication: IIdentity
     {
         [Key]
         public string Id { get; set; } = Guid.NewGuid().ToString();
@@ -29,7 +24,7 @@ namespace SkillProof.Entities.Models
 
         public DateTime AppliedAt { get; set; } = DateTime.UtcNow;
 
-        public virtual Jobs Job { get; set; }
+        public virtual Job Job { get; set; }
         public virtual Users User { get; set; }
         public virtual Tests? Test { get; set; }
     }

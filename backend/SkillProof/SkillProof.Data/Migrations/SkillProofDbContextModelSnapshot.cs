@@ -17,7 +17,7 @@ namespace SkillProof.Data.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.0")
+                .HasAnnotation("ProductVersion", "9.0.0")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -159,7 +159,7 @@ namespace SkillProof.Data.Migrations
 
                     b.ToTable("AspNetUsers", (string)null);
 
-                    b.HasDiscriminator<string>("Discriminator").HasValue("IdentityUser");
+                    b.HasDiscriminator().HasValue("IdentityUser");
 
                     b.UseTphMappingStrategy();
                 });
@@ -307,42 +307,7 @@ namespace SkillProof.Data.Migrations
                     b.ToTable("FillInTheBlankQuestions");
                 });
 
-            modelBuilder.Entity("SkillProof.Entities.Models.JobApplications", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<DateTime>("AppliedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("JobId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
-
-                    b.Property<string>("TestId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("JobId");
-
-                    b.HasIndex("TestId")
-                        .IsUnique()
-                        .HasFilter("[TestId] IS NOT NULL");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("JobApplications");
-                });
-
-            modelBuilder.Entity("SkillProof.Entities.Models.Jobs", b =>
+            modelBuilder.Entity("SkillProof.Entities.Models.Job", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
@@ -382,6 +347,41 @@ namespace SkillProof.Data.Migrations
                     b.HasIndex("CompanyId");
 
                     b.ToTable("Jobs");
+                });
+
+            modelBuilder.Entity("SkillProof.Entities.Models.JobApplication", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime>("AppliedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("JobId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<string>("TestId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("JobId");
+
+                    b.HasIndex("TestId")
+                        .IsUnique()
+                        .HasFilter("[TestId] IS NOT NULL");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("JobApplications");
                 });
 
             modelBuilder.Entity("SkillProof.Entities.Models.MultipleChoiceQuestions", b =>
@@ -589,8 +589,9 @@ namespace SkillProof.Data.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<string>("ProfilePictureUrl")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<byte[]>("ProfilePicture")
+                        .IsRequired()
+                        .HasColumnType("varbinary(max)");
 
                     b.HasDiscriminator().HasValue("Users");
                 });
@@ -683,9 +684,20 @@ namespace SkillProof.Data.Migrations
                     b.Navigation("Question");
                 });
 
-            modelBuilder.Entity("SkillProof.Entities.Models.JobApplications", b =>
+            modelBuilder.Entity("SkillProof.Entities.Models.Job", b =>
                 {
-                    b.HasOne("SkillProof.Entities.Models.Jobs", "Job")
+                    b.HasOne("SkillProof.Entities.Models.Companies", "Company")
+                        .WithMany("Jobs")
+                        .HasForeignKey("CompanyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Company");
+                });
+
+            modelBuilder.Entity("SkillProof.Entities.Models.JobApplication", b =>
+                {
+                    b.HasOne("SkillProof.Entities.Models.Job", "Job")
                         .WithMany("JobApplications")
                         .HasForeignKey("JobId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -693,7 +705,7 @@ namespace SkillProof.Data.Migrations
 
                     b.HasOne("SkillProof.Entities.Models.Tests", "Test")
                         .WithOne("JobApplication")
-                        .HasForeignKey("SkillProof.Entities.Models.JobApplications", "TestId")
+                        .HasForeignKey("SkillProof.Entities.Models.JobApplication", "TestId")
                         .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("SkillProof.Entities.Models.Users", "User")
@@ -707,17 +719,6 @@ namespace SkillProof.Data.Migrations
                     b.Navigation("Test");
 
                     b.Navigation("User");
-                });
-
-            modelBuilder.Entity("SkillProof.Entities.Models.Jobs", b =>
-                {
-                    b.HasOne("SkillProof.Entities.Models.Companies", "Company")
-                        .WithMany("Jobs")
-                        .HasForeignKey("CompanyId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Company");
                 });
 
             modelBuilder.Entity("SkillProof.Entities.Models.MultipleChoiceQuestions", b =>
@@ -787,7 +788,7 @@ namespace SkillProof.Data.Migrations
                     b.Navigation("Jobs");
                 });
 
-            modelBuilder.Entity("SkillProof.Entities.Models.Jobs", b =>
+            modelBuilder.Entity("SkillProof.Entities.Models.Job", b =>
                 {
                     b.Navigation("JobApplications");
                 });

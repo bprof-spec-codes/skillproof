@@ -1,12 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using SkillProof.Entities.Helper;
-using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SkillProof.Entities.Models
 {
@@ -21,15 +15,21 @@ namespace SkillProof.Entities.Models
         [Required]
         public string LastName { get; set; }
 
-        public string? ProfilePictureUrl { get; set; }
+        public byte[] ProfilePicture { get; set; }
 
         public string Headline { get; set; }
         public string Bio { get; set; }
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime CreatedAt { get; set; }
 
         public virtual ICollection<Companies>? Companies { get; set; }
         public virtual ICollection<UserExperiences>? UserExperiences { get; set; }
         public virtual ICollection<Tests>? Tests { get; set; }
-        public virtual ICollection<JobApplications>? JobApplications { get; set; }
+        public virtual ICollection<JobApplication>? JobApplications { get; set; }
+
+        public Users()
+        {
+            Id = Guid.NewGuid().ToString();
+            CreatedAt = DateTime.UtcNow;
+        }
     }
 }

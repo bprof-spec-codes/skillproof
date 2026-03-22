@@ -21,7 +21,7 @@ namespace SkillProof.Entities.Models
         public string Website { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-        public virtual ICollection<Jobs>? Jobs { get; set; }
+        public virtual ICollection<Job>? Jobs { get; set; }
         public virtual ICollection<Users>? Users { get; set; }
     }
 }

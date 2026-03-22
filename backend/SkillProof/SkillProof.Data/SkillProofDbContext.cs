@@ -2,11 +2,6 @@
 using Microsoft.EntityFrameworkCore;
 using SkillProof.Entities.Configurations;
 using SkillProof.Entities.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SkillProof.Data
 {
@@ -15,9 +10,9 @@ namespace SkillProof.Data
         public DbSet<Users> Users { get; set; }
         public DbSet<UserExperiences> UserExperiences { get; set; }
         public DbSet<Companies> Companies { get; set; }
-        public DbSet<Jobs> Jobs { get; set; }
+        public DbSet<Job> Jobs { get; set; }
         public DbSet<Tests> Tests { get; set; }
-        public DbSet<JobApplications> JobApplications { get; set; }
+        public DbSet<JobApplication> JobApplications { get; set; }
         public DbSet<Questions> Questions { get; set; }
         public DbSet<TestAnswers> TestAnswers { get; set; }
         public DbSet<MultipleChoiceQuestions> MultipleChoiceQuestion { get; set; }

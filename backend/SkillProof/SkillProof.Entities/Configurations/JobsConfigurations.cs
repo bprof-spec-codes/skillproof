@@ -9,9 +9,9 @@ using System.Threading.Tasks;
 
 namespace SkillProof.Entities.Configurations
 {
-    public class JobsConfigurations : IEntityTypeConfiguration<Jobs>
+    public class JobsConfigurations : IEntityTypeConfiguration<Job>
     {
-        public void Configure(EntityTypeBuilder<Jobs> builder)
+        public void Configure(EntityTypeBuilder<Job> builder)
         {
             builder.HasKey(j => j.Id);
             builder.HasOne(j => j.Company)

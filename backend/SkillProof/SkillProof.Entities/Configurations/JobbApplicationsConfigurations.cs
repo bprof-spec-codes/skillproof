@@ -9,9 +9,9 @@ using System.Threading.Tasks;
 
 namespace SkillProof.Entities.Configurations
 {
-    public class JobbApplicationsConfigurations : IEntityTypeConfiguration<JobApplications>
+    public class JobbApplicationsConfigurations : IEntityTypeConfiguration<JobApplication>
     {
-        public void Configure(EntityTypeBuilder<JobApplications> builder)
+        public void Configure(EntityTypeBuilder<JobApplication> builder)
         {
             builder.HasKey(ja => ja.Id);
             builder.HasOne(ja => ja.Job)
@@ -24,7 +24,7 @@ namespace SkillProof.Entities.Configurations
                 .OnDelete(DeleteBehavior.Cascade);
             builder.HasOne(ja => ja.Test)
                .WithOne(t => t.JobApplication)
-               .HasForeignKey<JobApplications>(ja => ja.TestId)
+               .HasForeignKey<JobApplication>(ja => ja.TestId)
                .IsRequired(false)
                .OnDelete(DeleteBehavior.Restrict);
         }
