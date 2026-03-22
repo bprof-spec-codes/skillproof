@@ -23,7 +23,7 @@ public class JobsController : ControllerBase
 
             return Ok(createdJob);
         }
-        catch (Exception ex)
+        catch (KeyNotFoundException ex)
         {
             return BadRequest(new { error = ex.Message });
         }
@@ -60,7 +60,7 @@ public class JobsController : ControllerBase
             {
                 return StatusCode(403, new { error = "You do not have permission to modify this job." });
             }
-            catch (Exception ex)
+            catch (KeyNotFoundException ex)
             {
                 return BadRequest(new { error = ex.Message });
             }
@@ -78,7 +78,7 @@ public class JobsController : ControllerBase
             {
                 return StatusCode(403, new { error = "You do not have permission to delete this job." });
             }
-            catch (Exception ex)
+            catch (KeyNotFoundException ex)
             {
                 return BadRequest(new { error = ex.Message });
             }

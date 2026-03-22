@@ -11,7 +11,6 @@ import { JwtPayload } from '../Models/Helpers/jwt-payload';
   providedIn: 'root',
 })
 export class AuthService {
-
   private storageKey = 'skillProof_token';
 
   constructor(private http:HttpClient, private router:Router){}
@@ -19,7 +18,7 @@ export class AuthService {
    
   login(loginDto:LoginDto): Observable<LoginResultDto> {
         
-      return this.http.post<LoginResultDto>(environment.apiUrls.login, loginDto)
+      return this.http.post<LoginResultDto>(`${environment.apiUrl}/User/Login`, loginDto)
   }
 
   saveToken(token: string) {
