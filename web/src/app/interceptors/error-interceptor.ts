@@ -3,9 +3,11 @@ import { inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { environment } from '../../environments/environment.development';
 import { catchError, throwError } from 'rxjs';
+import { ModalService } from '../services/modal-service';
 
 export const errorInterceptor: HttpInterceptorFn = (req, next) => {
   const router = inject(Router)
+  const modal = inject(ModalService)
   return next(req).pipe(
     catchError((err: HttpErrorResponse) => {
       let userMessage = "Ismeretlen hiba történt."
@@ -27,7 +29,13 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
         userMessage = "Szerverhiba történt. Próbáld meg később."
       }
       
-      // modalt ide
+      modal.open({
+          message: userMessage,
+          autoClose: true,
+          duration: 2000,
+          size: 'md',
+          type: 'error'
+        })
 
       console.error("[HTTP ERROR]", {
         method: req.method,
@@ -35,6 +43,8 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
         status: err.status,
         error: err
       });
+
+      
 
       (err as any).userMessage = userMessage
       return throwError(() => err) 
