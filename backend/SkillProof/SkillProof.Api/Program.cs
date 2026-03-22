@@ -9,11 +9,9 @@ using SkillProof.Data;
 using SkillProof.Data.Repositorys;
 using SkillProof.Entities.Helper;
 using SkillProof.Entities.Models;
-<<<<<<< HEAD
 using SkillProof.Logic.Questions;
-=======
 using System.Text;
->>>>>>> feature/10-RegisterLogin
+using SkillProof.Logic.Jobs;
 
 namespace SkillProof.Api
 {
@@ -40,8 +38,7 @@ namespace SkillProof.Api
             var frontendUrl = builder.Configuration["settings:frontend"];
 
             // Add services to the container.
-
-<<<<<<< HEAD
+            
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
@@ -56,7 +53,6 @@ namespace SkillProof.Api
                         .AllowAnyMethod();
                 });
             });
-=======
             builder.Services.AddTransient(typeof(Repository<>));
 
             builder.Services.AddCors(option =>
@@ -103,7 +99,6 @@ namespace SkillProof.Api
             }); ;
 
             //DbCtx
->>>>>>> feature/10-RegisterLogin
 
             builder.Services.AddDbContext<SkillProofDbContext>(options =>
                 options.UseSqlServer(builder.Configuration["db:conn"]));
@@ -146,10 +141,11 @@ namespace SkillProof.Api
                     }
                 });
             });
-  
-
+  #region DI
+            builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
             builder.Services.AddScoped<IQuestionBankService, QuestionBankService>();
-
+            builder.Services.AddScoped<IJobLogic, JobLogic>();
+#endregion
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -159,22 +155,13 @@ namespace SkillProof.Api
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
-
-<<<<<<< HEAD
-            app.UseHttpsRedirection();
-
-            app.UseCors("Frontend");
-
-=======
+            
             app.UseCors("AllowAngularApp");
 
             app.UseHttpsRedirection();
 
             app.UseAuthentication();
->>>>>>> feature/10-RegisterLogin
-            app.UseAuthorization();
-
-
+            
             app.UseStaticFiles();
 
             app.MapControllers();

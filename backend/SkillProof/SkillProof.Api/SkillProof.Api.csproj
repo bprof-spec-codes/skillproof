@@ -25,11 +25,7 @@
   </ItemGroup>
 
   <ItemGroup>
-<<<<<<< HEAD
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
-=======
     <Folder Include="wwwroot\image\" />
->>>>>>> feature/10-RegisterLogin
   </ItemGroup>
 
 </Project>

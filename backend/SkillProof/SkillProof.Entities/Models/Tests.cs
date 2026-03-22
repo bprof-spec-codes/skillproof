@@ -29,7 +29,7 @@ namespace SkillProof.Entities.Models
         public int Score { get; set; }
         public DateTime CompletedAt { get; set; } = DateTime.UtcNow;
 
-        public virtual JobApplications? JobApplication { get; set; }
+        public virtual JobApplication? JobApplication { get; set; }
         public virtual Users? User { get; set; }
         public virtual ICollection<TestAnswers> TestAnswers { get; set; }
     }
