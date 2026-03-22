@@ -28,4 +28,59 @@ public class JobsController : ControllerBase
             return BadRequest(new { error = ex.Message });
         }
     }
+    
+    [HttpGet]
+        public async Task<IActionResult> GetAllJobs()
+        {
+            var jobs = await _jobLogic.GetAllJobsAsync();
+            return Ok(jobs);
+        }
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetJobById(string id)
+        {
+            var job = await _jobLogic.GetJobByIdAsync(id);
+            if (job == null)
+            {
+                return NotFound(new { error = "The job is not found." });
+            }
+            
+            return Ok(job);
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateJob(string id, [FromBody] JobCreateDto dto)
+        {
+            try
+            {
+                var updatedJob = await _jobLogic.UpdateJobAsync(id, dto, dto.CompanyId);
+                return Ok(updatedJob);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return StatusCode(403, new { error = "You do not have permission to modify this job." });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteJob(string id, [FromQuery] string companyId)
+        {
+            try
+            {
+                await _jobLogic.DeleteJobAsync(id, companyId);
+                return NoContent();
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return StatusCode(403, new { error = "You do not have permission to delete this job." });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
+        }
 }
