@@ -46,11 +46,12 @@ export class HomePage {
     const results = allJobs
       .map(job => {
         let score = 0
+        let titleMatched = false
 
         if (lText && job.location) {
           const dist = levenshtein.get(lText, job.location.toLowerCase())
           if (dist <= threshold) {
-            score += (threshold + 1 - dist) * 5
+            score += (threshold + 1 - dist) * 2
           }
         }
 
@@ -58,6 +59,7 @@ export class HomePage {
           const titleDist = levenshtein.get(fText, job.title.toLowerCase())
           if (titleDist <= threshold) {
             score += (threshold + 1 - titleDist) * 3
+            titleMatched = true
           }
 
           job.tags?.forEach(tag => {
@@ -68,9 +70,9 @@ export class HomePage {
           });
         }
 
-        return { job, score }
+        return { job, score, titleMatched }
       })
-      .filter(item => item.score >= 2)
+      .filter(item => item.score >= 2 && item.titleMatched)
       .sort((a, b) => b.score - a.score)
       .map(item => item.job)
 
