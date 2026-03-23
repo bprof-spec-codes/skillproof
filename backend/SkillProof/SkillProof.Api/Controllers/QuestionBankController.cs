@@ -20,15 +20,8 @@ namespace SkillProof.Api.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<QuestionResponseDto>> Create([FromBody] CreateQuestionRequestDto request, CancellationToken cancellationToken)
         {
-            try
-            {
                 var created = await _questionBankService.CreateAsync(request, cancellationToken);
                 return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
         }
 
         [HttpGet]
@@ -54,15 +47,8 @@ namespace SkillProof.Api.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<QuestionResponseDto>> Update(string id, [FromBody] UpdateQuestionRequestDto request, CancellationToken cancellationToken)
         {
-            try
-            {
                 var updated = await _questionBankService.UpdateAsync(id, request, cancellationToken);
                 return updated == null ? NotFound() : Ok(updated);
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
         }
 
         [HttpDelete("{id}")]
