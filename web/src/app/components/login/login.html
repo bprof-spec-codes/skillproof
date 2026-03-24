@@ -1,19 +1,39 @@
-<form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
-  <div>
-    <label>Email</label>
-    <input type="email" formControlName="email" />
+<div class="d-flex align-items-center justify-content-center home">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="card border-0 border-card">
+        <div class="card-body p-3">
+          <div class="mb-4">
+            <h1 class="login-title">Find the job you need</h1>
+            <p class="login-smalltext">Please login or create an account</p>
+          </div>
+
+          <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+            <div class="mb-4">
+              <label for="email" class="form-label label-text">Email address</label>
+              <input type="email" id="email" class="form-control form-control-custom form-field" formControlName="email"
+                placeholder="Exampleaddress@example.com" required />
+            </div>
+
+            <div class="mb-4">
+              <label for="password" class="form-label label-text">Password</label>
+              <input type="password" id="password" class="form-control form-control-custom form-field"
+                formControlName="password" placeholder="••••••" required />
+            </div>
+
+            <div class="d-grid mt-4">
+              <button type="submit" class="btn login-btn">Login</button>
+            </div>
+          </form>
+
+          <hr class="line">
+
+          <div class="mt-4">
+            <p class="smalltext-center">Dont't have an account yet? <a href="/register" class="smalltext-center underline">Create an account</a></p>
+          </div>
+
+        </div>
+      </div>
+    </div>
   </div>
-
-  <div>
-    <label>Password</label>
-    <input type="password" formControlName="password" />
-  </div>
-
-  <button type="submit" [disabled]="loginForm.invalid">
-    Login
-  </button>
-
-  <p *ngIf="errorMessage" style="color: red;">
-    {{ errorMessage }}
-  </p>
-</form>
+</div>

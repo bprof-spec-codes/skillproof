@@ -1,15 +1,16 @@
 import { NgModule, provideBrowserGlobalErrorListeners } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-
+import { Header } from './header/header';
 import { AppRoutingModule } from './app-routing-module';
 import { App } from './app';
 import { Login } from './components/login/login';
 import { Register } from './components/register/register';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { HomePage } from './home-page/home-page';
 
 @NgModule({
-  declarations: [App, Login, Register],
+  declarations: [App, Login, Register, Header, HomePage],
   imports: [BrowserModule, AppRoutingModule, ReactiveFormsModule, HttpClientModule,FormsModule],
   providers: [provideBrowserGlobalErrorListeners()],
   bootstrap: [App],
