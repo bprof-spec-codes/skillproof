@@ -1,0 +1,11 @@
+<div *ngIf="modalService.modalState$ | async as config" class="modal-backdrop">
+  <div class="modal-box" 
+       [ngClass]="[config.size, config.type]">
+
+    <p>{{ config.message }}</p>
+
+    <button class="btn btn-light" (click)="close()">
+      Bezárás
+    </button>
+  </div>
+</div>

@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using SkillProof.Data.Repositorys;
 using SkillProof.Entities.Dtos.Job;
+using SkillProof.Entities.Dtos.Jobs;
 using SkillProof.Entities.Models;
 
 namespace SkillProof.Logic.Jobs;
@@ -14,7 +15,7 @@ public class JobLogic : IJobLogic
         _jobRepository = jobRepository;
     }
 
-    public async Task<Job> CreateJobAsync(JobCreateDto model, string companyId)
+    public async Task<JobViewDto> CreateJobAsync(JobCreateDto model, string companyId)
     {
         var newJob = new Job
         {
@@ -30,25 +31,59 @@ public class JobLogic : IJobLogic
         
         await _jobRepository.Create(newJob);
 
-        return newJob;
+        return new JobViewDto
+        {
+            CompanyId = newJob.CompanyId,
+            Title = newJob.Title,
+            Description = newJob.Description,
+            Location = newJob.Location,
+            Tags = newJob.Tags,
+            EmploymentType = newJob.EmploymentType,
+            CreatedAt = newJob.CreatedAt,
+            Id = newJob.Id
+        };
     }
     
-    public async Task<IEnumerable<Job>> GetAllJobsAsync()
+    public async Task<IEnumerable<JobViewDto>> GetAllJobsAsync()
     {
-        return await _jobRepository.GetAll().ToListAsync();
+        return await _jobRepository.GetAll().Select(j => new JobViewDto{
+            CompanyId = j.CompanyId,
+            Title = j.Title,
+            Description = j.Description,
+            Location = j.Location,
+            Tags = j.Tags,
+            EmploymentType = j.EmploymentType,
+            CreatedAt= j.CreatedAt,
+            Id = j.Id
+        }).ToListAsync();
     }
 
-    public async Task<Job?> GetJobByIdAsync(string id)
+    public async Task<JobViewDto?> GetJobByIdAsync(string id)
     {
-        return await _jobRepository.GetOne(id);
+        var job = await _jobRepository.GetOne(id);
+        if(job == null)
+        {
+            throw new KeyNotFoundException("The job is not found.");
+        }
+        return new JobViewDto
+        {
+            CompanyId = job.CompanyId,
+            Title = job.Title,
+            Description = job.Description,
+            Location = job.Location,
+            Tags = job.Tags,
+            EmploymentType = job.EmploymentType,
+            CreatedAt= job.CreatedAt,
+            Id = job.Id
+        };
     }
 
-    public async Task<Job> UpdateJobAsync(string id, JobCreateDto model, string companyId)
+    public async Task<JobViewDto> UpdateJobAsync(string id, JobCreateDto model, string companyId)
     {
         var job = await _jobRepository.GetOne(id);
         if (job == null)
         {
-            throw new Exception("The job is not found.");
+            throw new KeyNotFoundException("The job is not found.");
         }
 
         if (job.CompanyId != companyId)
@@ -62,7 +97,19 @@ public class JobLogic : IJobLogic
         job.Tags = model.Tags;
         job.EmploymentType = model.EmploymentType;
 
-        return await _jobRepository.Update(job);
+        await _jobRepository.Update(job);
+
+        return new JobViewDto
+        {
+            CompanyId = job.CompanyId,
+            Title = job.Title,
+            Description = job.Description,
+            Location = job.Location,
+            Tags = job.Tags,
+            EmploymentType = job.EmploymentType,
+            CreatedAt= job.CreatedAt,
+            Id = job.Id
+        };
     }
 
     public async Task DeleteJobAsync(string id, string companyId)
@@ -70,7 +117,7 @@ public class JobLogic : IJobLogic
         var job = await _jobRepository.GetOne(id);
         if (job == null)
         {
-            throw new Exception("The job is not found.");
+            throw new KeyNotFoundException("The job is not found.");
         }
 
         if (job.CompanyId != companyId)

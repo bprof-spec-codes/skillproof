@@ -1,0 +1,30 @@
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.5);
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-box {
+  padding: 20px;
+  border-radius: 10px;
+  color: white;
+  text-align: center;
+}
+
+/* Méretek */
+.sm { width: 320px; }
+.md { width: 600px; }
+.lg { width: 900px; }
+
+/* Színek */
+.success { background-color: #28a745; }
+.error { background-color: #dc3545; }
+.warning { background-color: #ffc107; color: black; }
+.info { background-color: #17a2b8; }
