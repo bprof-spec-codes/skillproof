@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { LoginResultDto } from '../Models/Dtos/User/login-result-dto';
 import { environment } from '../../environments/environment.development';
-import { Observable } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { LoginDto } from '../Models/Dtos/User/login-dto';
 import { Router } from '@angular/router';
 import { JwtPayload } from '../Models/Helpers/jwt-payload';
@@ -21,6 +21,7 @@ export class AuthService {
         
       return this.http.post<LoginResultDto>(environment.apiUrls.login, loginDto)
   }
+
 
   saveToken(token: string) {
     localStorage.setItem(this.storageKey, token);
