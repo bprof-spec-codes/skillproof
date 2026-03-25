@@ -1,0 +1,84 @@
+<section class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="m-0">Question Bank</h2>
+    <button class="btn btn-primary" type="button" (click)="goToCreate()">Create Question</button>
+  </div>
+
+  <div class="card p-3 mb-3">
+    <div class="row g-2">
+      <div class="col-12 col-md-3">
+        <label class="form-label">Type</label>
+        <select class="form-select" [(ngModel)]="filterType">
+          <option value="">All</option>
+          <option *ngFor="let option of questionTypeOptions" [value]="option.value">{{ option.label }}</option>
+        </select>
+      </div>
+
+      <div class="col-12 col-md-3">
+        <label class="form-label">Difficulty</label>
+        <select class="form-select" [(ngModel)]="filterDifficulty">
+          <option value="">All</option>
+          <option *ngFor="let option of difficultyOptions" [value]="option.value">{{ option.label }}</option>
+        </select>
+      </div>
+
+      <div class="col-12 col-md-3">
+        <label class="form-label">Language</label>
+        <input class="form-control" type="text" [(ngModel)]="filterLanguage" placeholder="e.g. C#" />
+      </div>
+
+      <div class="col-12 col-md-3">
+        <label class="form-label">Status</label>
+        <select class="form-select" [(ngModel)]="filterIsActive">
+          <option value="">All</option>
+          <option value="true">Active</option>
+          <option value="false">Inactive</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="d-flex gap-2 mt-3">
+      <button class="btn btn-outline-primary" type="button" (click)="applyFilters()">Apply</button>
+      <button class="btn btn-outline-secondary" type="button" (click)="clearFilters()">Clear</button>
+    </div>
+  </div>
+
+  <div *ngIf="loading" class="alert alert-info">Loading questions...</div>
+
+  <div *ngIf="!loading && questions.length === 0" class="alert alert-warning">
+    No questions found for the selected filters.
+  </div>
+
+  <div class="table-responsive" *ngIf="!loading && questions.length > 0">
+    <table class="table table-striped align-middle">
+      <thead>
+        <tr>
+          <th>Title</th>
+          <th>Type</th>
+          <th>Difficulty</th>
+          <th>Language</th>
+          <th>Status</th>
+          <th class="text-end">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let question of questions">
+          <td>{{ question.title }}</td>
+          <td>{{ getQuestionTypeLabel(question.type) }}</td>
+          <td>{{ getDifficultyLabel(question.difficulty) }}</td>
+          <td>{{ question.language }}</td>
+          <td>
+            <span [class]="question.isActive ? 'badge text-bg-success' : 'badge text-bg-secondary'">
+              {{ question.isActive ? 'Active' : 'Inactive' }}
+            </span>
+          </td>
+          <td class="text-end d-flex justify-content-end gap-2">
+            <button class="btn btn-sm btn-outline-primary" type="button" (click)="viewQuestion(question.id)">View</button>
+            <button class="btn btn-sm btn-outline-secondary" type="button" (click)="editQuestion(question.id)">Edit</button>
+            <button class="btn btn-sm btn-outline-danger" type="button" (click)="deleteQuestion(question.id)">Delete</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
