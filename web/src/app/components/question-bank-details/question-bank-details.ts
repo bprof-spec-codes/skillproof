@@ -1,5 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, NgZone, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { finalize } from 'rxjs';
 import { QuestionResponseDto } from '../../Models/Dtos/Question/question-response-dto';
 import { DifficultyLevel } from '../../Models/Enums/DifficultyLevel';
 import { QuestionType } from '../../Models/Enums/QuestionType';
@@ -31,7 +32,9 @@ export class QuestionBankDetails implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private questionBankService: QuestionBankService
+    private questionBankService: QuestionBankService,
+    private ngZone: NgZone,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -42,15 +45,30 @@ export class QuestionBankDetails implements OnInit {
     }
 
     this.loading = true;
-    this.questionBankService.getById(id).subscribe({
-      next: (question) => {
-        this.question = question;
-        this.loading = false;
-      },
-      error: () => {
-        this.loading = false;
-      },
-    });
+    this.questionBankService
+      .getById(id)
+      .pipe(
+        finalize(() => {
+          this.ngZone.run(() => {
+            this.loading = false;
+            this.cdr.detectChanges();
+          });
+        })
+      )
+      .subscribe({
+        next: (question) => {
+          this.ngZone.run(() => {
+            this.question = question;
+            this.cdr.detectChanges();
+          });
+        },
+        error: () => {
+          this.ngZone.run(() => {
+            this.question = null;
+            this.cdr.detectChanges();
+          });
+        },
+      });
   }
 
   goBack(): void {

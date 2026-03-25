@@ -1,6 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, NgZone, OnInit } from '@angular/core';
 import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import { finalize } from 'rxjs';
 import { CreateQuestionRequestDto } from '../../Models/Dtos/Question/create-question-request-dto';
 import { UpdateQuestionRequestDto } from '../../Models/Dtos/Question/update-question-request-dto';
 import {
@@ -48,7 +49,9 @@ export class QuestionBankForm implements OnInit {
     private router: Router,
     private authService: AuthService,
     private modalService: ModalService,
-    private questionBankService: QuestionBankService
+    private questionBankService: QuestionBankService,
+    private ngZone: NgZone,
+    private cdr: ChangeDetectorRef
   ) {
     this.form = this.fb.group({
       type: [QuestionType.MultipleChoice, Validators.required],
@@ -88,35 +91,49 @@ export class QuestionBankForm implements OnInit {
     }
 
     this.loading = true;
-    this.questionBankService.getById(id).subscribe({
-      next: (question) => {
-        this.form.patchValue({
-          type: question.type,
-          language: question.language,
-          difficulty: question.difficulty,
-          title: question.title,
-          questionText: question.questionText,
-          isActive: question.isActive,
-          codeSnippet: question.codeCompletion?.codeSnippet ?? '',
-          acceptedAnswersText: question.codeCompletion?.acceptedAnswers?.join('\n') ?? '',
-          fillInAnswer: question.fillInTheBlank?.answer ?? '',
-          fillInManualFeedback: question.fillInTheBlank?.manualFeedback ?? '',
-          trueFalseCorrectAnswer: question.trueFalse?.correctAnswer ?? false,
-          trueFalseExplanation: question.trueFalse?.explanation ?? '',
-        });
+    this.questionBankService
+      .getById(id)
+      .pipe(
+        finalize(() => {
+          this.ngZone.run(() => {
+            this.loading = false;
+            this.cdr.detectChanges();
+          });
+        })
+      )
+      .subscribe({
+        next: (question) => {
+          this.ngZone.run(() => {
+            this.form.patchValue({
+              type: question.type,
+              language: question.language,
+              difficulty: question.difficulty,
+              title: question.title,
+              questionText: question.questionText,
+              isActive: question.isActive,
+              codeSnippet: question.codeCompletion?.codeSnippet ?? '',
+              acceptedAnswersText: question.codeCompletion?.acceptedAnswers?.join('\n') ?? '',
+              fillInAnswer: question.fillInTheBlank?.answer ?? '',
+              fillInManualFeedback: question.fillInTheBlank?.manualFeedback ?? '',
+              trueFalseCorrectAnswer: question.trueFalse?.correctAnswer ?? false,
+              trueFalseExplanation: question.trueFalse?.explanation ?? '',
+            });
 
-        this.setMultipleChoiceControls(
-          question.multipleChoice?.options ?? [],
-          question.multipleChoice?.correctOptionIndexes ?? []
-        );
+            this.setMultipleChoiceControls(
+              question.multipleChoice?.options ?? [],
+              question.multipleChoice?.correctOptionIndexes ?? []
+            );
 
-        this.form.get('type')?.disable();
-        this.loading = false;
-      },
-      error: () => {
-        this.loading = false;
-      },
-    });
+            this.form.get('type')?.disable();
+            this.cdr.detectChanges();
+          });
+        },
+        error: () => {
+          this.ngZone.run(() => {
+            this.cdr.detectChanges();
+          });
+        },
+      });
   }
 
   get selectedType(): QuestionType {
@@ -167,21 +184,29 @@ export class QuestionBankForm implements OnInit {
 
     if (this.isEditMode && this.questionId) {
       const dto = this.buildUpdateDto();
-      this.questionBankService.update(this.questionId, dto).subscribe({
-        next: (updated) => {
-          this.saving = false;
-          this.modalService.open({
-            message: 'Question updated successfully.',
-            autoClose: true,
-            duration: 2500,
-            type: 'success',
-          });
-          this.router.navigate(['/question-bank', updated.id]);
-        },
-        error: () => {
-          this.saving = false;
-        },
-      });
+      this.questionBankService
+        .update(this.questionId, dto)
+        .pipe(
+          finalize(() => {
+            this.ngZone.run(() => {
+              this.saving = false;
+              this.cdr.detectChanges();
+            });
+          })
+        )
+        .subscribe({
+          next: (updated) => {
+            this.ngZone.run(() => {
+              this.modalService.open({
+                message: 'Question updated successfully.',
+                autoClose: true,
+                duration: 2500,
+                type: 'success',
+              });
+              this.router.navigate(['/question-bank', updated.id]);
+            });
+          },
+        });
       return;
     }
 
@@ -198,21 +223,29 @@ export class QuestionBankForm implements OnInit {
     }
 
     const dto = this.buildCreateDto(createdBy);
-    this.questionBankService.create(dto).subscribe({
-      next: (created) => {
-        this.saving = false;
-        this.modalService.open({
-          message: 'Question created successfully.',
-          autoClose: true,
-          duration: 2500,
-          type: 'success',
-        });
-        this.router.navigate(['/question-bank', created.id]);
-      },
-      error: () => {
-        this.saving = false;
-      },
-    });
+    this.questionBankService
+      .create(dto)
+      .pipe(
+        finalize(() => {
+          this.ngZone.run(() => {
+            this.saving = false;
+            this.cdr.detectChanges();
+          });
+        })
+      )
+      .subscribe({
+        next: (created) => {
+          this.ngZone.run(() => {
+            this.modalService.open({
+              message: 'Question created successfully.',
+              autoClose: true,
+              duration: 2500,
+              type: 'success',
+            });
+            this.router.navigate(['/question-bank', created.id]);
+          });
+        },
+      });
   }
 
   cancel(): void {

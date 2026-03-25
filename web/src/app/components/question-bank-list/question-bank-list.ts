@@ -1,5 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, NgZone, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { finalize } from 'rxjs';
 import { QuestionResponseDto } from '../../Models/Dtos/Question/question-response-dto';
 import { QuestionListFilterDto } from '../../Models/Dtos/Question/question-list-filter-dto';
 import { DifficultyLevel } from '../../Models/Enums/DifficultyLevel';
@@ -38,7 +39,9 @@ export class QuestionBankList implements OnInit {
   constructor(
     private questionBankService: QuestionBankService,
     private modalService: ModalService,
-    private router: Router
+    private router: Router,
+    private ngZone: NgZone,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -99,15 +102,30 @@ export class QuestionBankList implements OnInit {
   private loadQuestions(): void {
     this.loading = true;
 
-    this.questionBankService.getAll(this.buildFilter()).subscribe({
-      next: (questions) => {
-        this.questions = questions;
-        this.loading = false;
-      },
-      error: () => {
-        this.loading = false;
-      },
-    });
+    this.questionBankService
+      .getAll(this.buildFilter())
+      .pipe(
+        finalize(() => {
+          this.ngZone.run(() => {
+            this.loading = false;
+            this.cdr.detectChanges();
+          });
+        })
+      )
+      .subscribe({
+        next: (questions) => {
+          this.ngZone.run(() => {
+            this.questions = questions;
+            this.cdr.detectChanges();
+          });
+        },
+        error: () => {
+          this.ngZone.run(() => {
+            this.questions = [];
+            this.cdr.detectChanges();
+          });
+        },
+      });
   }
 
   private buildFilter(): QuestionListFilterDto {

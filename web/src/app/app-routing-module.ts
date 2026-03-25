@@ -14,8 +14,8 @@ const routes: Routes = [
   {path:"register", component:Register},
   {path:"question-bank", component:QuestionBankList},
   {path:"question-bank/create", component:QuestionBankForm},
-  {path:"question-bank/:id", component:QuestionBankDetails},
   {path:"question-bank/:id/edit", component:QuestionBankForm},
+  {path:"question-bank/:id", component:QuestionBankDetails},
   {path:"**", redirectTo:"login", pathMatch:"full"}
 ];
 
