@@ -1,0 +1,144 @@
+<section class="container py-4" *ngIf="!loading; else loadingBlock">
+  <h2 class="mb-3">{{ isEditMode ? 'Edit Question' : 'Create Question' }}</h2>
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="card p-3">
+    <div class="row g-3">
+      <div class="col-12 col-md-6">
+        <label class="form-label">Type</label>
+        <select class="form-select" formControlName="type">
+          <option *ngFor="let option of questionTypeOptions" [value]="option.value">{{ option.label }}</option>
+        </select>
+      </div>
+
+      <div class="col-12 col-md-6">
+        <label class="form-label">Difficulty</label>
+        <select class="form-select" formControlName="difficulty">
+          <option *ngFor="let option of difficultyOptions" [value]="option.value">{{ option.label }}</option>
+        </select>
+      </div>
+
+      <div class="col-12 col-md-6">
+        <label class="form-label">Language</label>
+        <input class="form-control" type="text" formControlName="language" maxlength="20" />
+      </div>
+
+      <div class="col-12 col-md-6" *ngIf="isEditMode">
+        <label class="form-label">Status</label>
+        <select class="form-select" formControlName="isActive">
+          <option [ngValue]="true">Active</option>
+          <option [ngValue]="false">Inactive</option>
+        </select>
+      </div>
+
+      <div class="col-12">
+        <label class="form-label">Title</label>
+        <input class="form-control" type="text" formControlName="title" maxlength="255" />
+      </div>
+
+      <div class="col-12">
+        <label class="form-label">Question Text</label>
+        <textarea class="form-control" rows="4" formControlName="questionText"></textarea>
+      </div>
+    </div>
+
+    <hr />
+
+    <div [ngSwitch]="selectedType">
+      <div *ngSwitchCase="0" class="row g-3">
+        <div class="col-12">
+          <label class="form-label">Options</label>
+
+          <div formArrayName="multipleChoiceOptions" class="d-flex flex-column gap-2">
+            <div
+              *ngFor="let optionControl of multipleChoiceOptionsArray.controls; let i = index"
+              class="input-group"
+            >
+              <span class="input-group-text">
+                <input
+                  class="form-check-input mt-0"
+                  type="checkbox"
+                  [formControl]="multipleChoiceCorrectFlagsArray.at(i)"
+                  [attr.aria-label]="'Correct answer for option ' + (i + 1)"
+                />
+              </span>
+
+              <input
+                class="form-control"
+                type="text"
+                [formControlName]="i"
+                [placeholder]="'Option ' + (i + 1)"
+              />
+
+              <button
+                class="btn btn-outline-danger"
+                type="button"
+                (click)="removeMultipleChoiceOption(i)"
+                [disabled]="multipleChoiceOptionsArray.length <= 2"
+              >
+                -
+              </button>
+            </div>
+          </div>
+
+          <div class="d-flex justify-content-between align-items-center mt-2">
+            <small class="text-muted">
+              Mark the correct options with the checkbox. If more than one is checked, multiple selection will be enabled automatically.
+            </small>
+            <button class="btn btn-sm btn-outline-primary" type="button" (click)="addMultipleChoiceOption()">
+              + Add Option
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div *ngSwitchCase="1" class="row g-3">
+        <div class="col-12">
+          <label class="form-label">Code Snippet</label>
+          <textarea class="form-control" rows="6" formControlName="codeSnippet"></textarea>
+        </div>
+        <div class="col-12">
+          <label class="form-label">Accepted Answers (one per line)</label>
+          <textarea class="form-control" rows="4" formControlName="acceptedAnswersText"></textarea>
+        </div>
+      </div>
+
+      <div *ngSwitchCase="3" class="row g-3">
+        <div class="col-12">
+          <label class="form-label">Answer</label>
+          <input class="form-control" type="text" formControlName="fillInAnswer" />
+        </div>
+        <div class="col-12">
+          <label class="form-label">Manual Feedback (optional)</label>
+          <textarea class="form-control" rows="3" formControlName="fillInManualFeedback"></textarea>
+        </div>
+      </div>
+
+      <div *ngSwitchCase="2" class="row g-3">
+        <div class="col-12 col-md-6">
+          <label class="form-label">Correct Answer</label>
+          <select class="form-select" formControlName="trueFalseCorrectAnswer">
+            <option [ngValue]="true">True</option>
+            <option [ngValue]="false">False</option>
+          </select>
+        </div>
+        <div class="col-12">
+          <label class="form-label">Explanation (optional)</label>
+          <textarea class="form-control" rows="3" formControlName="trueFalseExplanation"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="d-flex gap-2 mt-4">
+      <button class="btn btn-primary" type="submit" [disabled]="saving">
+        {{ saving ? 'Saving...' : (isEditMode ? 'Update Question' : 'Create Question') }}
+      </button>
+      <button class="btn btn-outline-secondary" type="button" (click)="cancel()" [disabled]="saving">Cancel</button>
+    </div>
+  </form>
+</section>
+
+<ng-template #loadingBlock>
+  <section class="container py-4">
+    <div class="alert alert-info">Loading question...</div>
+  </section>
+</ng-template>
