@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, ReplaySubject, Subject } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 
 export interface ModalConfig {
   message: string;
@@ -28,7 +28,14 @@ export class ModalService {
     this.modalState.next(null);
 
     setTimeout(() => {
-      this.modalState.next({ ...config });
+      const message = (config.message ?? '').toString().trim();
+
+      this.modalState.next({
+        ...config,
+        message: message || 'Operation completed.',
+        size: config.size ?? 'md',
+        type: config.type ?? 'info',
+      });
     });
 
     if (config.autoClose) {

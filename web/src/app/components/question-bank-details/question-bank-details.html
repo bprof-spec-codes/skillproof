@@ -1,0 +1,85 @@
+<section class="container py-4" *ngIf="!loading; else loadingBlock">
+  <div *ngIf="question; else noDataBlock" class="card p-3">
+    <div class="d-flex justify-content-between align-items-start mb-3">
+      <div>
+        <h2 class="mb-1">{{ question.title }}</h2>
+        <div class="text-muted">{{ getQuestionTypeLabel(question.type) }} | {{ getDifficultyLabel(question.difficulty) }}</div>
+      </div>
+      <span [class]="question.isActive ? 'badge text-bg-success' : 'badge text-bg-secondary'">
+        {{ question.isActive ? 'Active' : 'Inactive' }}
+      </span>
+    </div>
+
+    <div class="row g-3">
+      <div class="col-12 col-md-6">
+        <strong>Language:</strong> {{ question.language }}
+      </div>
+      <div class="col-12 col-md-6">
+        <strong>Created By:</strong> {{ question.createdBy }}
+      </div>
+      <div class="col-12 col-md-6">
+        <strong>Created At:</strong> {{ question.createdAt | date: 'medium' }}
+      </div>
+      <div class="col-12 col-md-6">
+        <strong>Updated At:</strong> {{ question.updatedAt | date: 'medium' }}
+      </div>
+      <div class="col-12">
+        <strong>Question Text:</strong>
+        <p class="mb-0 mt-1">{{ question.questionText }}</p>
+      </div>
+    </div>
+
+    <hr />
+
+    <div [ngSwitch]="question.type">
+      <div *ngSwitchCase="0">
+        <h5>Multiple Choice Payload</h5>
+        <p class="mb-1"><strong>Allow Multiple Selection:</strong> {{ question.multipleChoice?.allowMultipleSelection ? 'Yes' : 'No' }}</p>
+        <p class="mb-1"><strong>Options:</strong></p>
+        <ul>
+          <li *ngFor="let option of question.multipleChoice?.options; let i = index">{{ i }} - {{ option }}</li>
+        </ul>
+        <p class="mb-0"><strong>Correct Indexes:</strong> {{ question.multipleChoice?.correctOptionIndexes?.join(', ') }}</p>
+      </div>
+
+      <div *ngSwitchCase="1">
+        <h5>Code Completion Payload</h5>
+        <p class="mb-1"><strong>Code Snippet:</strong></p>
+        <pre class="p-2 bg-light border rounded"><code>{{ question.codeCompletion?.codeSnippet }}</code></pre>
+        <p class="mb-1"><strong>Accepted Answers:</strong></p>
+        <ul>
+          <li *ngFor="let answer of question.codeCompletion?.acceptedAnswers">{{ answer }}</li>
+        </ul>
+      </div>
+
+      <div *ngSwitchCase="3">
+        <h5>Fill In The Blank Payload</h5>
+        <p class="mb-1"><strong>Answer:</strong> {{ question.fillInTheBlank?.answer }}</p>
+        <p class="mb-0"><strong>Manual Feedback:</strong> {{ question.fillInTheBlank?.manualFeedback || '-' }}</p>
+      </div>
+
+      <div *ngSwitchCase="2">
+        <h5>True / False Payload</h5>
+        <p class="mb-1"><strong>Correct Answer:</strong> {{ question.trueFalse?.correctAnswer ? 'True' : 'False' }}</p>
+        <p class="mb-0"><strong>Explanation:</strong> {{ question.trueFalse?.explanation || '-' }}</p>
+      </div>
+    </div>
+
+    <div class="d-flex gap-2 mt-4">
+      <button class="btn btn-outline-secondary" type="button" (click)="goBack()">Back</button>
+      <button class="btn btn-primary" type="button" (click)="editQuestion()">Edit</button>
+    </div>
+  </div>
+</section>
+
+<ng-template #loadingBlock>
+  <section class="container py-4">
+    <div class="alert alert-info">Loading question details...</div>
+  </section>
+</ng-template>
+
+<ng-template #noDataBlock>
+  <section class="container py-4">
+    <div class="alert alert-warning">Question not found.</div>
+  </section>
+</ng-template>

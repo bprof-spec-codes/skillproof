@@ -16,9 +16,22 @@ import { Header } from './header/header';
 import { HomePage } from './home-page/home-page';
 import { errorInterceptor } from './interceptors/error-interceptor';
 import { Modal } from './components/modal/modal';
+import { QuestionBankList } from './components/question-bank-list/question-bank-list';
+import { QuestionBankForm } from './components/question-bank-form/question-bank-form';
+import { QuestionBankDetails } from './components/question-bank-details/question-bank-details';
 
 @NgModule({
-  declarations: [App, Login, Register, Header, HomePage, Modal],
+  declarations: [
+    App,
+    Login,
+    Register,
+    Header,
+    HomePage,
+    Modal,
+    QuestionBankList,
+    QuestionBankForm,
+    QuestionBankDetails,
+  ],
   imports: [BrowserModule, AppRoutingModule, ReactiveFormsModule, HttpClientModule, FormsModule],
   providers: [
     provideBrowserGlobalErrorListeners(),
