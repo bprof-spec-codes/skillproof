@@ -1,6 +1,6 @@
 import { NgModule, provideBrowserGlobalErrorListeners } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-
+import { Header } from './header/header';
 import { AppRoutingModule } from './app-routing-module';
 import { App } from './app';
 import { Login } from './components/login/login';

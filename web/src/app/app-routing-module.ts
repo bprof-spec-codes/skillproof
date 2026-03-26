@@ -8,15 +8,15 @@ import { QuestionBankForm } from './components/question-bank-form/question-bank-
 import { QuestionBankDetails } from './components/question-bank-details/question-bank-details';
 
 const routes: Routes = [
-  {path:"", redirectTo:"login", pathMatch:"full"},
-  {path: "home", component:HomePage},
+  {path:"", redirectTo:"home", pathMatch:"full"},
+  {path:"home", component: HomePage},
   {path:"login", component:Login},
   {path:"register", component:Register},
   {path:"question-bank", component:QuestionBankList},
   {path:"question-bank/create", component:QuestionBankForm},
   {path:"question-bank/:id/edit", component:QuestionBankForm},
   {path:"question-bank/:id", component:QuestionBankDetails},
-  {path:"**", redirectTo:"login", pathMatch:"full"}
+  {path:"**", redirectTo:"home", pathMatch:"full"}
 ];
 
 @NgModule({
