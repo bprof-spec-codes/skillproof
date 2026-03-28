@@ -7,25 +7,23 @@
     <nav class="d-flex align-items-center gap-lg-3">
 
       <!-- CSAK ha be van jelentkezve -->
-      <ng-container *ngIf="isLoggedIn; else loggedOut">
+      <ng-container *ngIf="isLoggedIn && (profile$ | async) as profile; else loggedOut">
 
         <div class="dropdown d-flex align-items-center gap-2">
-          <span class="username">
-            {{ profile?.fullName || 'User' }}
-          </span>
-          <button class="btn p-0 avatar-btn dropdown-toggle" type="button" data-bs-toggle="dropdown"
-              aria-expanded="false" aria-label="User menu">
-              <img *ngIf="profile?.image" [src]="getProfileImageSrc()" [alt]="profile?.fullName" class="avatar" />
-          </button>
           
+          <span class="username">
+            {{ profile.fullName }}
+          </span>
 
-          <ul class="dropdown-menu dropdown-menu-end">
-            <li>
-              <a class="dropdown-item" routerLink="/profile">
-                Edit my profile
-              </a>
-            </li>
-          </ul>
+          <button class="btn p-0 avatar-btn dropdown-toggle" type="button">
+            <img 
+              *ngIf="profile.image"
+              [src]="profile.image.startsWith('http') 
+                ? profile.image 
+                : 'data:image/*;base64,' + profile.image"
+              class="avatar" />
+          </button>
+
         </div>
 
       </ng-container>

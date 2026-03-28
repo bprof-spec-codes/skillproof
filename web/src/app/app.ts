@@ -1,6 +1,8 @@
-import { Component, signal } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
 import { filter } from 'rxjs';
+import { AuthService } from './services/auth-service';
+import { ProfileService } from './services/profile-service';
 
 @Component({
   selector: 'app-root',
@@ -8,12 +10,12 @@ import { filter } from 'rxjs';
   standalone: false,
   styleUrl: './app.scss'
 })
-export class App {
+export class App implements OnInit {
   protected readonly title = signal('web');
 
   showHeader = true;
 
-   constructor(private router: Router) {
+   constructor(private router: Router, private authService:AuthService, private profileService:ProfileService) {
     this.router.events
       .pipe(filter(event => event instanceof NavigationEnd))
       .subscribe((event: NavigationEnd) => {
@@ -23,4 +25,19 @@ export class App {
         this.showHeader = !hiddenRoutes.includes(event.urlAfterRedirects);
       });
   }
+
+
+  ngOnInit(): void {
+    
+    if (this.authService.isLoggedIn()) {
+      const userId = this.authService.getUserId();
+
+      if (userId) {
+        this.profileService.loadProfile(userId);
+      }
+    }
+  }
+
+  
+
 }

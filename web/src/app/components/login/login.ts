@@ -45,7 +45,7 @@ export class Login {
           return;
         }
         this.authService.saveToken(token);
-        this.router.navigate(['/homePage']); //majd ha lesz
+        this.router.navigate(['/homePage']);
       },
       error: (err) => {
         this.loading = false;

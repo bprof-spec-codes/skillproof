@@ -2,10 +2,12 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { LoginResultDto } from '../Models/Dtos/User/login-result-dto';
 import { environment } from '../../environments/environment.development';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { LoginDto } from '../Models/Dtos/User/login-dto';
 import { Router } from '@angular/router';
 import { JwtPayload } from '../Models/Helpers/jwt-payload';
+import { ProfileService } from './profile-service';
+import { ProfileViewDto } from '../Models/User/profile-view-dto';
 
 @Injectable({
   providedIn: 'root',
@@ -14,12 +16,21 @@ export class AuthService {
 
   private storageKey = 'skillProof_token';
 
-  constructor(private http:HttpClient, private router:Router){}
+  constructor(private http:HttpClient, private router:Router, private profileService:ProfileService){}
 
    
-  login(loginDto:LoginDto): Observable<LoginResultDto> {
-        
-      return this.http.post<LoginResultDto>(environment.apiUrls.login, loginDto)
+  login(loginDto: LoginDto): Observable<LoginResultDto> {
+    return this.http.post<LoginResultDto>(environment.apiUrls.login, loginDto).pipe(
+      tap((res) => {
+        this.saveToken(res.token);
+
+        const userId = this.getUserId();
+
+        if (userId) {
+          this.profileService.loadProfile(userId)
+        }
+      })
+    );
   }
 
 
