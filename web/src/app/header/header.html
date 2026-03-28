@@ -7,15 +7,20 @@
     <nav class="d-flex align-items-center gap-lg-3">
 
       <!-- CSAK ha be van jelentkezve -->
-      <ng-container *ngIf="isLoggedIn && (profile$ | async) as profile; else loggedOut">
+      <ng-container *ngIf="(profile$ | async) as profile; else loggedOut">
 
-        <div class="dropdown d-flex align-items-center gap-2">
-          
+       <div class="dropdown d-flex align-items-center gap-2">
+  
           <span class="username">
             {{ profile.fullName }}
           </span>
 
-          <button class="btn p-0 avatar-btn dropdown-toggle" type="button">
+          <button 
+            class="btn p-0 avatar-btn dropdown-toggle" 
+            type="button"
+            data-bs-toggle="dropdown"
+            aria-expanded="false"
+          >
             <img 
               *ngIf="profile.image"
               [src]="profile.image.startsWith('http') 
@@ -23,6 +28,15 @@
                 : 'data:image/*;base64,' + profile.image"
               class="avatar" />
           </button>
+
+          <!-- 👇 EZ HIÁNYZOTT -->
+          <ul class="dropdown-menu dropdown-menu-end">
+            <li>
+              <a class="dropdown-item" routerLink="/profile-view">
+                View profile
+              </a>
+            </li>
+          </ul>
 
         </div>
 
