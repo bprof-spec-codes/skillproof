@@ -6,7 +6,6 @@
 
     <nav class="d-flex align-items-center gap-lg-3">
 
-      <!-- CSAK ha be van jelentkezve -->
       <ng-container *ngIf="(profile$ | async) as profile; else loggedOut">
 
        <div class="dropdown d-flex align-items-center gap-2">
@@ -29,20 +28,26 @@
               class="avatar" />
           </button>
 
-          <!-- 👇 EZ HIÁNYZOTT -->
+         
           <ul class="dropdown-menu dropdown-menu-end">
             <li>
               <a class="dropdown-item" routerLink="/profile-view">
                 View profile
               </a>
             </li>
+            <li>
+              <a class="dropdown-item" routerLink="/profile-view">
+                Logout
+              </a>
+            </li>
+
           </ul>
 
         </div>
 
       </ng-container>
 
-      <!-- HA NINCS LOGIN -->
+      
       <ng-template #loggedOut>
         <a class="text-decoration-none header-font" routerLink="/employers">
           <i class="bi bi-briefcase me-2 header-icon"></i>For employers
