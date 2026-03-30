@@ -1,0 +1,51 @@
+<div class="container py-5" *ngIf="profile$ | async as profile">
+
+  <div class="card shadow-sm p-4 mx-auto" style="max-width: 600px;">
+
+    <!-- Profilkép -->
+    <div class="text-center mb-3">
+      <img 
+        *ngIf="profile.image"
+        [src]="profile.image.startsWith('http') 
+          ? profile.image 
+          : 'data:image/*;base64,' + profile.image"
+        class="rounded-circle"
+        style="width: 120px; height: 120px; object-fit: cover;"
+      />
+    </div>
+
+    <!-- Név -->
+    <h3 class="text-center mb-1">
+      {{ profile.fullName }}
+    </h3>
+
+    <!-- Headline -->
+    <p class="text-center text-muted mb-3">
+      {{ profile.headline }}
+    </p>
+
+    <!-- Email -->
+    <div class="mb-2">
+      <strong>Email:</strong>
+      <div>{{ profile.email }}</div>
+    </div>
+
+    <!-- Bio -->
+    <div class="mb-3">
+      <strong>About:</strong>
+      <div>{{ profile.bio }}</div>
+    </div>
+
+    <!-- Edit gomb -->
+    <div class="text-end">
+      <button 
+        class="btn btn-outline-primary"
+        routerLink="/profile"
+      >
+        Edit Profile
+      </button>
+    </div>
+
+  </div>
+
+</div>
