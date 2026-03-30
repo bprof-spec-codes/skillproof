@@ -10,6 +10,7 @@ import { Job } from '../Models/Dtos/Job/job';
   providedIn: 'root',
 })
 export class JobService {
+
   apiUrl = `${environment.apiUrl}/Jobs`
   jobs = new BehaviorSubject<JobViewDto[]>([])
   jobs$ = this.jobs.asObservable()
