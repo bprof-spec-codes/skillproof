@@ -13,7 +13,7 @@ $primary: 'Open Sans', sans-serif;
 $font-weight-semibold: 700;
 $primary-color: #003049;
 
-html, body {
+html, body, h1 {
   font-family: $primary;
   font-weight: $font-weight-semibold;
   color: $primary-color;
@@ -196,4 +196,106 @@ header {
     padding: 2rem !important;
   }
 }
+
+//Login, Register
+
+.border-card {
+  border-radius: 18px;
+  width: 70%;
+  padding-left: 25px;
+  padding-right: 25px;
+  padding-bottom: 15px;
+  padding-top: 15px;
+}
+
+.login-title {
+  padding-top: 15px;
+}
+
+.login-smalltext {
+  font-family: $primary;
+  font-weight: 200;
+}
+
+.label-text {
+  font-family: $primary;
+  font-weight: 700;
+}
+
+.form-field {
+  border: solid 2px $primary-color;
+  width: 100%;
+  height: 55px;
+  border-radius: 18px;
+  align-self: center;
+}
+
+.login-btn {
+  border-radius: 18px;
+  background-color: $primary-color;
+  color: #FFFFFF;
+  width: 100%;
+  height: 55px;
+  font-family: $primary;
+  font-weight: 500;
+  font-size: 25px;
+  margin-top: 15px;
+}
+
+.login-btn:hover {
+  background-color: #0a3d5d;
+  color: #FFFFFF;
+}
+
+form {
+  margin: 35px auto;
+  flex-direction: column;
+  gap: 10px;
+  align-self: center;
+}
+
+
+button {
+  padding: 8px;
+  cursor: pointer;
+}
+
+.line {
+  border: none;
+  height: 3px;
+  background-color: $primary-color;
+  border-radius: 30px;
+}
+
+.smalltext-center {
+  font-family: $primary;
+  font-weight: 200;
+  text-align: center;
+}
+
+.underline {
+  padding-bottom: 4px;
+  border-bottom: 2px solid $primary-color;
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
+
+  &:hover {
+    color: #0a3d5d;
+    border-bottom: 2px solid #0a3d5d;
+  }
+}
+
+.home-register {
+  background: #fdf0d5;
+  min-height: calc(100vh - 92px);
+  padding-bottom: 25px;
+}
+
+
+
+
+
+
+
 

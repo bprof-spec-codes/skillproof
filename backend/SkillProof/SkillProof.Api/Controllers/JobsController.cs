@@ -17,16 +17,8 @@ public class JobsController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> CreateJob([FromBody] JobCreateDto dto)
     {
-        try
-        {
             var createdJob = await _jobLogic.CreateJobAsync(dto, dto.CompanyId);
-
             return Ok(createdJob);
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(new { error = ex.Message });
-        }
     }
     
     [HttpGet]
@@ -40,47 +32,20 @@ public class JobsController : ControllerBase
         public async Task<IActionResult> GetJobById(string id)
         {
             var job = await _jobLogic.GetJobByIdAsync(id);
-            if (job == null)
-            {
-                return NotFound(new { error = "The job is not found." });
-            }
-            
             return Ok(job);
         }
 
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateJob(string id, [FromBody] JobCreateDto dto)
         {
-            try
-            {
                 var updatedJob = await _jobLogic.UpdateJobAsync(id, dto, dto.CompanyId);
                 return Ok(updatedJob);
-            }
-            catch (UnauthorizedAccessException)
-            {
-                return StatusCode(403, new { error = "You do not have permission to modify this job." });
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { error = ex.Message });
-            }
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteJob(string id, [FromQuery] string companyId)
         {
-            try
-            {
                 await _jobLogic.DeleteJobAsync(id, companyId);
                 return NoContent();
-            }
-            catch (UnauthorizedAccessException)
-            {
-                return StatusCode(403, new { error = "You do not have permission to delete this job." });
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { error = ex.Message });
-            }
         }
 }

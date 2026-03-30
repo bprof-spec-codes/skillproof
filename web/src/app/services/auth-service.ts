@@ -13,7 +13,6 @@ import { ProfileViewDto } from '../Models/User/profile-view-dto';
   providedIn: 'root',
 })
 export class AuthService {
-
   private storageKey = 'skillProof_token';
 
   constructor(private http:HttpClient, private router:Router, private profileService:ProfileService){}

@@ -3,6 +3,7 @@ import { NavigationEnd, Router } from '@angular/router';
 import { filter } from 'rxjs';
 import { AuthService } from './services/auth-service';
 import { ProfileService } from './services/profile-service';
+import { Header } from './header/header';
 
 @Component({
   selector: 'app-root',

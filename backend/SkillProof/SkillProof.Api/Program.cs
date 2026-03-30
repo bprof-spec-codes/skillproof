@@ -147,8 +147,9 @@ namespace SkillProof.Api
             builder.Services.AddScoped<IJobLogic, JobLogic>();
 #endregion
             var app = builder.Build();
-            
+
             // Configure the HTTP request pipeline.
+            app.UseMiddleware<ExceptionMiddleware>();
 
             if (app.Environment.IsDevelopment())
             {
