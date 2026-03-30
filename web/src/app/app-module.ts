@@ -9,9 +9,10 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { Header } from './header/header';
 import { ProfileView } from './components/profile-view/profile-view';
+import { EditProfile } from './components/edit-profile/edit-profile';
 
 @NgModule({
-  declarations: [App, Login, Register, Header, ProfileView],
+  declarations: [App, Login, Register, Header, ProfileView, EditProfile],
   imports: [BrowserModule, AppRoutingModule, ReactiveFormsModule, HttpClientModule, FormsModule],
   providers: [provideBrowserGlobalErrorListeners()],
   bootstrap: [App],

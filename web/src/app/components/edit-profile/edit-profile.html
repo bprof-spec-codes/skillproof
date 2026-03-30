@@ -1,0 +1,49 @@
+<div class="container py-5">
+
+  <div class="card p-4 mx-auto" style="max-width: 600px;">
+    
+    <h3 class="mb-4 text-center">Edit Profile</h3>
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()">
+
+      <div class="mb-3">
+        <label>Email</label>
+        <input class="form-control" formControlName="email">
+      </div>
+
+      <div class="mb-3">
+        <label>First Name</label>
+        <input class="form-control" formControlName="firstName">
+      </div>
+
+      <div class="mb-3">
+        <label>Last Name</label>
+        <input class="form-control" formControlName="lastName">
+      </div>
+
+      <div class="mb-3">
+        <label>Headline</label>
+        <input class="form-control" formControlName="headline">
+      </div>
+
+      <div class="mb-3">
+        <label>Bio</label>
+        <textarea class="form-control" formControlName="bio"></textarea>
+      </div>
+
+      <div class="mb-3">
+        <label>Profile Image (JPG/PNG)</label>
+        <input type="file" class="form-control" (change)="onFileSelected($event)">
+      </div>
+
+      <div class="text-end">
+        <button class="btn btn-primary" type="submit">
+          Save Changes
+        </button>
+      </div>
+
+    </form>
+
+  </div>
+
+</div>

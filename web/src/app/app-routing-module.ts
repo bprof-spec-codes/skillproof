@@ -4,6 +4,7 @@ import { Login } from './components/login/login';
 import { Register } from './components/register/register';
 import { HomePage } from './home-page/home-page';
 import { ProfileView } from './components/profile-view/profile-view';
+import { EditProfile } from './components/edit-profile/edit-profile';
 
 const routes: Routes = [
   {path:"", redirectTo:"homePage", pathMatch:"full"},
@@ -11,6 +12,7 @@ const routes: Routes = [
   {path:"register", component:Register},
   {path:"homePage", component:HomePage},
   {path:"profileView", component:ProfileView},
+  {path:"editProfile", component:EditProfile},
   {path:"**", redirectTo:"homePage", pathMatch:"full"}
 ];
 

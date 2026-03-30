@@ -118,8 +118,13 @@ namespace SkillProof.Api.Controllers
             currentUser.LastName = dto.LastName;
             currentUser.Bio = dto.Bio;
             currentUser.Headline = dto.HeadLine;
-            currentUser.ProfilePicture = Convert.FromBase64String(dto.ProfilePicture); //Majd a Fe Alakítja át Base64re byte[]-ból
 
+            if (!string.IsNullOrEmpty(dto.ProfilePicture))
+            {
+                currentUser.ProfilePicture = Convert.FromBase64String(dto.ProfilePicture);
+            }        
+
+                
 
             await userManager.SetEmailAsync(currentUser, dto.Email);
             await userManager.UpdateAsync(currentUser);
