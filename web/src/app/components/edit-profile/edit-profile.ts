@@ -4,6 +4,7 @@ import { AuthService } from '../../services/auth-service';
 import { HttpClient } from '@angular/common/http';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { environment } from '../../../environments/environment.development';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-edit-profile',
@@ -17,7 +18,8 @@ export class EditProfile implements OnInit {
     private fb: FormBuilder,
     private profileService: ProfileService,
     private authService: AuthService,
-    private http: HttpClient
+    private http: HttpClient,
+    private router:Router
   ){}
 
   form!: FormGroup;
@@ -32,7 +34,6 @@ export class EditProfile implements OnInit {
       bio: ['']
     });
 
-    // meglévő adatok betöltése
     this.profileService.currentProfile$.subscribe(profile => {
       if (profile) {
         this.form.patchValue({
@@ -60,14 +61,12 @@ export class EditProfile implements OnInit {
     reader.onload = () => {
       const base64 = reader.result as string;
 
-      // data:image/png;base64,XXXX → csak XXXX kell
       this.selectedImageBase64 = base64.split(',')[1];
     };
 
     reader.readAsDataURL(file);
   }
 
-  // 🚀 submit
   onSubmit() {
     if (this.form.invalid) return;
 
@@ -79,7 +78,7 @@ export class EditProfile implements OnInit {
       lastName: this.form.value.lastName,
       headLine: this.form.value.headline,
       bio: this.form.value.bio,
-      profilePicture: this.selectedImageBase64 // lehet null
+      profilePicture: this.selectedImageBase64
     };
 
     this.http.put(`${environment.apiUrls.updateUser}/${userId}`, dto)
@@ -87,7 +86,6 @@ export class EditProfile implements OnInit {
         next: () => {
           alert('Profile updated');
 
-          // újratöltjük a profilt
           if (userId) {
             this.profileService.loadProfile(userId);
           }
@@ -96,6 +94,8 @@ export class EditProfile implements OnInit {
           console.error(err);
         }
       });
+
+      this.router.navigate(['/homePage'])
   }
 
 

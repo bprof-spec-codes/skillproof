@@ -36,9 +36,13 @@
               </a>
             </li>
             <li>
-              <a class="dropdown-item" routerLink="/profile-view">
-                Logout
-              </a>
+              <button 
+                class="dropdown-item" 
+                (click)="authService.logout()"
+                data-bs-dismiss="dropdown"
+              >
+                Log out
+              </button>
             </li>
 
           </ul>

@@ -17,7 +17,7 @@ export class ProfileService {
     private http: HttpClient,
   ) {}
 
-   loadProfile(userId: string): void {
+  loadProfile(userId: string): void {
     this.http
       .get<ProfileViewDto>(`${environment.apiUrls.getProfile}/${userId}`)
       .subscribe({
@@ -30,6 +30,10 @@ export class ProfileService {
           this._currentProfile$.next(null);
         }
       });
+  }
+
+  clearProfile() {
+    this._currentProfile$.next(null);
   }
 
 }
