@@ -1,5 +1,5 @@
 <div class="d-flex flex-column min-vh-100 background">
-<app-header></app-header>
-<app-modal></app-modal>
-<router-outlet></router-outlet>
+    <app-header *ngIf="showHeader"></app-header>
+    <app-modal></app-modal>
+    <router-outlet></router-outlet>
 </div>

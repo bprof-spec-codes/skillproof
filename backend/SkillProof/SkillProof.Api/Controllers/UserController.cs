@@ -112,14 +112,23 @@ namespace SkillProof.Api.Controllers
         public async Task UpdateUser(string id, [FromBody] UpdateUser dto)
         {
             var currentUser = await userManager.Users.FirstOrDefaultAsync(u => u.Id == id);
+            if (currentUser == null)
+            {
+                throw new ArgumentException("User not found");
+            }
 
             currentUser.Email = dto.Email;
             currentUser.FirstName = dto.FirstName;
             currentUser.LastName = dto.LastName;
             currentUser.Bio = dto.Bio;
             currentUser.Headline = dto.HeadLine;
-            currentUser.ProfilePicture = Convert.FromBase64String(dto.ProfilePicture); //Majd a Fe Alakítja át Base64re byte[]-ból
 
+            if (!string.IsNullOrWhiteSpace(dto.ProfilePicture))
+            {
+                currentUser.ProfilePicture = Convert.FromBase64String(dto.ProfilePicture);
+            }        
+
+                
 
             await userManager.SetEmailAsync(currentUser, dto.Email);
             await userManager.UpdateAsync(currentUser);
