@@ -11,7 +11,7 @@ import { ProfileView } from './components/profile-view/profile-view';
 
 const routes: Routes = [
   {path:"", redirectTo:"home", pathMatch:"full"},
-  {path:"homePage", component: HomePage},
+  {path:"home", component: HomePage},
   {path:"login", component:Login},
   {path:"register", component:Register},
   {path:"question-bank", component:QuestionBankList},

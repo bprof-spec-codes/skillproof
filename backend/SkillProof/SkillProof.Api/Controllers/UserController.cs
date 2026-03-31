@@ -112,6 +112,10 @@ namespace SkillProof.Api.Controllers
         public async Task UpdateUser(string id, [FromBody] UpdateUser dto)
         {
             var currentUser = await userManager.Users.FirstOrDefaultAsync(u => u.Id == id);
+            if (currentUser == null)
+            {
+                throw new ArgumentException("User not found");
+            }
 
             currentUser.Email = dto.Email;
             currentUser.FirstName = dto.FirstName;
@@ -119,7 +123,7 @@ namespace SkillProof.Api.Controllers
             currentUser.Bio = dto.Bio;
             currentUser.Headline = dto.HeadLine;
 
-            if (!string.IsNullOrEmpty(dto.ProfilePicture))
+            if (!string.IsNullOrWhiteSpace(dto.ProfilePicture))
             {
                 currentUser.ProfilePicture = Convert.FromBase64String(dto.ProfilePicture);
             }        

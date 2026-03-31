@@ -12,10 +12,10 @@ namespace SkillProof.Entities.Dtos.Users
         public required string Email { get; set; }
         public required string FirstName { get; set; }
         public required string LastName { get; set; }
-        public string ProfilePicture { get; set; }
+        public string? ProfilePicture { get; set; }
 
-        public string Bio {  get; set; }
-        public string HeadLine { get; set; }
+        public string? Bio {  get; set; }
+        public string? HeadLine { get; set; }
     }
 }
 

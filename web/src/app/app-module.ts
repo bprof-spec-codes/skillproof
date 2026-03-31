@@ -7,18 +7,18 @@ import { Login } from './components/login/login';
 import { Register } from './components/register/register';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import {
-  HttpClient,
   HttpClientModule,
   provideHttpClient,
   withInterceptors,
 } from '@angular/common/http';
-import { Header } from './header/header';
 import { HomePage } from './home-page/home-page';
 import { errorInterceptor } from './interceptors/error-interceptor';
 import { Modal } from './components/modal/modal';
 import { QuestionBankList } from './components/question-bank-list/question-bank-list';
 import { QuestionBankForm } from './components/question-bank-form/question-bank-form';
 import { QuestionBankDetails } from './components/question-bank-details/question-bank-details';
+import { EditProfile } from './components/edit-profile/edit-profile';
+import { ProfileView } from './components/profile-view/profile-view';
 
 @NgModule({
   declarations: [
@@ -31,6 +31,8 @@ import { QuestionBankDetails } from './components/question-bank-details/question
     QuestionBankList,
     QuestionBankForm,
     QuestionBankDetails,
+    EditProfile,
+    ProfileView,
   ],
   imports: [BrowserModule, AppRoutingModule, ReactiveFormsModule, HttpClientModule, FormsModule],
   providers: [

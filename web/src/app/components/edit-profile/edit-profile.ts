@@ -71,31 +71,39 @@ export class EditProfile implements OnInit {
     if (this.form.invalid) return;
 
     const userId = this.authService.getUserId();
+    if (!userId) {
+      return;
+    }
 
-    const dto = {
+    const dto: {
+      email: string;
+      firstName: string;
+      lastName: string;
+      headLine: string;
+      bio: string;
+      profilePicture?: string;
+    } = {
       email: this.form.value.email,
       firstName: this.form.value.firstName,
       lastName: this.form.value.lastName,
       headLine: this.form.value.headline,
       bio: this.form.value.bio,
-      profilePicture: this.selectedImageBase64
     };
+
+    if (this.selectedImageBase64 && this.selectedImageBase64.trim() !== '') {
+      dto.profilePicture = this.selectedImageBase64;
+    }
 
     this.http.put(`${environment.apiUrls.updateUser}/${userId}`, dto)
       .subscribe({
         next: () => {
-          alert('Profile updated');
-
-          if (userId) {
-            this.profileService.loadProfile(userId);
-          }
+          this.profileService.loadProfile(userId);
+          this.router.navigate(['/viewProfile']);
         },
         error: (err) => {
           console.error(err);
         }
       });
-
-      this.router.navigate(['/homePage'])
   }
 
 

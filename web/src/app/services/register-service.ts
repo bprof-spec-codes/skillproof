@@ -11,4 +11,8 @@ export class RegisterService {
 
   constructor(private http:HttpClient){}
 
+  register(dto:RegisterDto):Observable<any>{
+    return this.http.post(environment.apiUrls.register, dto)
+  }
+
 }
