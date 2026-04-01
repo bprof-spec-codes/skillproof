@@ -1,6 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { RegisterService } from '../../services/register-service';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 
 @Component({
   selector: 'app-register',
@@ -8,18 +8,18 @@ import { Router } from '@angular/router';
   templateUrl: './register.html',
   styleUrl: './register.scss',
 })
-export class Register {
-  isEmployer: boolean = false;
+export class Register implements OnInit {
+  isEmployer = false;
 
-  email: string = '';
-  firstName: string = '';
-  lastName: string = '';
-  password: string = '';
-  confirmPassword: string = '';
+  email = '';
+  firstName = '';
+  lastName = '';
+  password = '';
+  confirmPassword = '';
 
-  companyName: string = '';
-  companyDescription: string = '';
-  companyWebsite: string = '';
+  companyName = '';
+  companyDescription = '';
+  companyWebsite = '';
 
   loading = false;
   error: string | null = null;
@@ -28,7 +28,16 @@ export class Register {
   constructor(
     private service: RegisterService,
     private router: Router,
+    private route: ActivatedRoute,
   ) {}
+
+  ngOnInit() {
+    this.route.queryParams.subscribe((params) => {
+      if (params['role'] === 'employer') {
+        this.isEmployer = true;
+      }
+    });
+  }
 
   toggleRole(role: string) {
     this.isEmployer = role === 'employer';
@@ -85,7 +94,7 @@ export class Register {
       },
       error: (err: any) => {
         this.loading = false;
-        this.error = err?.error?.message || 'Registration failed. Please try again.';
+        this.error = err?.error?.message || 'Registration failed.';
       },
     });
   }
