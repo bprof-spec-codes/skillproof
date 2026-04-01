@@ -19,6 +19,7 @@ import { QuestionBankForm } from './components/question-bank-form/question-bank-
 import { QuestionBankDetails } from './components/question-bank-details/question-bank-details';
 import { EditProfile } from './components/edit-profile/edit-profile';
 import { ProfileView } from './components/profile-view/profile-view';
+import { Jobupload } from './jobupload/jobupload';
 
 @NgModule({
   declarations: [
