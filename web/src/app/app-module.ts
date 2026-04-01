@@ -34,6 +34,7 @@ import { Jobupload } from './jobupload/jobupload';
     QuestionBankDetails,
     EditProfile,
     ProfileView,
+    Jobupload,
   ],
   imports: [BrowserModule, AppRoutingModule, ReactiveFormsModule, HttpClientModule, FormsModule],
   providers: [
