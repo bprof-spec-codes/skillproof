@@ -20,6 +20,11 @@ public class JobLogic : IJobLogic
 
     public async Task<JobViewDto> CreateJobAsync(JobCreateDto model, string companyId)
     {
+        if (model == null)
+        {
+            throw new ArgumentNullException(nameof(model), "The job data model cannot be null.");
+        }
+
         var newJob = new Job
         {
             Id = Guid.NewGuid().ToString(),
@@ -31,7 +36,7 @@ public class JobLogic : IJobLogic
             EmploymentType = model.EmploymentType,
             CreatedAt = DateTime.UtcNow
         };
-        
+    
         await _jobRepository.Create(newJob);
 
         return new JobViewDto
@@ -81,7 +86,7 @@ public class JobLogic : IJobLogic
         };
     }
 
-    public async Task<JobViewDto> UpdateJobAsync(string id, JobCreateDto model, string companyId)
+    public async Task<JobViewDto> UpdateJobAsync(string id, JobViewDto model, string companyId)
     {
         var job = await _jobRepository.GetOne(id);
         if (job == null)

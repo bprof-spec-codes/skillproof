@@ -289,10 +289,10 @@ namespace SkillProof.Logic.User
             var signinKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Key));
 
             return new JwtSecurityToken(
-                issuer: _jwtSettings.Issuer,
-                audience: _jwtSettings.Issuer,
+                issuer: string.IsNullOrEmpty(_jwtSettings.Issuer) ? "SkillProofApi" : _jwtSettings.Issuer,
+                audience: string.IsNullOrEmpty(_jwtSettings.Issuer) ? "SkillProofApi" : _jwtSettings.Issuer,
                 claims: claims?.ToArray(),
-                expires: DateTime.Now.AddMinutes(expiryInMinutes),
+                expires: DateTime.UtcNow.AddMinutes(expiryInMinutes),
                 signingCredentials: new SigningCredentials(signinKey, SecurityAlgorithms.HmacSha256)
             );
         }

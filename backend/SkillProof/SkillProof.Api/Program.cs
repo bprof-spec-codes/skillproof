@@ -1,6 +1,6 @@
+using System.IdentityModel.Tokens.Jwt;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -10,6 +10,7 @@ using SkillProof.Entities.Helper;
 using SkillProof.Entities.Models;
 using SkillProof.Logic.Questions;
 using System.Text;
+using Microsoft.AspNetCore.Mvc;
 using SkillProof.Logic.Jobs;
 using SkillProof.Logic.User;
 
@@ -20,6 +21,7 @@ namespace SkillProof.Api
 
         public static void Main(string[] args)
         {
+            JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
             var builder = WebApplication.CreateBuilder(args);
 
             //Connection string from json file
@@ -64,6 +66,11 @@ namespace SkillProof.Api
                             .AllowAnyMethod();
                 });
             });
+            
+            builder.Services.AddControllers().AddJsonOptions(options =>
+            {
+                options.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
+            });
 
             //Auth
 
@@ -87,14 +94,15 @@ namespace SkillProof.Api
             }).AddJwtBearer(options =>
             {
                 options.SaveToken = true;
-                options.RequireHttpsMetadata = true;
+                options.RequireHttpsMetadata = false; //fejlesztéshez jobb ha nincs bekapcsolva
                 options.TokenValidationParameters = new TokenValidationParameters()
                 {
-                    ValidateIssuer = true,
-                    ValidateAudience = true,
-                    ValidAudience = jwtIssuer,
-                    ValidIssuer = jwtIssuer,
+                    ValidateIssuer = false,
+                    ValidateAudience = false,
+                    ValidateIssuerSigningKey = true,
+                    ValidateLifetime = true,
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
+                    ClockSkew = TimeSpan.Zero
                 };
             }); ;
 
@@ -163,6 +171,7 @@ namespace SkillProof.Api
             app.UseHttpsRedirection();
 
             app.UseAuthentication();
+            app.UseAuthorization();
             
             app.UseStaticFiles();
 
