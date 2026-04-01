@@ -8,11 +8,14 @@ import { environment } from '../../environments/environment.development';
   providedIn: 'root',
 })
 export class RegisterService {
+  constructor(private http: HttpClient) {}
+  apiUrl: string = environment.apiUrl;
 
-  constructor(private http:HttpClient){}
-
-  register(dto:RegisterDto):Observable<any>{
-    return this.http.post(environment.apiUrls.register, dto)
+  register(dto: any): Observable<any> {
+    if (dto.role === 'Employer') {
+      return this.http.post(`${this.apiUrl}/User/RegisterEmployer`, dto);
+    } else {
+      return this.http.post(`${this.apiUrl}/User/Register`, dto);
+    }
   }
-
 }

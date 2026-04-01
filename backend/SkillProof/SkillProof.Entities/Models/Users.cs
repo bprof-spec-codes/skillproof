@@ -20,8 +20,8 @@ namespace SkillProof.Entities.Models
         public string Headline { get; set; }
         public string Bio { get; set; }
         public DateTime CreatedAt { get; set; }
-
-        public virtual ICollection<Companies>? Companies { get; set; }
+        public string? CompanyId { get; set; }
+        public virtual Companies Companies { get; set; }
         public virtual ICollection<UserExperiences>? UserExperiences { get; set; }
         public virtual ICollection<Tests>? Tests { get; set; }
         public virtual ICollection<JobApplication>? JobApplications { get; set; }

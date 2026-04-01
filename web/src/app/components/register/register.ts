@@ -1,7 +1,6 @@
 import { Component } from '@angular/core';
 import { RegisterService } from '../../services/register-service';
 import { Router } from '@angular/router';
-import { RegisterDto } from '../../Models/Dtos/User/register-dto';
 
 @Component({
   selector: 'app-register',
@@ -10,26 +9,51 @@ import { RegisterDto } from '../../Models/Dtos/User/register-dto';
   styleUrl: './register.scss',
 })
 export class Register {
+  isEmployer: boolean = false;
+
   email: string = '';
   firstName: string = '';
   lastName: string = '';
   password: string = '';
   confirmPassword: string = '';
 
+  companyName: string = '';
+  companyDescription: string = '';
+  companyWebsite: string = '';
+
   loading = false;
   error: string | null = null;
   success: string | null = null;
-  
-  constructor(private service:RegisterService, private router:Router){}
 
-  onRegister(){
+  constructor(
+    private service: RegisterService,
+    private router: Router,
+  ) {}
 
+  toggleRole(role: string) {
+    this.isEmployer = role === 'employer';
+    this.error = null;
+  }
+
+  onRegister() {
     this.error = null;
     this.success = null;
 
-    if (!this.email || !this.firstName || !this.lastName || !this.password || !this.confirmPassword) {
-      this.error = 'All fields are required.';
+    if (!this.email || !this.password || !this.confirmPassword) {
+      this.error = 'Email and passwords are required.';
       return;
+    }
+
+    if (this.isEmployer) {
+      if (!this.companyName || !this.companyDescription) {
+        this.error = 'Company name and description are required.';
+        return;
+      }
+    } else {
+      if (!this.firstName || !this.lastName) {
+        this.error = 'First and last names are required.';
+        return;
+      }
     }
 
     if (this.password !== this.confirmPassword) {
@@ -39,28 +63,31 @@ export class Register {
 
     this.loading = true;
 
-    const dto:RegisterDto = {
+    const dto: any = {
       email: this.email,
-      firstName: this.firstName,
-      lastName: this.lastName,
-      password: this.password
-    }
-      
+      firstName: this.isEmployer ? this.companyName : this.firstName,
+      lastName: this.isEmployer ? 'Account' : this.lastName,
+      password: this.password,
+      companyName: this.isEmployer ? this.companyName : null,
+      companyDescription: this.isEmployer ? this.companyDescription : null,
+      companyWebsite: this.isEmployer ? this.companyWebsite : null,
+      role: this.isEmployer ? 'Employer' : 'User',
+    };
+
     this.service.register(dto).subscribe({
       next: () => {
-        this.loading = false
-        this.success = "Registration successful!"
-        this.clearForm()
+        this.loading = false;
+        this.success = 'Registration successful!';
+        this.clearForm();
         setTimeout(() => {
-          this.router.navigate(["/login"])
-        }, 3000)
+          this.router.navigate(['/login']);
+        }, 3000);
       },
       error: (err: any) => {
         this.loading = false;
-        this.error = err?.error.message || 'Registration failed. Please try again.';
+        this.error = err?.error?.message || 'Registration failed. Please try again.';
       },
     });
-
   }
 
   clearForm() {
@@ -68,7 +95,9 @@ export class Register {
     this.firstName = '';
     this.lastName = '';
     this.password = '';
-    this.confirmPassword ='';
+    this.confirmPassword = '';
+    this.companyName = '';
+    this.companyDescription = '';
+    this.companyWebsite = '';
   }
-
 }

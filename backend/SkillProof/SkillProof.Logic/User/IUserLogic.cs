@@ -5,6 +5,7 @@ namespace SkillProof.Logic.User;
 public interface IUserLogic
 {
     Task RegisterUserAsync(RegisterUser dto);
+    Task RegisterEmployerAsync(RegisterEmployer dto);
     Task<IEnumerable<ViewUser>> GetAllUsersAsync();
     Task<ViewUser> GetUserByIdAsync(string id);
     Task UpdateUserAsync(string id, UpdateUser dto);

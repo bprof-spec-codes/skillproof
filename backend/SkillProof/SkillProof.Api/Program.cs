@@ -147,7 +147,6 @@ namespace SkillProof.Api
             builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
             builder.Services.AddScoped<IQuestionBankService, QuestionBankService>();
             builder.Services.AddScoped<IJobLogic, JobLogic>();
-            builder.Services.AddScoped<ICompanyLogic, CompanyLogic>();
             builder.Services.AddScoped<IUserLogic, UserLogic>();
 #endregion
             var app = builder.Build();

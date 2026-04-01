@@ -34,6 +34,13 @@ namespace SkillProof.Api.Controllers
                 await _userLogic.RegisterUserAsync(dto);
                 return Ok(new { message = "Registration successful." });
         }
+        
+        [HttpPost("RegisterEmployer")]
+        public async Task<IActionResult> RegisterEmployer([FromBody] RegisterEmployer dto)
+        {
+                await _userLogic.RegisterEmployerAsync(dto);
+                return Ok();
+        }
 
         [HttpGet("GetAllUsers")]
         public async Task<IActionResult> GetAllUsers()
