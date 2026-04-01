@@ -18,41 +18,17 @@ public class JobsController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> CreateJob([FromBody] JobCreateDto dto)
     {
-        // 1. Megnézzük, mi jött át az Angulartól a Headerben
-        var authHeader = Request.Headers["Authorization"].ToString();
-        Console.WriteLine("---------------------------------------------------");
-        Console.WriteLine($"1. BEÉRKEZŐ HEADER: {authHeader}");
-        Console.WriteLine("---------------------------------------------------");
-
-        // 2. Megnézzük, a C# mikre bontotta szét
-        Console.WriteLine("2. C# ÁLTAL LÁTOTT CLAIMEK:");
-        foreach (var claim in User.Claims)
-        {
-            Console.WriteLine($"   Kulcs: '{claim.Type}' | Érték: '{claim.Value}'");
-        }
-        Console.WriteLine("---------------------------------------------------");
-
-        // 3. Megpróbáljuk kivenni a CompanyId-t (minden lehetséges módon)
         var companyId = User.Claims.FirstOrDefault(c => 
             c.Type == "CompanyId" || 
             c.Type.EndsWith("CompanyId", StringComparison.OrdinalIgnoreCase))?.Value;
 
         if (string.IsNullOrEmpty(companyId))
         {
-            // Ha ide lép, a terminálban lévő logból azonnal látni fogjuk, miért!
-            return BadRequest(new { message = "Backend nem látja a CompanyId-t. Nézd meg a Rider terminálját!" });
+            return BadRequest(new { message = "There is no company id like this" });
         }
-
-        try 
-        {
-            // Ha megvan, megyünk a Logic-ba
-            var result = await _jobLogic.CreateJobAsync(dto, companyId);
-            return Ok(result);
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, new { message = ex.Message });
-        }
+        
+        var result = await _jobLogic.CreateJobAsync(dto, companyId);
+        return Ok(result);
     }
     
     [HttpGet]
