@@ -11,6 +11,7 @@ using SkillProof.Entities.Helper;
 using SkillProof.Entities.Models;
 using SkillProof.Logic.Questions;
 using System.Text;
+using SkillProof.Logic.Companies;
 using SkillProof.Logic.Jobs;
 
 namespace SkillProof.Api
@@ -145,6 +146,7 @@ namespace SkillProof.Api
             builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
             builder.Services.AddScoped<IQuestionBankService, QuestionBankService>();
             builder.Services.AddScoped<IJobLogic, JobLogic>();
+            builder.Services.AddScoped<ICompanyLogic, CompanyLogic>();
 #endregion
             var app = builder.Build();
 
