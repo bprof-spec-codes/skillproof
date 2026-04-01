@@ -103,7 +103,8 @@ namespace SkillProof.Logic.User
                 LastName = "Account",
                 Email = dto.Email,
                 UserName = dto.Email.Split('@')[0],
-                CompanyId = newCompany.Id
+                CompanyId = newCompany.Id,
+                CompanyRole = "Owner"
             };
 
             var defaultImagePath = Path.Combine(_env.WebRootPath, "image", "default.png");
@@ -221,7 +222,10 @@ namespace SkillProof.Logic.User
             var claim = new List<Claim>();
             claim.Add(new Claim(ClaimTypes.Name, user.UserName!));
             claim.Add(new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()));
-
+            if (!string.IsNullOrEmpty(user.CompanyId))
+            {
+                claim.Add(new Claim("CompanyId", user.CompanyId));
+            }
             foreach (var role in await _userManager.GetRolesAsync(user))
             {
                 claim.Add(new Claim(ClaimTypes.Role, role));
