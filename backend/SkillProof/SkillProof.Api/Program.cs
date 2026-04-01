@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -11,7 +10,6 @@ using SkillProof.Entities.Helper;
 using SkillProof.Entities.Models;
 using SkillProof.Logic.Questions;
 using System.Text;
-using SkillProof.Logic.Companies;
 using SkillProof.Logic.Jobs;
 using SkillProof.Logic.User;
 
