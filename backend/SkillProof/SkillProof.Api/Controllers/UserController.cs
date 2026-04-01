@@ -13,236 +13,83 @@ using System.Security.Claims;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using SkillProof.Logic.User;
 
 namespace SkillProof.Api.Controllers
 {
-    [Route("api/[controller]")]
+   [Route("api/[controller]")]
     [ApiController]
-    public class UserController:ControllerBase
+    public class UserController : ControllerBase
     {
-        private readonly IWebHostEnvironment env;
-        UserManager<Users> userManager;
-        RoleManager<IdentityRole> roleManager;
-        private readonly JwtSettings jwtSettings;
+        private readonly IUserLogic _userLogic;
 
-        public UserController(UserManager<Users> userManager, IWebHostEnvironment env, RoleManager<IdentityRole> roleManager, IOptions<JwtSettings> jwtSettings)
+        public UserController(IUserLogic userLogic)
         {
-            this.userManager = userManager;
-            this.env = env;
-            this.roleManager = roleManager;
-            this.jwtSettings = jwtSettings.Value;
+            _userLogic = userLogic;
         }   
 
         [HttpPost("Register")]
-        public async Task RegiterUser(RegisterUser dto)
+        public async Task<IActionResult> RegisterUser([FromBody] RegisterUser dto)
         {
-            if (dto.Password.Length < 8) throw new ArgumentException("The password must be at least 8 characters long");
-
-            if (await userManager.FindByEmailAsync(dto.Email) != null) throw new ArgumentException("Profile with this email already exists");
-
-            if (!(IsValidEmail(dto.Email))) throw new ArgumentException("The email address format is invalid");
-
-            var user = new Users();
-            user.FirstName = dto.FirstName;
-            user.LastName = dto.LastName;
-            user.Email = dto.Email;
-            user.UserName = dto.Email.Split('@')[0];
-
-            var defaultImagePath = Path.Combine(env.WebRootPath, "image", "default.png");
-
-            var fileBytes = await System.IO.File.ReadAllBytesAsync(defaultImagePath);
-
-            user.ProfilePicture = fileBytes;
-
-            var result = await userManager.CreateAsync(user, dto.Password);
-
-            if (userManager.Users.Count() == 1)
-            {
-                await roleManager.CreateAsync(new IdentityRole("Admin"));
-                await userManager.AddToRoleAsync(user, "Admin");
-            }
-
-
+                await _userLogic.RegisterUserAsync(dto);
+                return Ok(new { message = "Registration successful." });
+        }
+        
+        [HttpPost("RegisterEmployer")]
+        public async Task<IActionResult> RegisterEmployer([FromBody] RegisterEmployer dto)
+        {
+                await _userLogic.RegisterEmployerAsync(dto);
+                return Ok();
         }
 
         [HttpGet("GetAllUsers")]
-        public async Task<IEnumerable<ViewUser>> GetAllUsers()
+        public async Task<IActionResult> GetAllUsers()
         {
-            var users = await userManager.Users.ToListAsync();
-
-            var result = new List<ViewUser>();
-
-            foreach (var user in users)
-            {
-                result.Add(new ViewUser
-                {
-                    Id = user.Id,
-                    Email = user.Email,
-                    FullName = user.FirstName + " " + user.LastName,                            
-                    Image = Convert.ToBase64String(user.ProfilePicture),              
-                    Headline = user.Headline,
-                    Bio = user.Bio
-                });
-            }
-
-            return result;
+                var users = await _userLogic.GetAllUsersAsync();
+                return Ok(users);
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<ViewUser>> GetUserById(string id)
+        public async Task<IActionResult> GetUserById(string id)
         {
-            var user = await userManager.FindByIdAsync(id);
-
-            if (user is null) return NotFound("User not found");
-
-            var userView = new ViewUser
-            {
-                Id = user.Id,
-                FullName = $"{user.FirstName} {user.LastName}",
-                Email = user.Email,
-                Image = Convert.ToBase64String(user.ProfilePicture),
-                Bio = user.Bio,
-                Headline = user.Headline,            
-            };
-
-            return userView;
+                var user = await _userLogic.GetUserByIdAsync(id);
+                return Ok(user);
         }
 
         [HttpPut("{id}")]
-        public async Task UpdateUser(string id, [FromBody] UpdateUser dto)
+        public async Task<IActionResult> UpdateUser(string id, [FromBody] UpdateUser dto)
         {
-            var currentUser = await userManager.Users.FirstOrDefaultAsync(u => u.Id == id);
-            if (currentUser == null)
-            {
-                throw new ArgumentException("User not found");
-            }
+                await _userLogic.UpdateUserAsync(id, dto);
+                return Ok(new { message = "User updated successfully." });
+        }
 
-            currentUser.Email = dto.Email;
-            currentUser.FirstName = dto.FirstName;
-            currentUser.LastName = dto.LastName;
-            currentUser.Bio = dto.Bio;
-            currentUser.Headline = dto.HeadLine;
-
-            if (!string.IsNullOrWhiteSpace(dto.ProfilePicture))
-            {
-                currentUser.ProfilePicture = Convert.FromBase64String(dto.ProfilePicture);
-            }        
-
-                
-
-            await userManager.SetEmailAsync(currentUser, dto.Email);
-            await userManager.UpdateAsync(currentUser);
-
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteUser(string id)
+        {
+                await _userLogic.DeleteUserAsync(id);
+                return NoContent();
         }
 
         [HttpPost("Login")]
-        public async Task<IActionResult> Login(LoginUser dto)
+        public async Task<IActionResult> Login([FromBody] LoginUser dto)
         {
-            var user = await userManager.FindByEmailAsync(dto.Email);
-
-            if (user == null)
-            {
-                return BadRequest(new { message = "Incorrect Email" });
-            }
-
-            
-                var result = await userManager.CheckPasswordAsync(user, dto.Password);
-                if (!result)
-                {
-                    return BadRequest(new { message = "Incorrect Password" });
-                }
-                else
-                {
-                    //todo: generate token
-                    var claim = new List<Claim>();
-                    claim.Add(new Claim(ClaimTypes.Name, user.UserName!));
-                    claim.Add(new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()));
-
-                    foreach (var role in await userManager.GetRolesAsync(user))
-                    {
-                        claim.Add(new Claim(ClaimTypes.Role, role));
-                    }
-
-                    int expiryInMinutes = 24 * 60;
-                    var token = GenerateAccessToken(claim, expiryInMinutes);
-
-                    return Ok(new LoginResultDto()
-                    {
-                        Token = new JwtSecurityTokenHandler().WriteToken(token),
-                        Expiration = DateTime.Now.AddMinutes(expiryInMinutes)
-                    });
-
-                }
+                var result = await _userLogic.LoginAsync(dto);
+                return Ok(result);
         }
 
         [HttpGet("GrantAdmin/{userId}")]
-        //[Authorize] Admin
-        public async Task GrantAdminRole(string userId)
+        public async Task<IActionResult> GrantAdminRole(string userId)
         {
-            var user = await userManager.FindByIdAsync(userId);
-            if (user == null)
-                throw new ArgumentException("User not found");
-
-            var roles = await userManager.GetRolesAsync(user);
-
-            if (roles.FirstOrDefault() == "Admin")
-            {
-                throw new ArgumentException("User already has admin role");
-            }
-        
-            await userManager.AddToRoleAsync(user, "Admin");
+                await _userLogic.GrantAdminRoleAsync(userId);
+                return Ok(new { message = "Admin role granted." });
+            
         }
 
         [HttpGet("RevokeRole/{userId}")]
-        //[Authorize] Admin
-        public async Task RevokeRole(string userId)
+        public async Task<IActionResult> RevokeRole(string userId)
         {
-
-            var user = await userManager.FindByIdAsync(userId);
-            if (user == null)
-                throw new ArgumentException("User not found");
-
-            var roles = await userManager.GetRolesAsync(user);
-
-            if (roles.Contains("Admin"))
-            {
-                var admins = await userManager.GetUsersInRoleAsync("Admin");
-
-                if (admins.Count <= 1) throw new ArgumentException("You cannot remove the last remaining Admin user");
-            }
-
-            if (roles is null)
-            {
-                throw new ArgumentException("User has no roles");
-            }
-
-            await userManager.RemoveFromRolesAsync(user, roles);
+                await _userLogic.RevokeRoleAsync(userId);
+                return Ok(new { message = "Roles revoked successfully." });
         }
-
-
-
-
-        private bool IsValidEmail(string email)
-        {
-            string pattern = @"^[^@\s]+@[^@\s]+\.[^@\s]+$";
-            return Regex.IsMatch(email, pattern, RegexOptions.IgnoreCase);
-        }
-
-        private JwtSecurityToken GenerateAccessToken(IEnumerable<Claim>? claims, int expiryInMinutes)
-        {
-            var signinKey = new SymmetricSecurityKey(
-                  Encoding.UTF8.GetBytes(jwtSettings.Key));
-
-            return new JwtSecurityToken(
-                  issuer: jwtSettings.Issuer,
-                  audience: jwtSettings.Issuer,
-                  claims: claims?.ToArray(),
-                  expires: DateTime.Now.AddMinutes(expiryInMinutes),
-                  signingCredentials: new SigningCredentials(signinKey, SecurityAlgorithms.HmacSha256)
-            );
-        }
-
     }
-
-    
 }

@@ -1,11 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using SkillProof.Entities.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SkillProof.Entities.Configurations
 {
@@ -21,7 +16,9 @@ namespace SkillProof.Entities.Configurations
                 .HasMaxLength(1000)
                 .IsRequired();
             builder.HasMany(c => c.Users)
-               .WithMany(u => u.Companies);
+                .WithOne(u => u.Companies)
+                .HasForeignKey(u => u.CompanyId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }
