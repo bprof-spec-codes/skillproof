@@ -13,6 +13,7 @@ using SkillProof.Logic.Questions;
 using System.Text;
 using SkillProof.Logic.Companies;
 using SkillProof.Logic.Jobs;
+using SkillProof.Logic.User;
 
 namespace SkillProof.Api
 {
@@ -147,6 +148,7 @@ namespace SkillProof.Api
             builder.Services.AddScoped<IQuestionBankService, QuestionBankService>();
             builder.Services.AddScoped<IJobLogic, JobLogic>();
             builder.Services.AddScoped<ICompanyLogic, CompanyLogic>();
+            builder.Services.AddScoped<IUserLogic, UserLogic>();
 #endregion
             var app = builder.Build();
 
