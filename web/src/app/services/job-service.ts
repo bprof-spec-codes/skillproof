@@ -25,7 +25,7 @@ export class JobService {
         map((result) => {
           return result.map((job) => ({
             ...job,
-            tags: JSON.parse(job.tags),
+            tags: job.tags.split(','),
           })) as JobViewDto[];
         }),
       )
@@ -58,7 +58,7 @@ export class JobService {
   getJobById(id: string): Observable<JobViewDto> {
     return this.http.get<Job>(`${this.apiUrl}/${id}`).pipe(
       map((job) => {
-        return { ...job, tags: JSON.parse(job.tags) } as JobViewDto;
+        return { ...job, tags: job.tags.split(',') } as JobViewDto;
       }),
     );
   }
