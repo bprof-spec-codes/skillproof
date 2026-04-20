@@ -27,7 +27,7 @@ export class HomePage {
     this.jobService.jobs$.pipe(take(1)).subscribe((allJobs) => {
       const fText = this.freeTextControl.value?.toLowerCase().trim() || '';
       const lText = this.locationControl.value?.toLowerCase().trim() || '';
-
+      
       // Ha nincs keresési feltétel, visszaadjuk az összeset
       if (!fText && !lText) {
         this.filteredJobs.next(allJobs);
@@ -44,21 +44,19 @@ export class HomePage {
         .map((job) => {
           let score = 0;
           let titleMatched = false;
-
           if (lText && job.location) {
             const dist = levenshtein.get(lText, job.location.toLowerCase());
             if (dist <= threshold) {
               score += (threshold + 1 - dist) * 2;
             }
           }
-
+          
           if (fText) {
             const titleDist = levenshtein.get(fText, job.title.toLowerCase());
             if (titleDist <= threshold) {
               score += (threshold + 1 - titleDist) * 3;
               titleMatched = true;
             }
-
             job.tags?.forEach((tag) => {
               const tagDist = levenshtein.get(fText, tag.toLowerCase());
               if (tagDist <= threshold) {
@@ -69,11 +67,23 @@ export class HomePage {
 
           return { job, score, titleMatched };
         })
-        .filter((item) => item.score >= 2 && item.titleMatched)
+        .filter((item) => {
+          if (fText && lText) {
+            return item.score >= 2 && item.titleMatched;
+          }
+          if (fText) {
+            return item.score >= 2 && item.titleMatched;
+          }
+          if (lText) {
+            return item.score >= 1; // vagy akár > 0
+          }
+          return true;
+        })
         .sort((a, b) => b.score - a.score)
         .map((item) => item.job);
 
       this.filteredJobs.next(results);
+      console.log(results); //I)TTTTTTTTTTTTTTTT
     });
   }
 }

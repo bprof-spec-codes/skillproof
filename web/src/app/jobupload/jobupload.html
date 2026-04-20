@@ -41,11 +41,29 @@
         <input type="text" id="tags" name="tags" placeholder="e.g. Angular, C#, Frontend" [(ngModel)]="tags">
       </div>
 
-      <div class="form-group">
-        <label for="description">Job Description</label>
-        <textarea id="description" name="description" rows="6" placeholder="Describe the role, responsibilities, and requirements..." [(ngModel)]="description" required></textarea>
-      </div>
+      @if(isPreView$ | async){
+        <div class="form-group">
+          <label>Job Description Preview</label>
+          
+          <div class="preview-content" [innerHTML]="preViewmd | async"></div>
 
+          <div class="prev-container">
+            <button type="button" class="btn btn-primary" (click)="preView()">
+                Back
+            </button>
+          </div>
+        </div>
+      }@else{
+        <div class="form-group">
+          <label for="description">Job Description</label>
+          <textarea class="preview-textarea" id="description" name="description" rows="6" placeholder="Describe the role, responsibilities, and requirements..." [(ngModel)]="description" required></textarea>
+          <div class="prev-container">
+            <button type="button" class="btn btn-primary" (click)="preView()">
+                PreView
+            </button>
+          </div>
+        </div>
+      }
       @if (error) {
         <div class="mb-3 text-center">
           <p class="text-danger fw-bold">{{ error }}</p>

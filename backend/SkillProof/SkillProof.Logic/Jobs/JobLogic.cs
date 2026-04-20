@@ -4,6 +4,7 @@ using SkillProof.Data.Repositorys;
 using SkillProof.Entities.Dtos.Job;
 using SkillProof.Entities.Dtos.Jobs;
 using SkillProof.Entities.Models;
+using SkillProof.Logic.Helper;
 
 namespace SkillProof.Logic.Jobs;
 
@@ -11,11 +12,13 @@ public class JobLogic : IJobLogic
 {
     private readonly IRepository<Job> _jobRepository;
     private readonly UserManager<Users> _userManager;
+    private readonly IMarkdownService _markdownService;
 
-    public JobLogic(IRepository<Job> jobRepository,UserManager<Users> userManager)
+    public JobLogic(IRepository<Job> jobRepository,UserManager<Users> userManager, IMarkdownService markdownService)
     {
         _jobRepository = jobRepository;
         _userManager = userManager;
+        _markdownService = markdownService;
     }
 
     public async Task<JobViewDto> CreateJobAsync(JobCreateDto model, string companyId)
@@ -30,7 +33,7 @@ public class JobLogic : IJobLogic
             Id = Guid.NewGuid().ToString(),
             CompanyId = companyId, 
             Title = model.Title,
-            Description = model.Description,
+            Description = _markdownService.ToHtml(model.Description),
             Location = model.Location,
             Tags = model.Tags,
             EmploymentType = model.EmploymentType,
