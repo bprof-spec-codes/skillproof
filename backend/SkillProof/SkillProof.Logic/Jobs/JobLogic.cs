@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using SkillProof.Data.Repositorys;
 using SkillProof.Entities.Dtos.Job;
 using SkillProof.Entities.Dtos.Jobs;
+using SkillProof.Entities.Dtos.Questions;
 using SkillProof.Entities.Models;
 
 namespace SkillProof.Logic.Jobs;
@@ -11,6 +12,7 @@ public class JobLogic : IJobLogic
 {
     private readonly IRepository<Job> _jobRepository;
     private readonly UserManager<Users> _userManager;
+    private readonly IRepository<SkillProof.Entities.Models.Questions> _questionRepository;
 
     public JobLogic(IRepository<Job> jobRepository,UserManager<Users> userManager)
     {
@@ -146,4 +148,14 @@ public class JobLogic : IJobLogic
 
         await _jobRepository.DeleteById(id);
     }
+
+    /*public async Task<List<QuestionResponseDto>> GetRndQuestions(string id)
+    {
+        Job job = await _jobRepository.GetOne(id);
+
+        string tagsOfJob = job.Tags;
+
+
+    }
+    */
 }

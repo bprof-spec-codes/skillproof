@@ -33,6 +33,9 @@ namespace SkillProof.Entities.Models
         [Required]
         public string QuestionText { get; set; }
 
+        [Required]
+        public List<string> Tags { get; set; }
+
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 

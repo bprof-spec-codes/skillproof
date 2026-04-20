@@ -15,6 +15,8 @@ namespace SkillProof.Entities.Dtos.Questions
         [Required]
         public DifficultyLevel Difficulty { get; set; }
 
+        public List<string> Tags { get; set; }
+
         [Required]
         [StringLength(255)]
         public string Title { get; set; } = string.Empty;
