@@ -14,6 +14,8 @@ using SkillProof.Logic.Questions;
 using SkillProof.Logic.User;
 using System.IdentityModel.Tokens.Jwt;
 using System.Text;
+using SkillProof.Logic.Assesments;
+using SkillProof.Logic.Assessments;
 
 namespace SkillProof.Api
 {
@@ -156,6 +158,7 @@ namespace SkillProof.Api
             builder.Services.AddScoped<IQuestionBankService, QuestionBankService>();
             builder.Services.AddScoped<IJobLogic, JobLogic>();
             builder.Services.AddScoped<IUserLogic, UserLogic>();
+            builder.Services.AddScoped<IAssessmentLogic, AssessmentLogic>();
 #endregion
             var app = builder.Build();
 
