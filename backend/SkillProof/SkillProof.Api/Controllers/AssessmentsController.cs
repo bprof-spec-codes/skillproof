@@ -64,5 +64,12 @@ namespace SkillProof.Api.Controllers
             await _assessmentLogic.DeleteAssessmentAsync(id);
             return NoContent();
         }
+
+        [HttpPost("assign-to-job")]
+        public async Task<IActionResult> AssignAssessmentToJob(string assessmentId, string jobId)
+        {
+            await _assessmentLogic.AssignAssessmentToJob(assessmentId, jobId);
+            return Ok(new { message = "Assessment assigned to job successfully." });
+        }
     }
 }

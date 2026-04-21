@@ -11,13 +11,16 @@ namespace SkillProof.Logic.Assessments
     {
         private readonly IRepository<Entities.Models.Assessments> _assessmentRepository;
         private readonly IRepository<Entities.Models.Questions> _questionRepository;
+        private readonly IRepository<Entities.Models.Job> _jobRepository;
 
         public AssessmentLogic(
             IRepository<Entities.Models.Assessments> assessmentRepository,
-            IRepository<Entities.Models.Questions> questionRepository)
+            IRepository<Entities.Models.Questions> questionRepository,
+            IRepository<Entities.Models.Job> jobRepository)
         {
             _assessmentRepository = assessmentRepository;
             _questionRepository = questionRepository;
+            _jobRepository = jobRepository;
         }
 
         public async Task<AssessmentViewDto> CreateAssessmentAsync(CreateAssessmentDto model, string userId)
@@ -51,6 +54,17 @@ namespace SkillProof.Logic.Assessments
             }
 
             await _assessmentRepository.Create(assessment);
+
+            if (!string.IsNullOrEmpty(model.JobId))
+            {
+                var job = await _jobRepository.GetAll()
+                    .Include(j => j.Assessments)
+                    .FirstOrDefaultAsync(j => j.Id == model.JobId);
+
+                job.Assessments.Add(assessment);
+
+                await _jobRepository.Update(job);
+            }
 
             return await GetAssessmentByIdAsync(assessment.Id) 
                    ?? throw new InvalidOperationException("Failed to retrieve created assessment.");
@@ -146,6 +160,25 @@ namespace SkillProof.Logic.Assessments
                     Language = q.Language
                 }).ToList()
             };
+        }
+
+        public async Task AssignAssessmentToJob(string assessmentId, string jobId)
+        {
+            var assessment = await _assessmentRepository.GetAll()
+                .Include(a => a.Jobs)
+                .FirstOrDefaultAsync(a => a.Id == assessmentId);
+
+            if (assessment == null)
+                throw new KeyNotFoundException("Assessment not found.");
+
+            var job = await _jobRepository.GetOne(jobId);
+
+            if (job == null)
+                throw new KeyNotFoundException("Job not found.");
+
+            assessment.Jobs.Add(job);
+
+            await _assessmentRepository.Update(assessment);
         }
     }
 }

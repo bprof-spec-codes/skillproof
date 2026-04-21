@@ -1,6 +1,8 @@
+using SkillProof.Entities.Dtos.Assesment;
 using SkillProof.Entities.Dtos.Job;
 using SkillProof.Entities.Dtos.Jobs;
 using SkillProof.Entities.Dtos.Questions;
+using SkillProof.Entities.Models;
 
 namespace SkillProof.Logic.Jobs;
 
@@ -13,6 +15,6 @@ public interface IJobLogic
     Task DeleteJobAsync(string id, string companyId);
     Task<JobViewDto> CreateJobAsync(JobCreateDto model, string companyId);
 
-    //Task<List<QuestionResponseDto>> GetRndQuestions(string id);
+    Task<ICollection<AssessmentViewDto>> GetTestToJob(string id);
 
 }

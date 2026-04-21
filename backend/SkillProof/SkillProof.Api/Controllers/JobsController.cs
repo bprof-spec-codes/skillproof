@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using SkillProof.Entities.Dtos.Assesment;
 using SkillProof.Entities.Dtos.Job;
 using SkillProof.Entities.Dtos.Jobs;
 using SkillProof.Entities.Dtos.Questions;
@@ -82,12 +83,12 @@ public class JobsController : ControllerBase
         return NoContent();
     }
 
-    /*[HttpGet("GetRandomQuestions{id}")]
+    [HttpGet("GetTestToJob{id}")]
 
-    public async Task<ActionResult<List<QuestionResponseDto>>> GetRndQuestions(string id)
+    public async Task<ActionResult<ICollection<AssessmentViewDto>>> GetRndQuestions(string id)
     {
-        var questions = await _jobLogic.GetRndQuestions(id);
-        return questions == null ? NotFound() : Ok(questions);
+        var test = await _jobLogic.GetTestToJob(id);
+        return test == null ? NotFound() : Ok(test);
     }
-    */
+    
 }
