@@ -88,6 +88,28 @@ public class JobLogic : IJobLogic
             Id = job.Id
         };
     }
+    
+    public async Task<IEnumerable<JobViewDto>> GetJobsByCompanyIdAsync(string companyId)
+    {
+        if (string.IsNullOrWhiteSpace(companyId))
+        {
+            throw new ArgumentException("Company ID cannot be null or empty.", nameof(companyId));
+        }
+
+        return await _jobRepository.GetAll()
+            .Where(j => j.CompanyId == companyId)
+            .Select(j => new JobViewDto
+            {
+                CompanyId = j.CompanyId,
+                Title = j.Title,
+                Description = j.Description,
+                Location = j.Location,
+                Tags = j.Tags,
+                EmploymentType = j.EmploymentType,
+                CreatedAt = j.CreatedAt,
+                Id = j.Id
+            }).ToListAsync();
+    }
 
     public async Task<JobViewDto> UpdateJobAsync(string id, JobViewDto model, string companyId)
     {

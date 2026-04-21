@@ -1,51 +1,78 @@
-<div class="container py-5" *ngIf="profile$ | async as profile">
+<div class="container py-5">
+  @if (profile$ | async; as profile) {
 
-  <div class="card shadow-sm p-4 mx-auto" style="max-width: 600px;">
+    <div class="card shadow-sm p-4 mx-auto mb-4" style="max-width: 600px;">
+      <div class="text-center mb-3">
+        @if (profile.image) {
+          <img
+            [src]="profile.image.startsWith('http') ? profile.image : 'data:image/png;base64,' + profile.image"
+            class="rounded-circle"
+            style="width: 120px; height: 120px; object-fit: cover;"
+          />
+        }
+      </div>
 
-    <!-- Profilkép -->
-    <div class="text-center mb-3">
-      <img 
-        *ngIf="profile.image"
-        [src]="profile.image.startsWith('http') 
-          ? profile.image 
-          : 'data:image/*;base64,' + profile.image"
-        class="rounded-circle"
-        style="width: 120px; height: 120px; object-fit: cover;"
-      />
+      <h3 class="text-center mb-1">{{ profile.fullName }}</h3>
+      <p class="text-center text-muted mb-3">{{ profile.headline }}</p>
+
+      <div class="mb-2">
+        <strong>Email:</strong>
+        <div>{{ profile.email }}</div>
+      </div>
+
+      <div class="mb-3">
+        <strong>About:</strong>
+        <div>{{ profile.bio }}</div>
+      </div>
+
+      <div class="text-end">
+        <button class="btn btn-outline-primary" routerLink="/editProfile">
+          Edit Profile
+        </button>
+      </div>
     </div>
 
-    <!-- Név -->
-    <h3 class="text-center mb-1">
-      {{ profile.fullName }}
-    </h3>
+    @if (profile.companyId) {
+      <div class="card shadow-sm p-4 mx-auto" style="max-width: 600px;">
+        <h4 class="mb-4 text-center">My Posted Jobs</h4>
 
-    <!-- Headline -->
-    <p class="text-center text-muted mb-3">
-      {{ profile.headline }}
-    </p>
+        @if (companyJobs$ | async; as jobs) {
+          @if (jobs.length > 0) {
+            <div class="row g-3">
+              @for (job of jobs; track job.id) {
+                <div class="col-12">
+                  <div class="card border-light bg-light">
+                    <div class="card-body">
+                      <div class="d-flex justify-content-between align-items-start mb-2">
+                        <div>
+                          <h5 class="card-title mb-1">{{ job.title }}</h5>
+                          <h6 class="card-subtitle text-muted">
+                            <i class="bi bi-geo-alt-fill me-1"></i>{{ job.location }}
+                          </h6>
+                        </div>
+                        <button class="btn btn-sm btn-outline-danger" (click)="deleteJob(job.id, profile.companyId)">
+                          <i class="bi bi-trash"></i> Delete
+                        </button>
+                      </div>
 
-    <!-- Email -->
-    <div class="mb-2">
-      <strong>Email:</strong>
-      <div>{{ profile.email }}</div>
-    </div>
+                      <div class="d-flex flex-wrap gap-1 mt-3">
+                        @for (tag of job.tags; track tag) {
+                          <span class="badge bg-secondary bg-opacity-25 text-dark">{{ tag }}</span>
+                        }
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              }
+            </div>
+          } @else {
+            <div class="text-center text-muted py-3">
+              <p class="mb-0">You have not posted any jobs yet.</p>
+            </div>
+          }
+        }
+      </div>
+    }
 
-    <!-- Bio -->
-    <div class="mb-3">
-      <strong>About:</strong>
-      <div>{{ profile.bio }}</div>
-    </div>
-
-    <!-- Edit gomb -->
-    <div class="text-end">
-      <button 
-        class="btn btn-outline-primary"
-        routerLink="/editProfile"
-      >
-        Edit Profile
-      </button>
-    </div>
-
-  </div>
-
+  }
 </div>

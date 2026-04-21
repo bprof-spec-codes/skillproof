@@ -34,6 +34,17 @@ export class JobService {
       });
   }
 
+  getJobsByCompanyId(companyId: string): Observable<JobViewDto[]> {
+    return this.http.get<Job[]>(`${this.apiUrl}/company/${companyId}`).pipe(
+      map((result) => {
+        return result.map((job) => ({
+          ...job,
+          tags: job.tags.split(','),
+        })) as JobViewDto[];
+      }),
+    );
+  }
+
   createJobs(dto: JobCreateDto): Observable<JobViewDto> {
     const payload = {
       ...dto,

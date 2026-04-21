@@ -44,6 +44,18 @@ public class JobsController : ControllerBase
         var job = await _jobLogic.GetJobByIdAsync(id);
         return Ok(job);
     }
+    
+    [HttpGet("company/{companyId}")]
+    public async Task<IActionResult> GetJobsByCompany(string companyId)
+    {
+        if (string.IsNullOrWhiteSpace(companyId))
+        {
+            return BadRequest(new { message = "Company ID is required." });
+        }
+
+        var jobs = await _jobLogic.GetJobsByCompanyIdAsync(companyId);
+        return Ok(jobs);
+    }
 
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdateJob(string id, [FromBody] JobViewDto dto)
