@@ -15,14 +15,20 @@ export class HomePage implements OnInit {
   freeTextControl = new FormControl('');
   locationControl = new FormControl('');
 
+  isLoggedIn = false;
+
   filteredJobs = new BehaviorSubject<JobViewDto[]>([]);
   filteredJobs$: Observable<JobViewDto[]> = this.filteredJobs.asObservable();
 
   constructor(public jobService: JobService) {}
 
   ngOnInit() {
+    this.isLoggedIn = !!localStorage.getItem('skillProof_token');
+
     this.jobService.jobs$.subscribe((allJobs) => {
-      this.filteredJobs.next(allJobs);
+      if (!this.freeTextControl.value && !this.locationControl.value) {
+        this.filteredJobs.next(allJobs);
+      }
     });
   }
 

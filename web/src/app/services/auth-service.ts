@@ -15,9 +15,12 @@ import { ProfileViewDto } from '../Models/User/profile-view-dto';
 export class AuthService {
   private storageKey = 'skillProof_token';
 
-  constructor(private http:HttpClient, private router:Router, private profileService:ProfileService){}
+  constructor(
+    private http: HttpClient,
+    private router: Router,
+    private profileService: ProfileService,
+  ) {}
 
-   
   login(loginDto: LoginDto): Observable<LoginResultDto> {
     return this.http.post<LoginResultDto>(environment.apiUrls.login, loginDto).pipe(
       tap((res) => {
@@ -26,12 +29,11 @@ export class AuthService {
         const userId = this.getUserId();
 
         if (userId) {
-          this.profileService.loadProfile(userId)
+          this.profileService.loadProfile(userId);
         }
-      })
+      }),
     );
   }
-
 
   saveToken(token: string) {
     localStorage.setItem(this.storageKey, token);
@@ -44,7 +46,7 @@ export class AuthService {
   logout() {
     localStorage.removeItem(this.storageKey);
     this.profileService.clearProfile();
-    this.router.navigate(['/homePage']);
+    window.location.href = '/homePage';
   }
 
   isLoggedIn(): boolean {
@@ -65,8 +67,8 @@ export class AuthService {
       const jsonPayload = decodeURIComponent(
         atob(base64)
           .split('')
-          .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
-          .join('')
+          .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+          .join(''),
       );
       return JSON.parse(jsonPayload);
     } catch {
@@ -75,26 +77,25 @@ export class AuthService {
   }
 
   getRoles(): string[] {
-    const token = this.getToken()
-    if (!token) return []
+    const token = this.getToken();
+    if (!token) return [];
 
-    const payload = this.getPayload(token)
-    if (!payload) return []
+    const payload = this.getPayload(token);
+    if (!payload) return [];
 
-    // minden kulcsot végignézünk, és ami role, azt összegyűjtjük
-    const roles: string[] = []
+    const roles: string[] = [];
 
     for (const key in payload) {
       if (key.endsWith('/role')) {
-        const value = (payload as any)[key]
+        const value = (payload as any)[key];
         if (Array.isArray(value)) {
-          roles.push(...value)
+          roles.push(...value);
         } else {
-          roles.push(value)
+          roles.push(value);
         }
       }
     }
-    return roles
+    return roles;
   }
 
   isAdmin(): boolean {
@@ -108,7 +109,7 @@ export class AuthService {
     if (!payload) return null;
 
     const id = payload[AuthService.NAME_ID_CLAIM];
-    return (typeof id === 'string' && id.trim() !== '') ? id : null;
+    return typeof id === 'string' && id.trim() !== '' ? id : null;
   }
 
   public static readonly NAME_ID_CLAIM =
@@ -116,23 +117,23 @@ export class AuthService {
 
   private getPayload(token: string): JwtPayload | null {
     try {
-      const base64url = token.split('.')[1] ?? ''
-      const json = this.base64UrlDecode(base64url)
-      return JSON.parse(json) as JwtPayload
+      const base64url = token.split('.')[1] ?? '';
+      const json = this.base64UrlDecode(base64url);
+      return JSON.parse(json) as JwtPayload;
     } catch {
-      return null
+      return null;
     }
   }
 
   private base64UrlDecode(input: string): string {
-    const base64 = input.replace(/-/g, '+').replace(/_/g, '/')
-    const pad = base64.length % 4 === 0 ? '' : '='.repeat(4 - (base64.length % 4))
-    const s = atob(base64 + pad)
+    const base64 = input.replace(/-/g, '+').replace(/_/g, '/');
+    const pad = base64.length % 4 === 0 ? '' : '='.repeat(4 - (base64.length % 4));
+    const s = atob(base64 + pad);
     return decodeURIComponent(
-      s.split('').map(c => '%' + c.charCodeAt(0).toString(16).padStart(2, '0')).join('')
-    )
+      s
+        .split('')
+        .map((c) => '%' + c.charCodeAt(0).toString(16).padStart(2, '0'))
+        .join(''),
+    );
   }
-
-
-
 }
