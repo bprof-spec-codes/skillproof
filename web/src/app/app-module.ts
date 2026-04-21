@@ -15,8 +15,9 @@ import { QuestionBankForm } from './components/question-bank-form/question-bank-
 import { QuestionBankDetails } from './components/question-bank-details/question-bank-details';
 import { EditProfile } from './components/edit-profile/edit-profile';
 import { ProfileView } from './components/profile-view/profile-view';
-import { Jobupload } from './jobupload/jobupload';
-import { JobEdit } from './job-edit/job-edit';
+import { Jobupload } from './components/jobupload/jobupload';
+import { JobEdit } from './components/job-edit/job-edit';
+import { AssessmentCreate } from './components/assessment-create/assessment-create';
 
 @NgModule({
   declarations: [
@@ -33,6 +34,7 @@ import { JobEdit } from './job-edit/job-edit';
     ProfileView,
     Jobupload,
     JobEdit,
+    AssessmentCreate,
   ],
   imports: [BrowserModule, AppRoutingModule, ReactiveFormsModule, HttpClientModule, FormsModule],
   providers: [

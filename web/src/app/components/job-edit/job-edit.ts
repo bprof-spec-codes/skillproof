@@ -1,8 +1,8 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { BehaviorSubject } from 'rxjs';
-import { JobService } from '../services/job-service';
-import { AssessmentService } from '../services/assesmentservice';
+import { JobService } from '../../services/job-service';
+import { AssessmentService } from '../../services/assesmentservice';
 
 
 @Component({
