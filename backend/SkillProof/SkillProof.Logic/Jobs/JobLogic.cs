@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using SkillProof.Data.Repositorys;
 using SkillProof.Entities.Dtos.Job;
 using SkillProof.Entities.Dtos.Jobs;
+using SkillProof.Entities.Dtos.Questions;
 using SkillProof.Entities.Models;
 using SkillProof.Logic.Helper;
 
@@ -13,10 +14,16 @@ public class JobLogic : IJobLogic
     private readonly IRepository<Job> _jobRepository;
     private readonly UserManager<Users> _userManager;
     private readonly IMarkdownService _markdownService;
+    private readonly IRepository<Entities.Models.Questions> _questionRepository;
 
-    public JobLogic(IRepository<Job> jobRepository,UserManager<Users> userManager, IMarkdownService markdownService)
+    public JobLogic(
+        IRepository<Job> jobRepository,
+        IRepository<Entities.Models.Questions> questionRepository,
+        UserManager<Users> userManager,
+        IMarkdownService markdownService)
     {
         _jobRepository = jobRepository;
+        _questionRepository = questionRepository;
         _userManager = userManager;
         _markdownService = markdownService;
     }
@@ -57,25 +64,41 @@ public class JobLogic : IJobLogic
     
     public async Task<IEnumerable<JobViewDto>> GetAllJobsAsync()
     {
-        return await _jobRepository.GetAll().Select(j => new JobViewDto{
-            CompanyId = j.CompanyId,
-            Title = j.Title,
-            Description = j.Description,
-            Location = j.Location,
-            Tags = j.Tags,
-            EmploymentType = j.EmploymentType,
-            CreatedAt= j.CreatedAt,
-            Id = j.Id
-        }).ToListAsync();
+        return await _jobRepository.GetAll()
+            .Include(j => j.Questions)
+            .Select(j => new JobViewDto
+            {
+                CompanyId = j.CompanyId,
+                Title = j.Title,
+                Description = j.Description,
+                Location = j.Location,
+                Tags = j.Tags,
+                EmploymentType = j.EmploymentType,
+                CreatedAt = j.CreatedAt,
+                Id = j.Id,
+                QuestionIds = j.Questions.Select(q => q.Id).ToList(),
+                Questions = j.Questions.Select(q => new QuestionResponseDto
+                {
+                    Id = q.Id,
+                    Title = q.Title,
+                    Type = q.Type,
+                    Difficulty = q.Difficulty,
+                    Language = q.Language
+                }).ToList()
+            }).ToListAsync();
     }
 
     public async Task<JobViewDto?> GetJobByIdAsync(string id)
     {
-        var job = await _jobRepository.GetOne(id);
-        if(job == null)
+        var job = await _jobRepository.GetAll()
+            .Include(j => j.Questions)
+            .FirstOrDefaultAsync(j => j.Id == id);
+
+        if (job == null)
         {
             throw new KeyNotFoundException("The job is not found.");
         }
+
         return new JobViewDto
         {
             CompanyId = job.CompanyId,
@@ -84,8 +107,17 @@ public class JobLogic : IJobLogic
             Location = job.Location,
             Tags = job.Tags,
             EmploymentType = job.EmploymentType,
-            CreatedAt= job.CreatedAt,
-            Id = job.Id
+            CreatedAt = job.CreatedAt,
+            Id = job.Id,
+            QuestionIds = job.Questions.Select(q => q.Id).ToList(),
+            Questions = job.Questions.Select(q => new QuestionResponseDto
+            {
+                Id = q.Id,
+                Title = q.Title,
+                Type = q.Type,
+                Difficulty = q.Difficulty,
+                Language = q.Language
+            }).ToList()
         };
     }
     
@@ -113,7 +145,10 @@ public class JobLogic : IJobLogic
 
     public async Task<JobViewDto> UpdateJobAsync(string id, JobViewDto model, string companyId)
     {
-        var job = await _jobRepository.GetOne(id);
+        var job = await _jobRepository.GetAll()
+            .Include(j => j.Questions)
+            .FirstOrDefaultAsync(j => j.Id == id);
+
         if (job == null)
         {
             throw new KeyNotFoundException("The job is not found.");
@@ -121,7 +156,7 @@ public class JobLogic : IJobLogic
 
         if (job.CompanyId != companyId)
         {
-            throw new UnauthorizedAccessException("You do not have permission to modify this job.\n");
+            throw new UnauthorizedAccessException("You do not have permission to modify this job.");
         }
 
         job.Title = model.Title;
@@ -129,6 +164,20 @@ public class JobLogic : IJobLogic
         job.Location = model.Location;
         job.Tags = model.Tags;
         job.EmploymentType = model.EmploymentType;
+
+        job.Questions.Clear();
+
+        if (model.QuestionIds != null && model.QuestionIds.Any())
+        {
+            var selectedQuestions = await _questionRepository.GetAll()
+                .Where(q => model.QuestionIds.Contains(q.Id))
+                .ToListAsync();
+
+            foreach (var question in selectedQuestions)
+            {
+                job.Questions.Add(question);
+            }
+        }
 
         await _jobRepository.Update(job);
 
@@ -140,8 +189,9 @@ public class JobLogic : IJobLogic
             Location = job.Location,
             Tags = job.Tags,
             EmploymentType = job.EmploymentType,
-            CreatedAt= job.CreatedAt,
-            Id = job.Id
+            CreatedAt = job.CreatedAt,
+            Id = job.Id,
+            QuestionIds = job.Questions.Select(q => q.Id).ToList()
         };
     }
 

@@ -47,5 +47,6 @@ namespace SkillProof.Entities.Models
         public virtual FillInTheBlankQuestions? FillInTheBlankQuestions { get; set; }
         public virtual CodeCompletionQuestions? CodeCompletionQuestion { get; set; }
         public virtual TrueFalseQuestions? TrueFalseQuestion { get; set; }
+        public virtual ICollection<Job> Jobs { get; set; } = new List<Job>();
     }
 }

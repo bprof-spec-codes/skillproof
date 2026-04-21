@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { BehaviorSubject } from 'rxjs';
 import { JobService } from '../services/job-service';
@@ -13,6 +13,7 @@ import { QuestionResponseDto } from '../Models/Dtos/Question/question-response-d
 })
 export class JobEdit implements OnInit {
   jobId = '';
+  companyId = '';
   title = '';
   location = '';
   employmentType: number | null = 0;
@@ -37,6 +38,7 @@ export class JobEdit implements OnInit {
     private router: Router,
     private jobService: JobService,
     private questionBankService: QuestionBankService,
+    private cdr: ChangeDetectorRef,
   ) {}
 
   ngOnInit(): void {
@@ -45,14 +47,18 @@ export class JobEdit implements OnInit {
     if (this.jobId) {
       this.jobService.getJobById(this.jobId).subscribe({
         next: (job) => {
+          this.companyId = job.companyId ?? '';
           this.title = job.title;
           this.location = job.location;
           this.employmentType = job.EmploymentType ?? 0;
           this.tags = job.tags ? job.tags.join(', ') : '';
           this.description = job.description;
+          this.selectedQuestions = job.questions || [];
+          this.cdr.detectChanges();
         },
         error: () => {
           this.error = 'Failed to load job details.';
+          this.cdr.detectChanges();
         },
       });
     }
@@ -98,6 +104,8 @@ export class JobEdit implements OnInit {
       .filter((t) => t !== '');
 
     const updateDto = {
+      id: this.jobId,
+      companyId: this.companyId,
       title: this.title,
       location: this.location,
       employmentType: Number(this.employmentType),
