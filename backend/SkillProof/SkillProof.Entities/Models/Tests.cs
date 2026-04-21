@@ -27,5 +27,6 @@ namespace SkillProof.Entities.Models
         public virtual JobApplication? JobApplication { get; set; }
         public virtual Users? User { get; set; }
         public virtual ICollection<TestAnswers> TestAnswers { get; set; }
+        public virtual ICollection<Assessments> Assessments { get; set; } = new List<Assessments>();
     }
 }

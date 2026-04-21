@@ -12,6 +12,7 @@ namespace SkillProof.Data
         public DbSet<Companies> Companies { get; set; }
         public DbSet<Job> Jobs { get; set; }
         public DbSet<Tests> Tests { get; set; }
+        public DbSet<Assessments> Assessments { get; set; }
         public DbSet<JobApplication> JobApplications { get; set; }
         public DbSet<Questions> Questions { get; set; }
         public DbSet<TestAnswers> TestAnswers { get; set; }
@@ -34,6 +35,7 @@ namespace SkillProof.Data
             modelBuilder.ApplyConfiguration(new FillInTheBlankQuestionsConfigurations());
             modelBuilder.ApplyConfiguration(new TestAnswersConfigurations());
             modelBuilder.ApplyConfiguration(new TestsConfigurations());
+            modelBuilder.ApplyConfiguration(new AssessmentConfiguration());
             modelBuilder.ApplyConfiguration(new TrueFalseQuestionsConfigurations());
             modelBuilder.ApplyConfiguration(new UserExperiencesConfigurations());
             modelBuilder.ApplyConfiguration(new UsersConfigurations());

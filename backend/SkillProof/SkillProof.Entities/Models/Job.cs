@@ -32,5 +32,6 @@ namespace SkillProof.Entities.Models
         public virtual Companies Company { get; set; }
         public virtual ICollection<JobApplication>? JobApplications { get; set; }
         public virtual ICollection<Questions> Questions { get; set; } = new List<Questions>();
+        public virtual ICollection<Assessments> Assessments { get; set; } = new List<Assessments>();
     }
 }
