@@ -9,20 +9,22 @@ import { QuestionBankDetails } from './components/question-bank-details/question
 import { EditProfile } from './components/edit-profile/edit-profile';
 import { ProfileView } from './components/profile-view/profile-view';
 import { Jobupload } from './jobupload/jobupload';
+import { JobEdit } from './job-edit/job-edit';
 
 const routes: Routes = [
-  {path:"", redirectTo:"home", pathMatch:"full"},
-  {path:"home", component: HomePage},
-  {path:"login", component:Login},
-  {path:"register", component:Register},
-  {path:"question-bank", component:QuestionBankList},
-  {path:"question-bank/create", component:QuestionBankForm},
-  {path:"question-bank/:id/edit", component:QuestionBankForm},
-  {path:"question-bank/:id", component:QuestionBankDetails},
-  {path:"editProfile", component:EditProfile},
-  {path:"viewProfile", component:ProfileView},
-  {path:"job-upload", component: Jobupload},
-  {path:"**", redirectTo:"home", pathMatch:"full"}
+  { path: '', redirectTo: 'home', pathMatch: 'full' },
+  { path: 'home', component: HomePage },
+  { path: 'login', component: Login },
+  { path: 'register', component: Register },
+  { path: 'question-bank', component: QuestionBankList },
+  { path: 'question-bank/create', component: QuestionBankForm },
+  { path: 'question-bank/:id/edit', component: QuestionBankForm },
+  { path: 'question-bank/:id', component: QuestionBankDetails },
+  { path: 'editProfile', component: EditProfile },
+  { path: 'viewProfile', component: ProfileView },
+  { path: 'job-upload', component: Jobupload },
+  { path: 'editJob/:id', component: JobEdit },
+  { path: '**', redirectTo: 'home', pathMatch: 'full' },
 ];
 
 @NgModule({

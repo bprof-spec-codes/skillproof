@@ -6,11 +6,7 @@ import { App } from './app';
 import { Login } from './components/login/login';
 import { Register } from './components/register/register';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import {
-  HttpClientModule,
-  provideHttpClient,
-  withInterceptors,
-} from '@angular/common/http';
+import { HttpClientModule, provideHttpClient, withInterceptors } from '@angular/common/http';
 import { HomePage } from './home-page/home-page';
 import { errorInterceptor } from './interceptors/error-interceptor';
 import { Modal } from './components/modal/modal';
@@ -20,6 +16,7 @@ import { QuestionBankDetails } from './components/question-bank-details/question
 import { EditProfile } from './components/edit-profile/edit-profile';
 import { ProfileView } from './components/profile-view/profile-view';
 import { Jobupload } from './jobupload/jobupload';
+import { JobEdit } from './job-edit/job-edit';
 
 @NgModule({
   declarations: [
@@ -35,6 +32,7 @@ import { Jobupload } from './jobupload/jobupload';
     EditProfile,
     ProfileView,
     Jobupload,
+    JobEdit,
   ],
   imports: [BrowserModule, AppRoutingModule, ReactiveFormsModule, HttpClientModule, FormsModule],
   providers: [

@@ -1,0 +1,89 @@
+<main class="container mt-4">
+  <div class="back-link mb-4">
+    <a routerLink="/profile">&larr; Back to Profile</a>
+  </div>
+
+  <div class="form-card">
+    <h1 class="form-title">Update job advertisement</h1>
+    <p class="form-subtitle">Modify the details of your job posting below.</p>
+
+    <form class="job-form" (ngSubmit)="onSubmit()">
+
+      <div class="form-group">
+        <label for="job-title">Job Title</label>
+        <input type="text" id="job-title" name="title" placeholder="e.g. Product designer" [(ngModel)]="title" required>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="location">Location</label>
+          <input type="text" id="location" name="location" placeholder="e.g. Budapest XI. or Remote" [(ngModel)]="location" required>
+        </div>
+
+        <div class="form-group">
+          <label for="employment-type">Employment Type</label>
+          <select id="employment-type" name="employmentType" [(ngModel)]="employmentType">
+            <option [value]="0">Full-time</option>
+            <option [value]="1">Part-time</option>
+            <option [value]="2">Internship</option>
+            <option [value]="3">Temporary</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="salary">Salary / Payment (Optional)</label>
+        <input type="text" id="salary" name="salary" placeholder="e.g. 600 000 Ft / month" [(ngModel)]="salary">
+      </div>
+
+      <div class="form-group">
+        <label for="tags">Tags (comma separated)</label>
+        <input type="text" id="tags" name="tags" placeholder="e.g. Angular, C#, Frontend" [(ngModel)]="tags">
+      </div>
+
+      @if(isPreView$ | async){
+        <div class="form-group">
+          <label>Job Description Preview</label>
+
+          <div class="preview-content" [innerHTML]="preViewmd | async"></div>
+
+          <div class="prev-container">
+            <button type="button" class="btn btn-primary" (click)="preView()">
+              Back
+            </button>
+          </div>
+        </div>
+      } @else {
+        <div class="form-group">
+          <label for="description">Job Description</label>
+          <textarea class="preview-textarea" id="description" name="description" rows="6" placeholder="Describe the role, responsibilities, and requirements..." [(ngModel)]="description" required></textarea>
+          <div class="prev-container">
+            <button type="button" class="btn btn-primary" (click)="preView()">
+              PreView
+            </button>
+          </div>
+        </div>
+      }
+
+      <div class="form-group border-top pt-4 mt-4">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <label class="mb-0">Skill Assessments</label>
+          <button type="button" class="btn btn-outline-success btn-sm" (click)="openAddTestModal()">
+            <i class="bi bi-plus-circle me-1"></i> Add Test
+          </button>
+        </div>
+        <p class="text-muted small mb-0">Select an existing test from the question bank or create a new one to evaluate your applicants.</p>
+      </div>
+
+      @if (error) {
+        <div class="mb-3 text-center">
+          <p class="text-danger fw-bold">{{ error }}</p>
+        </div>
+      }
+
+      <button type="submit" class="submit-btn mt-2" [disabled]="loading">
+        {{ loading ? 'Updating...' : 'Update Advertisement' }}
+      </button>
+    </form>
+  </div>
+</main>
