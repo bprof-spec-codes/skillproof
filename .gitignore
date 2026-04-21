@@ -377,3 +377,5 @@ wwwroot/images/*
 # --- Log fájlok és ideiglenes fájlok ---
 *.log
 .DS_Store
+
+.idea/
