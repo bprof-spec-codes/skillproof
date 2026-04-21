@@ -2,118 +2,133 @@ using Microsoft.EntityFrameworkCore;
 using SkillProof.Entities.Enums;
 using SkillProof.Entities.Models;
 using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace SkillProof.Data
 {
+    public class QuestionSeedDto
+    {
+        public QuestionType Type { get; set; }
+        public string Language { get; set; }
+        public DifficultyLevel Difficulty { get; set; }
+        public string Title { get; set; }
+        public string QuestionText { get; set; }
+        public TrueFalseSeedDto? TrueFalsePayload { get; set; }
+        public MultipleChoiceSeedDto? MultipleChoicePayload { get; set; }
+    }
+
+    public class TrueFalseSeedDto
+    {
+        public bool CorrectAnswer { get; set; }
+        public string Explanation { get; set; }
+    }
+
+    public class MultipleChoiceSeedDto
+    {
+        public object Options { get; set; }
+        public object CorrectAnswerIds { get; set; }
+        public bool AllowMultipleSelection { get; set; }
+    }
+
     public static class DbInitializer
     {
         public static void Seed(DbContext context)
         {
             context.Database.EnsureCreated();
 
-            if (context.Set<Questions>().Any())
+            if (context.Set<Questions>().Any() || context.Set<Assessments>().Any())
             {
                 return;
             }
 
             var existingUser = context.Set<Users>().FirstOrDefault();
             var adminUserId = existingUser != null ? existingUser.Id : Guid.NewGuid().ToString();
-            var testUserId = existingUser?.Id;
 
-            var tfQuestionId = Guid.NewGuid().ToString();
-            var tfQuestion = new Questions
+            // Debugging tipp: kiírathatod az elérési utat a konzolra, ha továbbra sem találja
+            var seedFilePath = Path.Combine(AppContext.BaseDirectory, "seed-questions.json");
+
+            if (!File.Exists(seedFilePath))
             {
-                Id = tfQuestionId,
-                Type = QuestionType.TrueFalse,
-                Language = "English",
-                Difficulty = DifficultyLevel.Junior,
-                Title = "C# OOP",
-                QuestionText = "C# is an object-oriented programming language.",
-                CreatedBy = adminUserId,
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow,
-                IsActive = true
-            };
+                // Ha nem találja a bin-ben, megpróbáljuk a gyökérben (fejlesztői környezet)
+                seedFilePath = Path.Combine(Directory.GetCurrentDirectory(), "seed-questions.json");
 
-            var tfDetails = new TrueFalseQuestions
+                if (!File.Exists(seedFilePath))
+                {
+                    throw new FileNotFoundException($"The seed JSON file was not found. Looked in: {seedFilePath}");
+                }
+            }
+
+            var jsonContent = File.ReadAllText(seedFilePath);
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            options.Converters.Add(new JsonStringEnumConverter());
+
+            var seedQuestions = JsonSerializer.Deserialize<List<QuestionSeedDto>>(jsonContent, options);
+
+            if (seedQuestions == null || !seedQuestions.Any())
             {
-                QuestionId = tfQuestionId,
-                CorrectAnswer = true,
-                Explanation = "C# supports encapsulation, inheritance, and polymorphism."
-            };
+                return;
+            }
 
-            var mcQuestionId = Guid.NewGuid().ToString();
-            var mcQuestion = new Questions
+            var generatedQuestions = new List<Questions>();
+
+            foreach (var sq in seedQuestions)
             {
-                Id = mcQuestionId,
-                Type = QuestionType.MultipleChoice,
-                Language = "English",
-                Difficulty = DifficultyLevel.Medior,
-                Title = "C# Value Types",
-                QuestionText = "Which of the following are value types in C#?",
-                CreatedBy = adminUserId,
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow,
-                IsActive = true
-            };
+                var questionId = Guid.NewGuid().ToString();
+                var question = new Questions
+                {
+                    Id = questionId,
+                    Type = sq.Type,
+                    Language = sq.Language,
+                    Difficulty = sq.Difficulty,
+                    Title = sq.Title,
+                    QuestionText = sq.QuestionText,
+                    CreatedBy = adminUserId,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow,
+                    IsActive = true
+                };
 
-            var options = new[]
-            {
-                new { Id = "A", Text = "int" },
-                new { Id = "B", Text = "string" },
-                new { Id = "C", Text = "struct" },
-                new { Id = "D", Text = "class" }
-            };
+                generatedQuestions.Add(question);
+                context.Set<Questions>().Add(question);
 
-            var correctAnswers = new[] { "A", "C" };
+                if (sq.Type == QuestionType.TrueFalse && sq.TrueFalsePayload != null)
+                {
+                    context.Set<TrueFalseQuestions>().Add(new TrueFalseQuestions
+                    {
+                        QuestionId = questionId,
+                        CorrectAnswer = sq.TrueFalsePayload.CorrectAnswer,
+                        Explanation = sq.TrueFalsePayload.Explanation
+                    });
+                }
+                else if (sq.Type == QuestionType.MultipleChoice && sq.MultipleChoicePayload != null)
+                {
+                    context.Set<MultipleChoiceQuestions>().Add(new MultipleChoiceQuestions
+                    {
+                        QuestionId = questionId,
+                        Options = JsonSerializer.Serialize(sq.MultipleChoicePayload.Options),
+                        CorrectAnswerIds = JsonSerializer.Serialize(sq.MultipleChoicePayload.CorrectAnswerIds),
+                        AllowMultipleSelection = sq.MultipleChoicePayload.AllowMultipleSelection
+                    });
+                }
+            }
 
-            var mcDetails = new MultipleChoiceQuestions
-            {
-                QuestionId = mcQuestionId,
-                Options = JsonSerializer.Serialize(options),
-                CorrectAnswerIds = JsonSerializer.Serialize(correctAnswers),
-                AllowMultipleSelection = true
-            };
-
-            var testId = Guid.NewGuid().ToString();
-            var test = new Tests
-            {
-                Id = testId,
-                DifficultyLevel = DifficultyLevel.Medior,
-                UserId = testUserId,
-                Passed = true,
-                Score = 85,
-                CompletedAt = DateTime.UtcNow
-            };
-
-            var answer1 = new TestAnswers
-            {
-                Id = Guid.NewGuid().ToString(),
-                TestId = testId,
-                QuestionId = tfQuestionId,
-                FreeTextResponse = "True",
-                IsCorrect = true,
-                AiFeedback = "Correct."
-            };
-
-            var answer2 = new TestAnswers
+            var defaultAssessment = new Assessments
             {
                 Id = Guid.NewGuid().ToString(),
-                TestId = testId,
-                QuestionId = mcQuestionId,
-                FreeTextResponse = "A, C",
-                IsCorrect = true,
-                AiFeedback = "Accurate selection of value types."
+                Title = "Full-Stack Developer Starter Kit",
+                Description = "Comprehensive test covering basic C# and .NET concepts.",
+                DifficultyLevel = DifficultyLevel.Junior,
+                CreatedBy = adminUserId,
+                CreatedAt = DateTime.UtcNow,
+                IsActive = true,
+                Questions = generatedQuestions
             };
 
-            context.Set<Questions>().AddRange(tfQuestion, mcQuestion);
-            context.Set<TrueFalseQuestions>().Add(tfDetails);
-            context.Set<MultipleChoiceQuestions>().Add(mcDetails);
-            context.Set<Tests>().Add(test);
-            context.Set<TestAnswers>().AddRange(answer1, answer2);
-
+            context.Set<Assessments>().Add(defaultAssessment);
             context.SaveChanges();
         }
     }
