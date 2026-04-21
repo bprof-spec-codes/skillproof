@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SkillProof.Data;
 
@@ -11,9 +12,11 @@ using SkillProof.Data;
 namespace SkillProof.Data.Migrations
 {
     [DbContext(typeof(SkillProofDbContext))]
-    partial class SkillProofDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260421091623_AddJobQuestions")]
+    partial class AddJobQuestions
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,51 +24,6 @@ namespace SkillProof.Data.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
-
-            modelBuilder.Entity("AssessmentsJob", b =>
-                {
-                    b.Property<string>("AssessmentsId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("JobsId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("AssessmentsId", "JobsId");
-
-                    b.HasIndex("JobsId");
-
-                    b.ToTable("AssessmentsJob");
-                });
-
-            modelBuilder.Entity("AssessmentsQuestions", b =>
-                {
-                    b.Property<string>("AssessmentsId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("QuestionsId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("AssessmentsId", "QuestionsId");
-
-                    b.HasIndex("QuestionsId");
-
-                    b.ToTable("AssessmentsQuestions");
-                });
-
-            modelBuilder.Entity("AssessmentsTests", b =>
-                {
-                    b.Property<string>("AssessmentsId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("TestAttemptsId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("AssessmentsId", "TestAttemptsId");
-
-                    b.HasIndex("TestAttemptsId");
-
-                    b.ToTable("AssessmentsTests");
-                });
 
             modelBuilder.Entity("JobQuestions", b =>
                 {
@@ -288,38 +246,6 @@ namespace SkillProof.Data.Migrations
                     b.HasKey("UserId", "LoginProvider", "Name");
 
                     b.ToTable("AspNetUserTokens", (string)null);
-                });
-
-            modelBuilder.Entity("SkillProof.Entities.Models.Assessments", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("CreatedBy")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("DifficultyLevel")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Assessments");
                 });
 
             modelBuilder.Entity("SkillProof.Entities.Models.CodeCompletionQuestions", b =>
@@ -679,51 +605,6 @@ namespace SkillProof.Data.Migrations
                     b.HasIndex("CompanyId");
 
                     b.HasDiscriminator().HasValue("Users");
-                });
-
-            modelBuilder.Entity("AssessmentsJob", b =>
-                {
-                    b.HasOne("SkillProof.Entities.Models.Assessments", null)
-                        .WithMany()
-                        .HasForeignKey("AssessmentsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("SkillProof.Entities.Models.Job", null)
-                        .WithMany()
-                        .HasForeignKey("JobsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("AssessmentsQuestions", b =>
-                {
-                    b.HasOne("SkillProof.Entities.Models.Assessments", null)
-                        .WithMany()
-                        .HasForeignKey("AssessmentsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("SkillProof.Entities.Models.Questions", null)
-                        .WithMany()
-                        .HasForeignKey("QuestionsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("AssessmentsTests", b =>
-                {
-                    b.HasOne("SkillProof.Entities.Models.Assessments", null)
-                        .WithMany()
-                        .HasForeignKey("AssessmentsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("SkillProof.Entities.Models.Tests", null)
-                        .WithMany()
-                        .HasForeignKey("TestAttemptsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("JobQuestions", b =>

@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace SkillProof.Entities.Dtos.Users
+﻿namespace SkillProof.Entities.Dtos.Users
 {
     public class ViewUser
     {
@@ -14,5 +8,6 @@ namespace SkillProof.Entities.Dtos.Users
         public string Image { get; set; } = string.Empty;
         public string Headline { get; set; } = string.Empty;
         public string Bio { get; set; } = string.Empty;
+        public string? CompanyId { get; set; }
     }
 }

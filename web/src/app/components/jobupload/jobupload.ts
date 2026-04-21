@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
-import { JobService } from '../services/job-service';
-import { MarkdownService } from '../services/markdown-service';
+import { JobService } from '../../services/job-service';
+import { MarkdownService } from '../../services/markdown-service';
 import { BehaviorSubject, Observable } from 'rxjs';
 
 @Component({
