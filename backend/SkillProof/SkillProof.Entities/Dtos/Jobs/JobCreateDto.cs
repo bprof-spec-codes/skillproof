@@ -12,4 +12,5 @@ public class JobCreateDto
     public string? Salary { get; set; }
     public string Description { get; set; }
     public string Tags { get; set; }
+    public List<string>? AssessmentIds { get; set; }
 }

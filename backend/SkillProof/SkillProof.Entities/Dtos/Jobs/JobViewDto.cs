@@ -1,4 +1,5 @@
-﻿using SkillProof.Entities.Dtos.Questions;
+﻿using SkillProof.Entities.Dtos.Assesment;
+using SkillProof.Entities.Dtos.Questions;
 using SkillProof.Entities.Enums;
 
 namespace SkillProof.Entities.Dtos.Jobs
@@ -22,7 +23,7 @@ namespace SkillProof.Entities.Dtos.Jobs
         public string Tags { get; set; } // Json array of string
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-        public List<QuestionResponseDto> Questions { get; set; } = new();
-        public List<string>? QuestionIds { get; set; }
+        public List<AssessmentViewDto> Assessments { get; set; } = new List<AssessmentViewDto>();
+        public List<string>? AssessmentIds { get; set; }
     }
 }
