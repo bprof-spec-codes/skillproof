@@ -1,0 +1,142 @@
+[
+  {
+    "Type": "TrueFalse",
+    "Language": "English",
+    "Difficulty": "Junior",
+    "Title": "C# Case Sensitivity",
+    "QuestionText": "C# is a case-sensitive programming language.",
+    "TrueFalsePayload": {
+      "CorrectAnswer": true,
+      "Explanation": "In C#, 'Variable' and 'variable' are treated as two distinct identifiers."
+    }
+  },
+  {
+    "Type": "MultipleChoice",
+    "Language": "English",
+    "Difficulty": "Junior",
+    "Title": "Reference Types",
+    "QuestionText": "Which of the following are reference types in C#?",
+    "MultipleChoicePayload": {
+      "Options": [
+        { "Id": "A", "Text": "int" },
+        { "Id": "B", "Text": "string" },
+        { "Id": "C", "Text": "bool" },
+        { "Id": "D", "Text": "class" }
+      ],
+      "CorrectAnswerIds": ["B", "D"],
+      "AllowMultipleSelection": true
+    }
+  },
+  {
+    "Type": "TrueFalse",
+    "Language": "English",
+    "Difficulty": "Junior",
+    "Title": "String Mutability",
+    "QuestionText": "Strings in C# are mutable, meaning they can be changed after they are created.",
+    "TrueFalsePayload": {
+      "CorrectAnswer": false,
+      "Explanation": "Strings are immutable. Any operation that appears to modify a string actually creates a new string object."
+    }
+  },
+  {
+    "Type": "MultipleChoice",
+    "Language": "English",
+    "Difficulty": "Medior",
+    "Title": "Access Modifiers",
+    "QuestionText": "Which access modifier restricts access to the containing class or types derived from the containing class?",
+    "MultipleChoicePayload": {
+      "Options": [
+        { "Id": "A", "Text": "public" },
+        { "Id": "B", "Text": "private" },
+        { "Id": "C", "Text": "protected" },
+        { "Id": "D", "Text": "internal" }
+      ],
+      "CorrectAnswerIds": ["C"],
+      "AllowMultipleSelection": false
+    }
+  },
+  {
+    "Type": "TrueFalse",
+    "Language": "English",
+    "Difficulty": "Medior",
+    "Title": "Interface Instantiation",
+    "QuestionText": "You can create a direct instance of an interface using the 'new' keyword.",
+    "TrueFalsePayload": {
+      "CorrectAnswer": false,
+      "Explanation": "Interfaces cannot be instantiated directly. They must be implemented by a class or struct."
+    }
+  },
+  {
+    "Type": "MultipleChoice",
+    "Language": "English",
+    "Difficulty": "Medior",
+    "Title": "Dependency Injection Lifetimes",
+    "QuestionText": "In ASP.NET Core, which service lifetime creates a new instance every time it is requested?",
+    "MultipleChoicePayload": {
+      "Options": [
+        { "Id": "A", "Text": "Singleton" },
+        { "Id": "B", "Text": "Scoped" },
+        { "Id": "C", "Text": "Transient" },
+        { "Id": "D", "Text": "Static" }
+      ],
+      "CorrectAnswerIds": ["C"],
+      "AllowMultipleSelection": false
+    }
+  },
+  {
+    "Type": "TrueFalse",
+    "Language": "English",
+    "Difficulty": "Senior",
+    "Title": "Async / Await Blocking",
+    "QuestionText": "Using the 'await' keyword blocks the calling thread until the awaited task completes.",
+    "TrueFalsePayload": {
+      "CorrectAnswer": false,
+      "Explanation": "'await' yields control back to the calling method, allowing the thread to do other work without blocking."
+    }
+  },
+  {
+    "Type": "MultipleChoice",
+    "Language": "English",
+    "Difficulty": "Senior",
+    "Title": "Garbage Collection Generations",
+    "QuestionText": "How many generations does the .NET Garbage Collector use to group objects by their lifetime?",
+    "MultipleChoicePayload": {
+      "Options": [
+        { "Id": "A", "Text": "One (Gen 0)" },
+        { "Id": "B", "Text": "Two (Gen 0, Gen 1)" },
+        { "Id": "C", "Text": "Three (Gen 0, Gen 1, Gen 2)" },
+        { "Id": "D", "Text": "Four (Gen 0, Gen 1, Gen 2, Gen 3)" }
+      ],
+      "CorrectAnswerIds": ["C"],
+      "AllowMultipleSelection": false
+    }
+  },
+  {
+    "Type": "MultipleChoice",
+    "Language": "English",
+    "Difficulty": "Senior",
+    "Title": "LINQ Execution",
+    "QuestionText": "Which of the following LINQ operators enforce immediate execution?",
+    "MultipleChoicePayload": {
+      "Options": [
+        { "Id": "A", "Text": "Where()" },
+        { "Id": "B", "Text": "ToList()" },
+        { "Id": "C", "Text": "Select()" },
+        { "Id": "D", "Text": "Count()" }
+      ],
+      "CorrectAnswerIds": ["B", "D"],
+      "AllowMultipleSelection": true
+    }
+  },
+  {
+    "Type": "TrueFalse",
+    "Language": "Hungarian",
+    "Difficulty": "Medior",
+    "Title": "Értéktípusok",
+    "QuestionText": "A struct (struktúra) a C#-ban referenciatípusnak számít.",
+    "TrueFalsePayload": {
+      "CorrectAnswer": false,
+      "Explanation": "A struct értéktípus (value type), ellentétben a class-szal, ami referenciatípus (reference type)."
+    }
+  }
+]

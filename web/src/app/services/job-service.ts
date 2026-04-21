@@ -25,13 +25,24 @@ export class JobService {
         map((result) => {
           return result.map((job) => ({
             ...job,
-            tags: JSON.parse(job.tags),
+            tags: job.tags ? job.tags.split(',') : [],
           })) as JobViewDto[];
         }),
       )
       .subscribe((jobs) => {
         this.jobs.next(jobs);
       });
+  }
+
+  getJobsByCompanyId(companyId: string): Observable<JobViewDto[]> {
+    return this.http.get<Job[]>(`${this.apiUrl}/company/${companyId}`).pipe(
+      map((result) => {
+        return result.map((job) => ({
+          ...job,
+          tags: job.tags ? job.tags.split(',') : [],
+        })) as JobViewDto[];
+      }),
+    );
   }
 
   createJobs(dto: JobCreateDto): Observable<JobViewDto> {
@@ -58,19 +69,29 @@ export class JobService {
   getJobById(id: string): Observable<JobViewDto> {
     return this.http.get<Job>(`${this.apiUrl}/${id}`).pipe(
       map((job) => {
-        return { ...job, tags: JSON.parse(job.tags) } as JobViewDto;
+        return { ...job, tags: job.tags ? job.tags.split(',') : [] } as JobViewDto;
       }),
     );
   }
 
   deleteJob(id: string, companyId: string): void {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('skillProof_token');
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
 
-    this.http.delete(`${this.apiUrl}/${id}`, {
-      headers: headers,
-      params: { companyId: companyId },
-    });
+    this.http
+      .delete(`${this.apiUrl}/${id}`, {
+        headers: headers,
+        params: { companyId: companyId },
+      })
+      .subscribe({
+        next: () => {
+          const jobsArray = this.jobs.value.filter((j) => j.id !== id);
+          this.jobs.next(jobsArray);
+        },
+        error: (err) => {
+          console.error('Delete failed.', err);
+        },
+      });
   }
 
   updateJob(id: string, dto: JobCreateDto): void {
@@ -79,7 +100,7 @@ export class JobService {
       tags: JSON.stringify(dto.tags),
     };
 
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('skillProof_token');
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
 
     this.http.put<JobViewDto>(`${this.apiUrl}/${id}`, payload, { headers }).subscribe({

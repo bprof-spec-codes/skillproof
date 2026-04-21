@@ -8,21 +8,25 @@ import { QuestionBankForm } from './components/question-bank-form/question-bank-
 import { QuestionBankDetails } from './components/question-bank-details/question-bank-details';
 import { EditProfile } from './components/edit-profile/edit-profile';
 import { ProfileView } from './components/profile-view/profile-view';
-import { Jobupload } from './jobupload/jobupload';
+import { Jobupload } from './components/jobupload/jobupload';
+import { JobEdit } from './components/job-edit/job-edit';
+import { AssessmentCreate } from './components/assessment-create/assessment-create';
 
 const routes: Routes = [
-  {path:"", redirectTo:"home", pathMatch:"full"},
-  {path:"home", component: HomePage},
-  {path:"login", component:Login},
-  {path:"register", component:Register},
-  {path:"question-bank", component:QuestionBankList},
-  {path:"question-bank/create", component:QuestionBankForm},
-  {path:"question-bank/:id/edit", component:QuestionBankForm},
-  {path:"question-bank/:id", component:QuestionBankDetails},
-  {path:"editProfile", component:EditProfile},
-  {path:"viewProfile", component:ProfileView},
-  {path:"job-upload", component: Jobupload},
-  {path:"**", redirectTo:"home", pathMatch:"full"}
+  { path: '', redirectTo: 'home', pathMatch: 'full' },
+  { path: 'home', component: HomePage },
+  { path: 'login', component: Login },
+  { path: 'register', component: Register },
+  { path: 'question-bank', component: QuestionBankList },
+  { path: 'question-bank/create', component: QuestionBankForm },
+  { path: 'question-bank/:id/edit', component: QuestionBankForm },
+  { path: 'question-bank/:id', component: QuestionBankDetails },
+  { path: 'editProfile', component: EditProfile },
+  { path: 'viewProfile', component: ProfileView },
+  { path: 'job-upload', component: Jobupload },
+  { path: 'editJob/:id', component: JobEdit },
+  { path: 'assessments/create', component: AssessmentCreate},
+  { path: '**', redirectTo: 'home', pathMatch: 'full' },
 ];
 
 @NgModule({

@@ -1,6 +1,6 @@
-using System.IdentityModel.Tokens.Jwt;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -8,11 +8,14 @@ using SkillProof.Data;
 using SkillProof.Data.Repositorys;
 using SkillProof.Entities.Helper;
 using SkillProof.Entities.Models;
-using SkillProof.Logic.Questions;
-using System.Text;
-using Microsoft.AspNetCore.Mvc;
+using SkillProof.Logic.Helper;
 using SkillProof.Logic.Jobs;
+using SkillProof.Logic.Questions;
 using SkillProof.Logic.User;
+using System.IdentityModel.Tokens.Jwt;
+using System.Text;
+using SkillProof.Logic.Assesments;
+using SkillProof.Logic.Assessments;
 
 namespace SkillProof.Api
 {
@@ -50,12 +53,13 @@ namespace SkillProof.Api
                 options.AddPolicy("Frontend", policy =>
                 {
                     policy
-                        .WithOrigins("http://localhost:4200", "https://localhost:4200")
+                        .WithOrigins(frontendUrl ?? "http://localhost:4200", "https://localhost:4200")
                         .AllowAnyHeader()
                         .AllowAnyMethod();
                 });
             });
             builder.Services.AddTransient(typeof(Repository<>));
+            builder.Services.AddScoped<IMarkdownService, MarkdownService>();
 
             builder.Services.AddCors(option =>
             {
@@ -154,6 +158,7 @@ namespace SkillProof.Api
             builder.Services.AddScoped<IQuestionBankService, QuestionBankService>();
             builder.Services.AddScoped<IJobLogic, JobLogic>();
             builder.Services.AddScoped<IUserLogic, UserLogic>();
+            builder.Services.AddScoped<IAssessmentLogic, AssessmentLogic>();
 #endregion
             var app = builder.Build();
 
@@ -176,7 +181,21 @@ namespace SkillProof.Api
             app.UseStaticFiles();
 
             app.MapControllers();
-
+                
+            using (var scope = app.Services.CreateScope())
+            {
+                var services = scope.ServiceProvider;
+                try
+                {
+                    var context = services.GetRequiredService<SkillProofDbContext>();
+                    DbInitializer.Seed(context);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Database seeding failed: {ex.Message}");
+                }
+            }
+            
             app.Run();
         }
     }

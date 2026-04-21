@@ -163,6 +163,7 @@ namespace SkillProof.Logic.User
                 Image = Convert.ToBase64String(user.ProfilePicture),
                 Bio = user.Bio,
                 Headline = user.Headline,
+                CompanyId = user.CompanyId
             };
         }
 

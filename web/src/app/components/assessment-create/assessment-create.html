@@ -1,0 +1,101 @@
+<main class="container mt-4">
+  <div class="form-card p-4 shadow-sm bg-white rounded">
+    <h2 class="fw-bold mb-1">Create Test Template</h2>
+    <p class="text-muted mb-4">Group questions together to create a reusable assessment.</p>
+
+    <form (ngSubmit)="onSubmit()">
+      <div class="mb-3">
+        <label class="form-label fw-bold">Assessment Title</label>
+        <input type="text" class="form-control" [(ngModel)]="title" name="title" placeholder="e.g., Senior .NET Developer Test">
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label fw-bold">Description</label>
+        <textarea class="form-control" [(ngModel)]="description" name="description" rows="3"></textarea>
+      </div>
+
+      <div class="mb-4">
+        <label class="form-label fw-bold">Target Difficulty</label>
+        <select class="form-select" [(ngModel)]="difficultyLevel" name="difficulty">
+          <option [value]="0">Junior</option>
+          <option [value]="1">Medior</option>
+          <option [value]="2">Senior</option>
+        </select>
+      </div>
+
+      <div class="border-top pt-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="mb-0">Selected Questions ({{ selectedQuestions.length }})</h5>
+          <button type="button" class="btn btn-primary btn-sm" (click)="openQuestionModal()">
+            <i class="bi bi-search me-1"></i> Browse Question Bank
+          </button>
+        </div>
+
+        @if (selectedQuestions.length > 0) {
+          <div class="list-group">
+            @for (q of selectedQuestions; track q.id) {
+              <div class="list-group-item d-flex justify-content-between align-items-center border-start-0 border-end-0 px-0">
+                <div>
+                  <span class="badge bg-light text-dark border me-2">{{ q.type }}</span>
+                  <strong>{{ q.title }}</strong>
+                </div>
+                <button type="button" class="btn btn-link text-danger p-0" (click)="removeQuestion(q.id)">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </div>
+            }
+          </div>
+        } @else {
+          <div class="text-center py-4 border rounded bg-light">
+            <p class="text-muted mb-0">Your assessment is empty. Add questions from the bank.</p>
+          </div>
+        }
+      </div>
+
+      @if (error) {
+        <div class="alert alert-danger mt-4">{{ error }}</div>
+      }
+
+      <div class="mt-5 d-flex gap-2">
+        <button type="submit" class="btn btn-success px-4" [disabled]="loading">
+          {{ loading ? 'Saving...' : 'Save Assessment Template' }}
+        </button>
+        <button type="button" class="btn btn-light" routerLink="/profile">Cancel</button>
+      </div>
+    </form>
+  </div>
+</main>
+
+@if (showQuestionModal) {
+  <div class="modal-backdrop fade show" style="background-color: rgba(0,0,0,0.5);"></div>
+  <div class="modal fade show d-block" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Question Bank</h5>
+          <button type="button" class="btn-close" (click)="closeQuestionModal()"></button>
+        </div>
+        <div class="modal-body">
+          <div class="row g-3">
+            @for (q of availableQuestions; track q.id) {
+              <div class="col-12">
+                <div class="card card-hover" (click)="addQuestion(q)">
+                  <div class="card-body d-flex justify-content-between align-items-center">
+                    <div>
+                      <h6 class="mb-1 fw-bold">{{ q.title }}</h6>
+                      <small class="text-muted">{{ q.difficulty }} • {{ q.language }}</small>
+                    </div>
+                    <i class="bi bi-plus-circle fs-4 text-success"></i>
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="closeQuestionModal()">Done</button>
+        </div>
+      </div>
+    </div>
+  </div>
+}

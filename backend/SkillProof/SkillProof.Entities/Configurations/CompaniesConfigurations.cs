@@ -14,7 +14,7 @@ namespace SkillProof.Entities.Configurations
                 .HasMaxLength(100);
             builder.Property(c => c.Description)
                 .HasMaxLength(1000)
-                .IsRequired();
+                .IsRequired(); 
             builder.HasMany(c => c.Users)
                 .WithOne(u => u.Companies)
                 .HasForeignKey(u => u.CompanyId)

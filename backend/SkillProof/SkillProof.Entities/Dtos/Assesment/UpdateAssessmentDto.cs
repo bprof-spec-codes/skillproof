@@ -1,0 +1,12 @@
+using SkillProof.Entities.Enums;
+
+namespace SkillProof.Entities.Dtos.Assesment;
+
+public class UpdateAssessmentDto
+{
+    public string Title { get; set; }
+    public string Description { get; set; }
+    public DifficultyLevel DifficultyLevel { get; set; }
+    public bool IsActive { get; set; }
+    public List<string> QuestionIds { get; set; } = new List<string>();
+}

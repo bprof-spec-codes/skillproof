@@ -46,11 +46,32 @@ public class JobsController : ControllerBase
         var job = await _jobLogic.GetJobByIdAsync(id);
         return Ok(job);
     }
+    
+    [HttpGet("company/{companyId}")]
+    public async Task<IActionResult> GetJobsByCompany(string companyId)
+    {
+        if (string.IsNullOrWhiteSpace(companyId))
+        {
+            return BadRequest(new { message = "Company ID is required." });
+        }
+
+        var jobs = await _jobLogic.GetJobsByCompanyIdAsync(companyId);
+        return Ok(jobs);
+    }
 
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdateJob(string id, [FromBody] JobViewDto dto)
     {
-        var updatedJob = await _jobLogic.UpdateJobAsync(id, dto, dto.CompanyId);
+        var companyId = User.Claims.FirstOrDefault(c => 
+            c.Type == "CompanyId" || 
+            c.Type.EndsWith("CompanyId", StringComparison.OrdinalIgnoreCase))?.Value;
+
+        if (string.IsNullOrEmpty(companyId))
+        {
+            return BadRequest(new { message = "Company ID is missing from the authentication token." });
+        }
+
+        var updatedJob = await _jobLogic.UpdateJobAsync(id, dto, companyId);
         return Ok(updatedJob);
     }
 

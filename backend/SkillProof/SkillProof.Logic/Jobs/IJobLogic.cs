@@ -8,6 +8,7 @@ public interface IJobLogic
 {
     Task<IEnumerable<JobViewDto>> GetAllJobsAsync();
     Task<JobViewDto?> GetJobByIdAsync(string id);
+    Task<IEnumerable<JobViewDto>> GetJobsByCompanyIdAsync(string companyId);
     Task<JobViewDto> UpdateJobAsync(string id, JobViewDto model, string companyId);
     Task DeleteJobAsync(string id, string companyId);
     Task<JobViewDto> CreateJobAsync(JobCreateDto model, string companyId);

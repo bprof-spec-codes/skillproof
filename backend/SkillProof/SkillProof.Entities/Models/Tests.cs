@@ -1,12 +1,7 @@
 ﻿using SkillProof.Entities.Enums;
 using SkillProof.Entities.Helper;
-using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SkillProof.Entities.Models
 {
@@ -32,5 +27,6 @@ namespace SkillProof.Entities.Models
         public virtual JobApplication? JobApplication { get; set; }
         public virtual Users? User { get; set; }
         public virtual ICollection<TestAnswers> TestAnswers { get; set; }
+        public virtual ICollection<Assessments> Assessments { get; set; } = new List<Assessments>();
     }
 }
