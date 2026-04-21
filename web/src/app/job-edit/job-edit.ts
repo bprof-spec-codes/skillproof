@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { BehaviorSubject } from 'rxjs';
 import { JobService } from '../services/job-service';
+import { QuestionBankService } from '../services/question-bank-service';
+import { QuestionResponseDto } from '../Models/Dtos/Question/question-response-dto';
 
 @Component({
   selector: 'app-job-edit',
@@ -25,10 +27,16 @@ export class JobEdit implements OnInit {
   preViewmdSubject = new BehaviorSubject<string>('');
   preViewmd = this.preViewmdSubject.asObservable();
 
+  showQuestionModal = false;
+
+  availableQuestions: QuestionResponseDto[] = [];
+  selectedQuestions: QuestionResponseDto[] = [];
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private jobService: JobService,
+    private questionBankService: QuestionBankService,
   ) {}
 
   ngOnInit(): void {
@@ -48,6 +56,11 @@ export class JobEdit implements OnInit {
         },
       });
     }
+
+    this.questionBankService.getAll().subscribe();
+    this.questionBankService.questions$.subscribe((questions) => {
+      this.availableQuestions = questions;
+    });
   }
 
   preView(): void {
@@ -55,8 +68,24 @@ export class JobEdit implements OnInit {
     this.preViewmdSubject.next(this.description);
   }
 
-  openAddTestModal(): void {
-    console.log('Action triggered: Open test selection modal or navigate to test creation.');
+  openAddQuestionModal(): void {
+    this.showQuestionModal = true;
+  }
+
+  closeQuestionModal(): void {
+    this.showQuestionModal = false;
+  }
+
+  selectQuestion(question: QuestionResponseDto): void {
+    const alreadyAdded = this.selectedQuestions.some((q) => q.id === question.id);
+    if (!alreadyAdded) {
+      this.selectedQuestions.push(question);
+    }
+    this.closeQuestionModal();
+  }
+
+  removeQuestion(questionId: string): void {
+    this.selectedQuestions = this.selectedQuestions.filter((q) => q.id !== questionId);
   }
 
   onSubmit(): void {
@@ -74,6 +103,7 @@ export class JobEdit implements OnInit {
       employmentType: Number(this.employmentType),
       description: this.description,
       tags: tagsArray,
+      questionIds: this.selectedQuestions.map((q) => q.id),
     };
 
     try {

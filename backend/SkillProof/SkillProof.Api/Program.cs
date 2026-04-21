@@ -178,7 +178,21 @@ namespace SkillProof.Api
             app.UseStaticFiles();
 
             app.MapControllers();
-
+                
+            using (var scope = app.Services.CreateScope())
+            {
+                var services = scope.ServiceProvider;
+                try
+                {
+                    var context = services.GetRequiredService<SkillProofDbContext>();
+                    DbInitializer.Seed(context);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Database seeding failed: {ex.Message}");
+                }
+            }
+            
             app.Run();
         }
     }

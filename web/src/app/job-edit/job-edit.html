@@ -1,4 +1,4 @@
-<main class="container mt-4">
+<main class="container mt-4 position-relative">
   <div class="back-link mb-4">
     <a routerLink="/profile">&larr; Back to Profile</a>
   </div>
@@ -44,9 +44,7 @@
       @if(isPreView$ | async){
         <div class="form-group">
           <label>Job Description Preview</label>
-
           <div class="preview-content" [innerHTML]="preViewmd | async"></div>
-
           <div class="prev-container">
             <button type="button" class="btn btn-primary" (click)="preView()">
               Back
@@ -66,13 +64,30 @@
       }
 
       <div class="form-group border-top pt-4 mt-4">
-        <div class="d-flex justify-content-between align-items-center mb-2">
-          <label class="mb-0">Skill Assessments</label>
-          <button type="button" class="btn btn-outline-success btn-sm" (click)="openAddTestModal()">
-            <i class="bi bi-plus-circle me-1"></i> Add Test
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <label class="mb-0">Skill Questions</label>
+          <button type="button" class="btn btn-outline-success btn-sm" (click)="openAddQuestionModal()">
+            <i class="bi bi-plus-circle me-1"></i> Add Question
           </button>
         </div>
-        <p class="text-muted small mb-0">Select an existing test from the question bank or create a new one to evaluate your applicants.</p>
+
+        @if (selectedQuestions.length > 0) {
+          <div class="list-group mb-3">
+            @for (question of selectedQuestions; track question.id) {
+              <div class="list-group-item d-flex justify-content-between align-items-center bg-light border-0 rounded mb-2">
+                <div>
+                  <h6 class="mb-0 fw-bold">{{ question.title }}</h6>
+                  <small class="text-muted">Type: {{ question.type }} • Difficulty: {{ question.difficulty }}</small>
+                </div>
+                <button type="button" class="btn btn-sm text-danger" (click)="removeQuestion(question.id)">
+                  <i class="bi bi-x-circle fs-5"></i>
+                </button>
+              </div>
+            }
+          </div>
+        } @else {
+          <p class="text-muted small mb-3">No questions selected yet. Add questions to evaluate your applicants.</p>
+        }
       </div>
 
       @if (error) {
@@ -87,3 +102,42 @@
     </form>
   </div>
 </main>
+
+@if (showQuestionModal) {
+  <div class="modal-backdrop fade show" style="background-color: rgba(0,0,0,0.5);"></div>
+  <div class="modal fade show d-block" tabindex="-1" role="dialog" aria-modal="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+      <div class="modal-content shadow">
+        <div class="modal-header border-bottom-0 pb-0">
+          <h5 class="modal-title fw-bold">Select a Question</h5>
+          <button type="button" class="btn-close shadow-none" (click)="closeQuestionModal()" aria-label="Close"></button>
+        </div>
+
+        <div class="modal-body py-4">
+          <div class="row g-3">
+            @for (question of availableQuestions; track question.id) {
+              <div class="col-12 col-md-6">
+                <div class="card h-100 border cursor-pointer test-card" (click)="selectQuestion(question)">
+                  <div class="card-body">
+                    <h6 class="card-title fw-bold text-dark">{{ question.title }}</h6>
+                    <div class="d-flex justify-content-between align-items-center mt-3">
+                      <span class="badge bg-secondary bg-opacity-25 text-dark">{{ question.difficulty }}</span>
+                      <span class="text-muted small">{{ question.type }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+
+        <div class="modal-footer border-top-0 pt-0 justify-content-between">
+          <span class="text-muted small">Can't find what you need?</span>
+          <button type="button" class="btn btn-outline-primary btn-sm" routerLink="/question-bank/create">
+            Create New Question
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}
