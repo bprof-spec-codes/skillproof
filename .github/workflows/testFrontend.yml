@@ -46,7 +46,7 @@ jobs:
           cat "$FILE" || true
           echo
           echo "Felülírás az apiUrl értékre..."
-          sed -i "s#apiUrl: .*#apiUrl: '${{ env.BACKEND_URL }}',#" "$FILE"
+          sed -i "s#http://localhost:[0-9]*/api#${{ env.BACKEND_URL }}#g" "$FILE"
           echo "Új environment.development.ts tartalom:"
           cat "$FILE" || true
 
