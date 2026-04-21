@@ -1,9 +1,9 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { BehaviorSubject } from 'rxjs';
 import { JobService } from '../services/job-service';
-import { QuestionBankService } from '../services/question-bank-service';
-import { QuestionResponseDto } from '../Models/Dtos/Question/question-response-dto';
+import { AssessmentService } from '../services/assesmentservice';
+
 
 @Component({
   selector: 'app-job-edit',
@@ -28,16 +28,16 @@ export class JobEdit implements OnInit {
   preViewmdSubject = new BehaviorSubject<string>('');
   preViewmd = this.preViewmdSubject.asObservable();
 
-  showQuestionModal = false;
+  showAssessmentModal = false;
 
-  availableQuestions: QuestionResponseDto[] = [];
-  selectedQuestions: QuestionResponseDto[] = [];
+  availableAssessments: any[] = [];
+  selectedAssessments: any[] = [];
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private jobService: JobService,
-    private questionBankService: QuestionBankService,
+    private assessmentService: AssessmentService,
     private cdr: ChangeDetectorRef,
   ) {}
 
@@ -53,7 +53,7 @@ export class JobEdit implements OnInit {
           this.employmentType = job.EmploymentType ?? 0;
           this.tags = job.tags ? job.tags.join(', ') : '';
           this.description = job.description;
-          this.selectedQuestions = job.questions || [];
+          this.selectedAssessments = job.assessments || [];
           this.cdr.detectChanges();
         },
         error: () => {
@@ -63,9 +63,9 @@ export class JobEdit implements OnInit {
       });
     }
 
-    this.questionBankService.getAll().subscribe();
-    this.questionBankService.questions$.subscribe((questions) => {
-      this.availableQuestions = questions;
+    this.assessmentService.getAllAssessments().subscribe();
+    this.assessmentService.assessments$.subscribe((assessments) => {
+      this.availableAssessments = assessments;
     });
   }
 
@@ -74,24 +74,24 @@ export class JobEdit implements OnInit {
     this.preViewmdSubject.next(this.description);
   }
 
-  openAddQuestionModal(): void {
-    this.showQuestionModal = true;
+  openAddAssessmentModal(): void {
+    this.showAssessmentModal = true;
   }
 
-  closeQuestionModal(): void {
-    this.showQuestionModal = false;
+  closeAssessmentModal(): void {
+    this.showAssessmentModal = false;
   }
 
-  selectQuestion(question: QuestionResponseDto): void {
-    const alreadyAdded = this.selectedQuestions.some((q) => q.id === question.id);
+  selectAssessment(assessment: any): void {
+    const alreadyAdded = this.selectedAssessments.some((a) => a.id === assessment.id);
     if (!alreadyAdded) {
-      this.selectedQuestions.push(question);
+      this.selectedAssessments.push(assessment);
     }
-    this.closeQuestionModal();
+    this.closeAssessmentModal();
   }
 
-  removeQuestion(questionId: string): void {
-    this.selectedQuestions = this.selectedQuestions.filter((q) => q.id !== questionId);
+  removeAssessment(assessmentId: string): void {
+    this.selectedAssessments = this.selectedAssessments.filter((a) => a.id !== assessmentId);
   }
 
   onSubmit(): void {
@@ -111,7 +111,7 @@ export class JobEdit implements OnInit {
       employmentType: Number(this.employmentType),
       description: this.description,
       tags: tagsArray,
-      questionIds: this.selectedQuestions.map((q) => q.id),
+      assessmentIds: this.selectedAssessments.map((a) => a.id),
     };
 
     try {

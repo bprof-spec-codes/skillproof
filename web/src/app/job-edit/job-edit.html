@@ -65,28 +65,28 @@
 
       <div class="form-group border-top pt-4 mt-4">
         <div class="d-flex justify-content-between align-items-center mb-3">
-          <label class="mb-0">Skill Questions</label>
-          <button type="button" class="btn btn-outline-success btn-sm" (click)="openAddQuestionModal()">
-            <i class="bi bi-plus-circle me-1"></i> Add Question
+          <label class="mb-0">Skill Assessments (Tests)</label>
+          <button type="button" class="btn btn-outline-success btn-sm" (click)="openAddAssessmentModal()">
+            <i class="bi bi-plus-circle me-1"></i> Add Test
           </button>
         </div>
 
-        @if (selectedQuestions.length > 0) {
+        @if (selectedAssessments.length > 0) {
           <div class="list-group mb-3">
-            @for (question of selectedQuestions; track question.id) {
+            @for (assessment of selectedAssessments; track assessment.id) {
               <div class="list-group-item d-flex justify-content-between align-items-center bg-light border-0 rounded mb-2">
                 <div>
-                  <h6 class="mb-0 fw-bold">{{ question.title }}</h6>
-                  <small class="text-muted">Type: {{ question.type }} • Difficulty: {{ question.difficulty }}</small>
+                  <h6 class="mb-0 fw-bold">{{ assessment.title }}</h6>
+                  <small class="text-muted">Difficulty: {{ assessment.difficultyLevel }} • {{ assessment.questions?.length || 0 }} questions</small>
                 </div>
-                <button type="button" class="btn btn-sm text-danger" (click)="removeQuestion(question.id)">
+                <button type="button" class="btn btn-sm text-danger" (click)="removeAssessment(assessment.id)">
                   <i class="bi bi-x-circle fs-5"></i>
                 </button>
               </div>
             }
           </div>
         } @else {
-          <p class="text-muted small mb-3">No questions selected yet. Add questions to evaluate your applicants.</p>
+          <p class="text-muted small mb-3">No tests selected yet. Add a test template to evaluate your applicants.</p>
         }
       </div>
 
@@ -103,26 +103,27 @@
   </div>
 </main>
 
-@if (showQuestionModal) {
+@if (showAssessmentModal) {
   <div class="modal-backdrop fade show" style="background-color: rgba(0,0,0,0.5);"></div>
   <div class="modal fade show d-block" tabindex="-1" role="dialog" aria-modal="true">
     <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
       <div class="modal-content shadow">
         <div class="modal-header border-bottom-0 pb-0">
-          <h5 class="modal-title fw-bold">Select a Question</h5>
-          <button type="button" class="btn-close shadow-none" (click)="closeQuestionModal()" aria-label="Close"></button>
+          <h5 class="modal-title fw-bold">Select a Test Template</h5>
+          <button type="button" class="btn-close shadow-none" (click)="closeAssessmentModal()" aria-label="Close"></button>
         </div>
 
         <div class="modal-body py-4">
           <div class="row g-3">
-            @for (question of availableQuestions; track question.id) {
+            @for (assessment of availableAssessments; track assessment.id) {
               <div class="col-12 col-md-6">
-                <div class="card h-100 border cursor-pointer test-card" (click)="selectQuestion(question)">
+                <div class="card h-100 border cursor-pointer test-card" (click)="selectAssessment(assessment)">
                   <div class="card-body">
-                    <h6 class="card-title fw-bold text-dark">{{ question.title }}</h6>
+                    <h6 class="card-title fw-bold text-dark">{{ assessment.title }}</h6>
+                    <p class="text-muted small text-truncate mb-0">{{ assessment.description }}</p>
                     <div class="d-flex justify-content-between align-items-center mt-3">
-                      <span class="badge bg-secondary bg-opacity-25 text-dark">{{ question.difficulty }}</span>
-                      <span class="text-muted small">{{ question.type }}</span>
+                      <span class="badge bg-secondary bg-opacity-25 text-dark">{{ assessment.difficultyLevel }}</span>
+                      <span class="text-muted small">{{ assessment.questions?.length || 0 }} Qs</span>
                     </div>
                   </div>
                 </div>
@@ -132,9 +133,9 @@
         </div>
 
         <div class="modal-footer border-top-0 pt-0 justify-content-between">
-          <span class="text-muted small">Can't find what you need?</span>
-          <button type="button" class="btn btn-outline-primary btn-sm" routerLink="/question-bank/create">
-            Create New Question
+          <span class="text-muted small">Need a new test?</span>
+          <button type="button" class="btn btn-outline-primary btn-sm" routerLink="/assessments/create">
+            Build New Test
           </button>
         </div>
       </div>

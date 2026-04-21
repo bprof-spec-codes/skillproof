@@ -1,5 +1,5 @@
 import { EmploymentType } from "../../Enums/EmploymentType"
-import { QuestionResponseDto } from '../Question/question-response-dto';
+import { AssessmentViewDto } from '../Assesment/AssessmentViewDto';
 
 export class JobViewDto {
   id: string = '';
@@ -10,6 +10,6 @@ export class JobViewDto {
   location: string = '';
   tags: string[] = [];
   createdAt: string = '';
-  questions: QuestionResponseDto[] = [];
-  //companyName: string = ""
+  assessments: AssessmentViewDto[] = [];
+  assessmentIds: string[] = [];
 }
