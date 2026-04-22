@@ -1,5 +1,5 @@
 import { ChangeDetectorRef, Component, NgZone, OnDestroy, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { JobViewDto } from '../../Models/Dtos/Job/JobView-dto';
 import { EmploymentType } from '../../Models/Enums/EmploymentType';
@@ -23,6 +23,7 @@ export class JobDetail implements OnInit, OnDestroy {
 
   constructor(
     private route: ActivatedRoute,
+    private router: Router,
     private jobService: JobService,
     private modalService: ModalService,
     private authService: AuthService,
@@ -74,10 +75,11 @@ export class JobDetail implements OnInit, OnDestroy {
       return;
     }
 
-    this.modalService.open({
-      type: 'success',
-      message: 'Application submitted successfully! (Placeholder flow)',
-    });
+    if (!this.job?.id) {
+      return;
+    }
+
+    this.router.navigate(['/job', this.job.id, 'test']);
   }
 
   shareJob(): void {
