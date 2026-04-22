@@ -65,9 +65,9 @@ export class JobDetail implements OnInit, OnDestroy {
 
     const roles = this.authService.getRoles().map((r) => r.toLowerCase());
     const isEmployer = roles.includes('employer');
-    const isUser = roles.includes('user');
+    const isAdmin = roles.includes('admin');
 
-    if (isEmployer || !isUser) {
+    if (isEmployer || isAdmin) {
       this.modalService.open({
         type: 'warning',
         message: 'Only Job Seeker accounts can submit an application.',
