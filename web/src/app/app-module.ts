@@ -22,6 +22,7 @@ import { JobDetail } from './components/job-detail/job-detail';
 import { TestTake } from './components/test-take/test-take';
 import { QuestionTrueFalse } from './components/question-true-false/question-true-false';
 import { QuestionMultipleChoice } from './components/question-multiple-choice/question-multiple-choice';
+import { QuestionCodeCompletion } from './components/question-code-completion/question-code-completion';
 
 @NgModule({
   declarations: [
@@ -43,6 +44,7 @@ import { QuestionMultipleChoice } from './components/question-multiple-choice/qu
     TestTake,
     QuestionTrueFalse,
     QuestionMultipleChoice,
+    QuestionCodeCompletion,
   ],
   imports: [BrowserModule, AppRoutingModule, ReactiveFormsModule, FormsModule],
   providers: [

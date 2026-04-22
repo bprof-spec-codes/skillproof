@@ -36,9 +36,12 @@
             [currentAnswer]="currentAnswerFor(currentQuestion.id)"
             (answerChange)="onAnswerChange($event)"
           ></app-question-multiple-choice>
-          <div *ngSwitchCase="QuestionType.CodeCompletion">
-            <em>[CodeCompletion component placeholder — Commit 5]</em>
-          </div>
+          <app-question-code-completion
+            *ngSwitchCase="QuestionType.CodeCompletion"
+            [question]="currentQuestion"
+            [currentAnswer]="currentAnswerFor(currentQuestion.id)"
+            (answerChange)="onAnswerChange($event)"
+          ></app-question-code-completion>
           <div *ngSwitchCase="QuestionType.FillInTheBlank">
             <em>[FillInTheBlank component placeholder — Commit 6]</em>
           </div>
