@@ -90,5 +90,16 @@ public class JobsController : ControllerBase
         var test = await _jobLogic.GetTestToJob(id);
         return test == null ? NotFound() : Ok(test);
     }
-    
+
+    [HttpGet("{id}/test")]
+    public async Task<IActionResult> GetCandidateTest(string id)
+    {
+        var candidateTest = await _jobLogic.GetCandidateTestForJob(id);
+        if (candidateTest == null)
+        {
+            return NoContent();
+        }
+        return Ok(candidateTest);
+    }
+
 }

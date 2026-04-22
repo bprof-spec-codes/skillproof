@@ -2,6 +2,7 @@ using SkillProof.Entities.Dtos.Assesment;
 using SkillProof.Entities.Dtos.Job;
 using SkillProof.Entities.Dtos.Jobs;
 using SkillProof.Entities.Dtos.Questions;
+using SkillProof.Entities.Dtos.Tests;
 using SkillProof.Entities.Models;
 
 namespace SkillProof.Logic.Jobs;
@@ -16,5 +17,7 @@ public interface IJobLogic
     Task<JobViewDto> CreateJobAsync(JobCreateDto model, string companyId);
 
     Task<ICollection<AssessmentViewDto>> GetTestToJob(string id);
+
+    Task<CandidateAssessmentDto?> GetCandidateTestForJob(string jobId);
 
 }
