@@ -11,6 +11,7 @@ import { ProfileView } from './components/profile-view/profile-view';
 import { Jobupload } from './components/jobupload/jobupload';
 import { JobEdit } from './components/job-edit/job-edit';
 import { AssessmentCreate } from './components/assessment-create/assessment-create';
+import { JobDetail } from './components/job-detail/job-detail';
 
 const routes: Routes = [
   { path: '', redirectTo: 'home', pathMatch: 'full' },
@@ -25,6 +26,7 @@ const routes: Routes = [
   { path: 'viewProfile', component: ProfileView },
   { path: 'job-upload', component: Jobupload },
   { path: 'editJob/:id', component: JobEdit },
+  { path: 'job/:id', component: JobDetail },
   { path: 'assessments/create', component: AssessmentCreate},
   { path: '**', redirectTo: 'home', pathMatch: 'full' },
 ];

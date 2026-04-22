@@ -25,12 +25,17 @@ export class JobService {
         map((result) => {
           return result.map((job) => ({
             ...job,
-            tags: job.tags ? job.tags.split(',') : [],
+            tags: this.normalizeTags(job.tags),
           })) as JobViewDto[];
         }),
       )
-      .subscribe((jobs) => {
-        this.jobs.next(jobs);
+      .subscribe({
+        next: (jobs) => {
+          this.jobs.next(jobs);
+        },
+        error: () => {
+          this.jobs.next([]);
+        },
       });
   }
 
@@ -39,7 +44,7 @@ export class JobService {
       map((result) => {
         return result.map((job) => ({
           ...job,
-          tags: job.tags ? job.tags.split(',') : [],
+          tags: this.normalizeTags(job.tags),
         })) as JobViewDto[];
       }),
     );
@@ -69,7 +74,7 @@ export class JobService {
   getJobById(id: string): Observable<JobViewDto> {
     return this.http.get<Job>(`${this.apiUrl}/${id}`).pipe(
       map((job) => {
-        return { ...job, tags: job.tags ? job.tags.split(',') : [] } as JobViewDto;
+        return { ...job, tags: this.normalizeTags(job.tags) } as JobViewDto;
       }),
     );
   }
@@ -116,5 +121,35 @@ export class JobService {
         console.error('Update failed.', err);
       },
     });
+  }
+
+  private normalizeTags(tags: unknown): string[] {
+    if (Array.isArray(tags)) {
+      return tags.map((t) => String(t).trim()).filter((t) => t.length > 0);
+    }
+
+    if (typeof tags !== 'string') {
+      return [];
+    }
+
+    const trimmed = tags.trim();
+    if (!trimmed) {
+      return [];
+    }
+
+    if (trimmed.startsWith('[') && trimmed.endsWith(']')) {
+      try {
+        const parsed = JSON.parse(trimmed);
+        if (Array.isArray(parsed)) {
+          return parsed.map((t) => String(t).trim()).filter((t) => t.length > 0);
+        }
+      } catch {
+      }
+    }
+
+    return trimmed
+      .split(',')
+      .map((t) => t.trim())
+      .filter((t) => t.length > 0);
   }
 }
