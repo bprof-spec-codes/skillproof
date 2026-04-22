@@ -23,31 +23,36 @@ namespace SkillProof.Logic.Questions
         {
             ValidatePayload(request.Type, request.MultipleChoice, request.CodeCompletion, request.FillInTheBlank, request.TrueFalse);
 
-            var entity = new QuestionEntity
+            string createdQuestionId = string.Empty;
+            var strategy = _dbContext.Database.CreateExecutionStrategy();
+            await strategy.ExecuteAsync(async () =>
             {
-                Type = request.Type,
-                Language = request.Language,
-                Difficulty = request.Difficulty,
-                Title = request.Title,
-                QuestionText = request.QuestionText,
-                CreatedBy = request.CreatedBy,
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow,
-                IsActive = true,
-                Tags = request.Tags
-                
-            };
+                var entity = new QuestionEntity
+                {
+                    Type = request.Type,
+                    Language = request.Language,
+                    Difficulty = request.Difficulty,
+                    Title = request.Title,
+                    QuestionText = request.QuestionText,
+                    CreatedBy = request.CreatedBy,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow,
+                    IsActive = true,
+                    Tags = request.Tags ?? new List<string>()
+                };
 
-            await using var transaction = await _dbContext.Database.BeginTransactionAsync(cancellationToken);
+                await using var transaction = await _dbContext.Database.BeginTransactionAsync(cancellationToken);
 
-            _dbContext.Questions.Add(entity);
-            await _dbContext.SaveChangesAsync(cancellationToken);
+                _dbContext.Questions.Add(entity);
+                await _dbContext.SaveChangesAsync(cancellationToken);
 
-            AddTypedQuestion(entity.Id, request.Type, request.MultipleChoice, request.CodeCompletion, request.FillInTheBlank, request.TrueFalse);
-            await _dbContext.SaveChangesAsync(cancellationToken);
-            await transaction.CommitAsync(cancellationToken);
+                AddTypedQuestion(entity.Id, request.Type, request.MultipleChoice, request.CodeCompletion, request.FillInTheBlank, request.TrueFalse);
+                await _dbContext.SaveChangesAsync(cancellationToken);
+                await transaction.CommitAsync(cancellationToken);
+                createdQuestionId = entity.Id;
+            });
 
-            var created = await GetQuestionWithIncludes(entity.Id, cancellationToken);
+            var created = await GetQuestionWithIncludes(createdQuestionId, cancellationToken);
             return MapToResponse(created!);
         }
 
