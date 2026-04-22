@@ -21,6 +21,7 @@ import { AssessmentCreate } from './components/assessment-create/assessment-crea
 import { JobDetail } from './components/job-detail/job-detail';
 import { TestTake } from './components/test-take/test-take';
 import { QuestionTrueFalse } from './components/question-true-false/question-true-false';
+import { QuestionMultipleChoice } from './components/question-multiple-choice/question-multiple-choice';
 
 @NgModule({
   declarations: [
@@ -41,6 +42,7 @@ import { QuestionTrueFalse } from './components/question-true-false/question-tru
     JobDetail,
     TestTake,
     QuestionTrueFalse,
+    QuestionMultipleChoice,
   ],
   imports: [BrowserModule, AppRoutingModule, ReactiveFormsModule, FormsModule],
   providers: [

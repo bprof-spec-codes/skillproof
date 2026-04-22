@@ -30,9 +30,12 @@
             [currentAnswer]="currentAnswerFor(currentQuestion.id)"
             (answerChange)="onAnswerChange($event)"
           ></app-question-true-false>
-          <div *ngSwitchCase="QuestionType.MultipleChoice">
-            <em>[MultipleChoice component placeholder — Commit 4]</em>
-          </div>
+          <app-question-multiple-choice
+            *ngSwitchCase="QuestionType.MultipleChoice"
+            [question]="currentQuestion"
+            [currentAnswer]="currentAnswerFor(currentQuestion.id)"
+            (answerChange)="onAnswerChange($event)"
+          ></app-question-multiple-choice>
           <div *ngSwitchCase="QuestionType.CodeCompletion">
             <em>[CodeCompletion component placeholder — Commit 5]</em>
           </div>
