@@ -85,6 +85,14 @@ export class TestTake implements OnInit, OnDestroy {
     }
   }
 
+  currentAnswerFor(questionId: string): TestAnswerSubmitDto | null {
+    return this.answers.get(questionId) ?? null;
+  }
+
+  onAnswerChange(answer: TestAnswerSubmitDto): void {
+    this.answers.set(answer.questionId, answer);
+  }
+
   onSubmit(): void {
     console.log('Test answers (stub — will be wired up in Commit 7):', Array.from(this.answers.values()));
   }

@@ -20,6 +20,7 @@ import { JobEdit } from './components/job-edit/job-edit';
 import { AssessmentCreate } from './components/assessment-create/assessment-create';
 import { JobDetail } from './components/job-detail/job-detail';
 import { TestTake } from './components/test-take/test-take';
+import { QuestionTrueFalse } from './components/question-true-false/question-true-false';
 
 @NgModule({
   declarations: [
@@ -39,6 +40,7 @@ import { TestTake } from './components/test-take/test-take';
     AssessmentCreate,
     JobDetail,
     TestTake,
+    QuestionTrueFalse,
   ],
   imports: [BrowserModule, AppRoutingModule, ReactiveFormsModule, FormsModule],
   providers: [
