@@ -9,12 +9,12 @@
       <button class="btn btn-outline-secondary" type="button" (click)="backToJob()">Back to Job</button>
     </div>
 
-    <div *ngIf="!isLoading && !errorMessage && !assessment" class="state-block">
+    <div *ngIf="!isLoading && !errorMessage && !result && !assessment" class="state-block">
       <p class="mb-3">This job has no test attached.</p>
       <button class="btn btn-outline-secondary" type="button" (click)="backToJob()">Back to Job</button>
     </div>
 
-    <ng-container *ngIf="!isLoading && !errorMessage && assessment && currentQuestion">
+    <ng-container *ngIf="!isLoading && !errorMessage && !result && assessment && currentQuestion">
       <header class="test-header mb-3">
         <h2>{{ assessment.title }}</h2>
         <p class="question-counter">Question {{ currentIndex + 1 }} / {{ assessment.questions.length }}</p>
@@ -52,7 +52,7 @@
       </div>
 
       <div class="navigation-row">
-        <button class="btn btn-outline-secondary" type="button" (click)="goBack()" [disabled]="isFirstQuestion">
+        <button class="btn btn-outline-secondary" type="button" (click)="goBack()" [disabled]="isFirstQuestion || isSubmitting">
           Back
         </button>
 
@@ -60,9 +60,40 @@
           Next
         </button>
 
-        <button *ngIf="isLastQuestion" class="btn btn-success" type="button" (click)="onSubmit()">
-          Submit
+        <button *ngIf="isLastQuestion" class="btn btn-success" type="button" (click)="onSubmit()" [disabled]="isSubmitting">
+          {{ isSubmitting ? 'Submitting...' : 'Submit' }}
         </button>
+      </div>
+    </ng-container>
+
+    <ng-container *ngIf="!isLoading && !errorMessage && result">
+      <div class="result-block">
+        <h2 class="result-title">
+          You got {{ result.score }} / {{ result.maxScore }} points
+          — {{ result.passed ? 'Passed' : 'Not passed' }}
+        </h2>
+
+        <ul class="result-list">
+          <li *ngFor="let qr of result.questionResults" class="result-item">
+            <div class="result-item-header">
+              <span class="result-icon" [class.correct]="qr.isCorrect" [class.incorrect]="!qr.isCorrect">
+                {{ qr.isCorrect ? '✓' : '✗' }}
+              </span>
+              <span class="result-question-title">{{ qr.questionTitle }}</span>
+              <span class="result-points">{{ qr.pointsAwarded }} / {{ qr.maxPoints }}</span>
+            </div>
+
+            <div *ngIf="qr.userResponse" class="result-user-response">
+              <strong>Your answer:</strong> {{ qr.userResponse }}
+            </div>
+
+            <div *ngIf="qr.aiFeedback && qr.aiFeedback !== '-'" class="result-ai-feedback">
+              <strong>Feedback:</strong> {{ qr.aiFeedback }}
+            </div>
+          </li>
+        </ul>
+
+        <button class="btn btn-outline-secondary" type="button" (click)="backToJob()">Back to Job</button>
       </div>
     </ng-container>
   </div>

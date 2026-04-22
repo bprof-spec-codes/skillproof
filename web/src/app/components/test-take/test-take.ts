@@ -5,7 +5,9 @@ import { CandidateAssessmentDto } from '../../Models/Dtos/Test/candidate-assessm
 import { CandidateQuestionDto } from '../../Models/Dtos/Test/candidate-question-dto';
 import { TestAnswerSubmitDto } from '../../Models/Dtos/Test/test-answer-submit-dto';
 import { TestResultDto } from '../../Models/Dtos/Test/test-result-dto';
+import { TestSubmitDto } from '../../Models/Dtos/Test/test-submit-dto';
 import { QuestionType } from '../../Models/Enums/QuestionType';
+import { ModalService } from '../../services/modal-service';
 import { TestService } from '../../services/test-service';
 
 @Component({
@@ -26,13 +28,17 @@ export class TestTake implements OnInit, OnDestroy {
   errorMessage: string | null = null;
   result: TestResultDto | null = null;
 
+  isSubmitting = false;
+
   private routeSubscription: Subscription | null = null;
   private loadSubscription: Subscription | null = null;
+  private submitSubscription: Subscription | null = null;
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private testService: TestService,
+    private modalService: ModalService,
     private ngZone: NgZone,
     private cdr: ChangeDetectorRef,
   ) {}
@@ -56,6 +62,7 @@ export class TestTake implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.routeSubscription?.unsubscribe();
     this.loadSubscription?.unsubscribe();
+    this.submitSubscription?.unsubscribe();
   }
 
   get currentQuestion(): CandidateQuestionDto | null {
@@ -94,7 +101,47 @@ export class TestTake implements OnInit, OnDestroy {
   }
 
   onSubmit(): void {
-    console.log('Test answers (stub — will be wired up in Commit 7):', Array.from(this.answers.values()));
+    if (!this.assessment || !this.jobId || this.isSubmitting) {
+      return;
+    }
+
+    const dto: TestSubmitDto = {
+      jobId: this.jobId,
+      answers: this.assessment.questions.map((q) => this.buildAnswerFor(q)),
+    };
+
+    this.isSubmitting = true;
+    this.submitSubscription?.unsubscribe();
+    this.submitSubscription = this.testService.submitTest(dto).subscribe({
+      next: (result) => {
+        this.ngZone.run(() => {
+          this.result = result;
+          this.isSubmitting = false;
+          this.cdr.detectChanges();
+        });
+      },
+      error: () => {
+        this.ngZone.run(() => {
+          this.isSubmitting = false;
+          this.modalService.open({
+            message: 'Failed to submit the test. Please try again.',
+            autoClose: true,
+            duration: 3000,
+            type: 'error',
+          });
+          this.cdr.detectChanges();
+        });
+      },
+    });
+  }
+
+  private buildAnswerFor(question: CandidateQuestionDto): TestAnswerSubmitDto {
+    const existing = this.answers.get(question.id);
+    if (existing) {
+      return existing;
+    }
+
+    return { questionId: question.id };
   }
 
   backToJob(): void {
