@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, NgZone, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { JobViewDto } from '../../Models/Dtos/Job/JobView-dto';
@@ -26,6 +26,8 @@ export class JobDetail implements OnInit, OnDestroy {
     private jobService: JobService,
     private modalService: ModalService,
     private authService: AuthService,
+    private ngZone: NgZone,
+    private cdr: ChangeDetectorRef,
   ) {}
 
   ngOnInit(): void {
@@ -33,9 +35,12 @@ export class JobDetail implements OnInit, OnDestroy {
       const id = params.get('id');
 
       if (!id) {
-        this.isLoading = false;
-        this.job = null;
-        this.errorMessage = 'Invalid job id.';
+        this.ngZone.run(() => {
+          this.isLoading = false;
+          this.job = null;
+          this.errorMessage = 'Invalid job id.';
+          this.cdr.detectChanges();
+        });
         return;
       }
 
@@ -159,12 +164,18 @@ export class JobDetail implements OnInit, OnDestroy {
       .getJobById(id)
       .subscribe({
         next: (job) => {
-          this.job = job;
-          this.isLoading = false;
+          this.ngZone.run(() => {
+            this.job = job;
+            this.isLoading = false;
+            this.cdr.detectChanges();
+          });
         },
         error: () => {
-          this.errorMessage = 'Job not found or unavailable.';
-          this.isLoading = false;
+          this.ngZone.run(() => {
+            this.errorMessage = 'Job not found or unavailable.';
+            this.isLoading = false;
+            this.cdr.detectChanges();
+          });
         },
       });
   }
