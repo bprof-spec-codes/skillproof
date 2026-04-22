@@ -33,7 +33,9 @@ namespace SkillProof.Logic.Questions
                 CreatedBy = request.CreatedBy,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow,
-                IsActive = true
+                IsActive = true,
+                Tags = request.Tags
+                
             };
 
             await using var transaction = await _dbContext.Database.BeginTransactionAsync(cancellationToken);

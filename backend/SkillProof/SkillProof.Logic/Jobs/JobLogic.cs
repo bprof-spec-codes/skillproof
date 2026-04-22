@@ -1,12 +1,16 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using SkillProof.Data;
 using SkillProof.Data.Repositorys;
 using SkillProof.Entities.Dtos.Assesment;
 using SkillProof.Entities.Dtos.Job;
 using SkillProof.Entities.Dtos.Jobs;
 using SkillProof.Entities.Dtos.Questions;
+using SkillProof.Entities.Enums;
 using SkillProof.Entities.Models;
 using SkillProof.Logic.Helper;
+using System.Linq;
+using System.Text.Json;
 
 namespace SkillProof.Logic.Jobs;
 
@@ -15,18 +19,21 @@ public class JobLogic : IJobLogic
     private readonly IRepository<Job> _jobRepository;
     private readonly IRepository<Entities.Models.Assessments> _assessmentRepository;
     private readonly UserManager<Users> _userManager;
+    private readonly IRepository<SkillProof.Entities.Models.Questions> _questionRepository;
     private readonly IMarkdownService _markdownService;
+    private readonly SkillProofDbContext _ctx;
 
     public JobLogic(
         IRepository<Job> jobRepository,
         IRepository<Entities.Models.Assessments> assessmentRepository,
         UserManager<Users> userManager,
-        IMarkdownService markdownService)
+        IMarkdownService markdownService, SkillProofDbContext ctx)
     {
         _jobRepository = jobRepository;
         _assessmentRepository = assessmentRepository;
         _userManager = userManager;
         _markdownService = markdownService;
+        _ctx = ctx;
     }
 
     public async Task<JobViewDto> CreateJobAsync(JobCreateDto model, string companyId)
@@ -281,4 +288,91 @@ public class JobLogic : IJobLogic
 
         await _jobRepository.DeleteById(id);
     }
+
+    public async Task<ICollection<AssessmentViewDto>> GetTestToJob(string id)
+    {
+        var job = await _jobRepository.GetAll()
+        .Include(j => j.Assessments)
+            .ThenInclude(a => a.Questions)
+                .ThenInclude(q => q.MultipleChoiceQuestion)
+        .Include(j => j.Assessments)
+            .ThenInclude(a => a.Questions)
+                .ThenInclude(q => q.CodeCompletionQuestion)
+        .Include(j => j.Assessments)
+            .ThenInclude(a => a.Questions)
+                .ThenInclude(q => q.FillInTheBlankQuestions)
+        .Include(j => j.Assessments)
+            .ThenInclude(a => a.Questions)
+                .ThenInclude(q => q.TrueFalseQuestion)
+        .FirstOrDefaultAsync(j => j.Id == id);
+
+        if (job == null)
+            return new List<AssessmentViewDto>();
+
+        return job.Assessments.Select(a => new AssessmentViewDto
+        {
+            Id = a.Id,
+            Title = a.Title,
+            Description = a.Description,
+            DifficultyLevel = a.DifficultyLevel,
+            CreatedBy = a.CreatedBy,
+            CreatedAt = a.CreatedAt,
+            IsActive = a.IsActive,
+
+            QuestionIds = a.Questions.Select(q => q.Id).ToList(),
+
+            Questions = a.Questions.Select(q => new QuestionResponseDto
+            {
+                Id = q.Id,
+                Title = q.Title,
+                Type = q.Type,
+                Difficulty = q.Difficulty,
+                Language = q.Language,
+
+                QuestionText = q.QuestionText,
+                CreatedBy = q.CreatedBy,
+                CreatedAt = q.CreatedAt,
+                IsActive = q.IsActive,
+                UpdatedAt = q.UpdatedAt,
+
+                MultipleChoice = q.MultipleChoiceQuestion == null ? null : new MultipleChoiceQuestionPayloadDto
+                {
+                    Options = string.IsNullOrWhiteSpace(q.MultipleChoiceQuestion.Options)
+                    ? new List<string>()
+                    : JsonSerializer.Deserialize<List<string>>(q.MultipleChoiceQuestion.Options) ?? new List<string>(),
+
+                                CorrectOptionIndexes = string.IsNullOrWhiteSpace(q.MultipleChoiceQuestion.CorrectAnswerIds)
+                    ? new List<int>()
+                    : JsonSerializer.Deserialize<List<int>>(q.MultipleChoiceQuestion.CorrectAnswerIds) ?? new List<int>(),
+
+                    AllowMultipleSelection = q.MultipleChoiceQuestion.AllowMultipleSelection
+                },
+
+                CodeCompletion = q.CodeCompletionQuestion == null ? null : new CodeCompletionQuestionPayloadDto
+                {
+                    CodeSnippet = q.CodeCompletionQuestion.CodeSnippet,
+
+                    AcceptedAnswers = string.IsNullOrWhiteSpace(q.CodeCompletionQuestion.AcceptedAnswers)
+                    ? new List<string>()
+                    : JsonSerializer.Deserialize<List<string>>(q.CodeCompletionQuestion.AcceptedAnswers) ?? new List<string>()
+                },
+
+                FillInTheBlank = q.FillInTheBlankQuestions == null ? null : new FillInTheBlankQuestionPayloadDto
+                {
+                    Answer = q.FillInTheBlankQuestions.Answer,
+                    ManualFeedback = q.FillInTheBlankQuestions.manualFeedback
+                },
+
+                TrueFalse = q.TrueFalseQuestion == null ? null : new TrueFalseQuestionPayloadDto
+                {
+                    CorrectAnswer = q.TrueFalseQuestion.CorrectAnswer,
+                    Explanation = q.TrueFalseQuestion.Explanation
+                }
+
+            }).ToList()
+
+        }).ToList();
+    }
+
+
 }

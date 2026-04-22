@@ -1,6 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
+using SkillProof.Entities.Dtos.Assesment;
 using SkillProof.Entities.Dtos.Job;
 using SkillProof.Entities.Dtos.Jobs;
+using SkillProof.Entities.Dtos.Questions;
+using SkillProof.Entities.Models;
 using SkillProof.Logic.Jobs;
 
 namespace SkillProof.Api.Controllers;
@@ -79,4 +82,13 @@ public class JobsController : ControllerBase
         await _jobLogic.DeleteJobAsync(id, companyId);
         return NoContent();
     }
+
+    [HttpGet("GetTestToJob{id}")]
+
+    public async Task<ActionResult<ICollection<AssessmentViewDto>>> GetRndQuestions(string id)
+    {
+        var test = await _jobLogic.GetTestToJob(id);
+        return test == null ? NotFound() : Ok(test);
+    }
+    
 }
