@@ -1,0 +1,57 @@
+<section class="test-take-page py-4">
+  <div class="container">
+    <div *ngIf="isLoading" class="state-block">
+      Loading test...
+    </div>
+
+    <div *ngIf="!isLoading && errorMessage" class="state-block state-error">
+      <p class="mb-3">{{ errorMessage }}</p>
+      <button class="btn btn-outline-secondary" type="button" (click)="backToJob()">Back to Job</button>
+    </div>
+
+    <div *ngIf="!isLoading && !errorMessage && !assessment" class="state-block">
+      <p class="mb-3">This job has no test attached.</p>
+      <button class="btn btn-outline-secondary" type="button" (click)="backToJob()">Back to Job</button>
+    </div>
+
+    <ng-container *ngIf="!isLoading && !errorMessage && assessment && currentQuestion">
+      <header class="test-header mb-3">
+        <h2>{{ assessment.title }}</h2>
+        <p class="question-counter">Question {{ currentIndex + 1 }} / {{ assessment.questions.length }}</p>
+      </header>
+
+      <div class="question-block mb-4">
+        <h3 class="question-title">{{ currentQuestion.title }}</h3>
+
+        <div [ngSwitch]="currentQuestion.type">
+          <div *ngSwitchCase="QuestionType.TrueFalse">
+            <em>[TrueFalse component placeholder — Commit 3]</em>
+          </div>
+          <div *ngSwitchCase="QuestionType.MultipleChoice">
+            <em>[MultipleChoice component placeholder — Commit 4]</em>
+          </div>
+          <div *ngSwitchCase="QuestionType.CodeCompletion">
+            <em>[CodeCompletion component placeholder — Commit 5]</em>
+          </div>
+          <div *ngSwitchCase="QuestionType.FillInTheBlank">
+            <em>[FillInTheBlank component placeholder — Commit 6]</em>
+          </div>
+        </div>
+      </div>
+
+      <div class="navigation-row">
+        <button class="btn btn-outline-secondary" type="button" (click)="goBack()" [disabled]="isFirstQuestion">
+          Back
+        </button>
+
+        <button *ngIf="!isLastQuestion" class="btn btn-primary" type="button" (click)="goNext()">
+          Next
+        </button>
+
+        <button *ngIf="isLastQuestion" class="btn btn-success" type="button" (click)="onSubmit()">
+          Submit
+        </button>
+      </div>
+    </ng-container>
+  </div>
+</section>

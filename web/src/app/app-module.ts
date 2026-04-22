@@ -19,6 +19,7 @@ import { Jobupload } from './components/jobupload/jobupload';
 import { JobEdit } from './components/job-edit/job-edit';
 import { AssessmentCreate } from './components/assessment-create/assessment-create';
 import { JobDetail } from './components/job-detail/job-detail';
+import { TestTake } from './components/test-take/test-take';
 
 @NgModule({
   declarations: [
@@ -37,6 +38,7 @@ import { JobDetail } from './components/job-detail/job-detail';
     JobEdit,
     AssessmentCreate,
     JobDetail,
+    TestTake,
   ],
   imports: [BrowserModule, AppRoutingModule, ReactiveFormsModule, FormsModule],
   providers: [

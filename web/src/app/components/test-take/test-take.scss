@@ -1,0 +1,21 @@
+.test-take-page {
+  .state-block {
+    padding: 2rem;
+    text-align: center;
+  }
+
+  .state-error {
+    color: #b00020;
+  }
+
+  .question-counter {
+    color: #666;
+    font-size: 0.9rem;
+  }
+
+  .navigation-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+}
