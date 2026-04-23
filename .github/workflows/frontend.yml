@@ -1,0 +1,116 @@
+name: Deploy Angular Frontend
+
+on:
+  push:
+    branches: [ "master" ]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    env:
+      APP_DIR: web
+      DIST_DIR: web/dist/web/browser
+      REMOTE_BASE: /var/skillprooffrontend
+      REMOTE_RELEASES: /var/skillprooffrontend/releases
+      REMOTE_CURRENT: /var/skillprooffrontend/current
+      BACKEND_URL: https://api.skillproof.hu/api
+      SSH_HOST: skillproof.hu
+      SSH_USER: root
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Cache npm
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: npm-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            npm-${{ runner.os }}-
+
+      - name: Install deps
+        run: npm ci
+        working-directory: ${{ env.APP_DIR }}
+
+      - name: Override environment.development.ts (apiUrl)
+        run: |
+          FILE="${{ env.APP_DIR }}/src/environments/environment.development.ts"
+          echo "Eredeti environment.development.ts tartalom:"
+          cat "$FILE" || true
+          echo
+          echo "Felülírás az apiUrl értékre..."
+          sed -i "s#http://localhost:[0-9]*/api#${{ env.BACKEND_URL }}#g" "$FILE"
+          echo "Új environment.development.ts tartalom:"
+          cat "$FILE" || true
+
+      - name: Build Angular
+        run: npm run build -- --configuration development
+        working-directory: ${{ env.APP_DIR }}
+
+      - name: Pack dist
+        run: |
+          tar -C ${{ env.DIST_DIR }} -czf frontend-${{ github.sha }}.tar.gz .
+
+      - name: Add remote host key
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H "${{ env.SSH_HOST }}" >> ~/.ssh/known_hosts
+
+      - name: Upload dist via SCP
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ env.SSH_HOST }}
+          username: ${{ env.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          passphrase: ${{ secrets.SSH_PASS }}
+          source: "frontend-${{ github.sha }}.tar.gz"
+          target: "/tmp/"
+
+      - name: Deploy to server (releases + symlink + keep last 5)
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ env.SSH_HOST }}
+          username: ${{ env.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          passphrase: ${{ secrets.SSH_PASS }}
+          script: |
+            set -euo pipefail
+
+            BASE="${{ env.REMOTE_BASE }}"
+            RELEASES="${{ env.REMOTE_RELEASES }}"
+            CURRENT="${{ env.REMOTE_CURRENT }}"
+            TS="$(date +%Y%m%d%H%M%S)-${{ github.sha }}"
+            NEW_RELEASE="${RELEASES}/${TS}"
+
+            # Könyvtárak
+            sudo mkdir -p "$RELEASES"
+            sudo mkdir -p "$BASE"
+
+            # Új release kibontása
+            sudo mkdir -p "$NEW_RELEASE"
+            sudo tar -xzf "/tmp/frontend-${{ github.sha }}.tar.gz" -C "$NEW_RELEASE"
+            sudo rm -f "/tmp/frontend-${{ github.sha }}.tar.gz"
+
+            # (Opcionális) tulajdonos állítás (pl. nginx userre)
+            if [ -n "${{ secrets.REMOTE_OWNER || '' }}" ]; then
+              sudo chown -R "${{ secrets.REMOTE_OWNER }}" "$BASE"
+            fi
+
+            # Symlink csere atomikusan
+            sudo ln -sfn "$NEW_RELEASE" "$CURRENT"
+
+            # Régi release-ek takarítása – tartsunk meg 5-öt
+            COUNT=$(ls -1dt "$RELEASES"/* 2>/dev/null | wc -l || true)
+            if [ "$COUNT" -gt 5 ]; then
+              ls -1dt "$RELEASES"/* | tail -n +6 | xargs -r sudo rm -rf
+            fi
+
+            echo "✅ Frontend deploy kész."
+            echo "Current -> $(readlink -f "$CURRENT")"

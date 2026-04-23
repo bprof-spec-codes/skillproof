@@ -1,0 +1,138 @@
+name: Deploy Backend to Prod
+
+on:
+  push:
+    branches: [ "master" ]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    env:
+      # --- ÁLLÍTHATÓ ---
+      PROJECT_PATH: backend/SkillProof/SkillProof.Api/SkillProof.Api.csproj
+      PUBLISH_DIR: publish
+      RUNTIME: linux-x64
+      SELF_CONTAINED: "true"
+      PUBLISH_SINGLE_FILE: "true"
+      # Remote könyvtárak (a Debian szerveren)
+      REMOTE_BASE: /var/backend
+      REMOTE_RELEASES: /var/skillproofbackend/releases
+      REMOTE_CURRENT: /var/skillproofbackend/current
+      SERVICE_NAME: skillproof
+      FRONTEND_URL: https://skillproof.hu
+      SSH_HOST: skillproof.hu
+      SSH_USER: root
+      # --- SECRET-ek ---
+      # SSH_KEY, SSH_PASS, DB_CONN, DESIRED_PORT
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Cache NuGet
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('**/*.csproj') }}
+          restore-keys: |
+            nuget-${{ runner.os }}-
+
+      - name: Restore
+        run: dotnet restore ${{ env.PROJECT_PATH }}
+
+      - name: Publish (Release, Linux)
+        run: |
+          dotnet publish ${{ env.PROJECT_PATH }} \
+            -c Release \
+            -r ${{ env.RUNTIME }} \
+            -p:PublishSingleFile=${{ env.PUBLISH_SINGLE_FILE }} \
+            --self-contained ${{ env.SELF_CONTAINED }} \
+            -o ${{ env.PUBLISH_DIR }}
+
+      - name: Pack artifact (tar.gz)
+        run: |
+          tar -C ${{ env.PUBLISH_DIR }} -czf app-${{ github.sha }}.tar.gz .
+
+      - name: Add remote host key
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H "${{ env.SSH_HOST }}" >> ~/.ssh/known_hosts
+
+      - name: Upload package via SCP
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ env.SSH_HOST }}
+          username: ${{ env.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          passphrase: ${{ secrets.SSH_PASS }}
+          source: "app-${{ github.sha }}.tar.gz"
+          target: "/tmp/"
+
+      - name: Deploy on server (atomic symlink switch + systemd restart)
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ env.SSH_HOST }}
+          username: ${{ env.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          passphrase: ${{ secrets.SSH_PASS }}
+          script: |
+            set -euo pipefail
+
+            SERVICE="${{ env.SERVICE_NAME }}"
+            BASE="${{ env.REMOTE_BASE }}"
+            RELEASES="${{ env.REMOTE_RELEASES }}"
+            CURRENT="${{ env.REMOTE_CURRENT }}"
+            TS="$(date +%Y%m%d%H%M%S)-${{ github.sha }}"
+            NEW_RELEASE="${RELEASES}/${TS}"
+
+            sudo mkdir -p "$RELEASES"
+            sudo mkdir -p "$BASE"
+            sudo systemctl stop "$SERVICE"
+
+            # Kibontás új release mappába
+            sudo mkdir -p "$NEW_RELEASE"
+            sudo tar -xzf "/tmp/app-${{ github.sha }}.tar.gz" -C "$NEW_RELEASE"
+            sudo rm -f "/tmp/app-${{ github.sha }}.tar.gz"
+
+            # appsettings.json módosítása
+            if command -v jq >/dev/null; then
+              sudo jq \
+                --arg conn "${{ secrets.DB_CONN }}" \
+                --arg frontend "${{ env.FRONTEND_URL }}" \
+                --arg jwtkey "${{ secrets.JWT_KEY }}" \
+                --arg port "${{ secrets.DESIRED_PORT }}" \
+                '.db.conn = $conn | .settings.frontend = $frontend | .settings.port = $port | .Jwt.Key = $jwtkey' \
+                "$NEW_RELEASE/appsettings.json" | sudo tee "$NEW_RELEASE/appsettings.json.tmp" > /dev/null
+
+              sudo mv "$NEW_RELEASE/appsettings.json.tmp" "$NEW_RELEASE/appsettings.json"
+            else
+              echo "jq nincs telepítve, telepíteni kell!"
+              exit 1
+            fi
+
+            # (Opcionális) tulajdonos állítás
+            if [ -n "${{ secrets.REMOTE_OWNER || '' }}" ]; then
+              sudo chown -R "${{ secrets.REMOTE_OWNER }}" "$BASE"
+            fi
+
+            # Symlink csere atomikusan
+            sudo ln -sfn "$NEW_RELEASE" "$CURRENT"
+
+            # Service újraindítás + engedélyezés
+            sudo systemctl daemon-reload || true
+            sudo systemctl start "$SERVICE"
+            sudo systemctl enable "$SERVICE" || true
+
+            # Régi release-ek törlése (tartsunk meg 5-öt)
+            COUNT=$(ls -1dt "$RELEASES"/* | wc -l || true)
+            if [ "$COUNT" -gt 5 ]; then
+              ls -1dt "$RELEASES"/* | tail -n +6 | xargs -r sudo rm -rf
+            fi
+
+            sudo systemctl status "$SERVICE" --no-pager -l || true
