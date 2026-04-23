@@ -102,4 +102,10 @@ public class JobsController : ControllerBase
         return Ok(candidateTest);
     }
 
+    [HttpGet("jobsOfCompany/{id}")]
+    public async Task<IActionResult> GetJobsByCompanyId(string id)
+    {
+        var jobs = await _jobLogic.GetJobsOfCompanyAsync(id);
+        return Ok(jobs);
+    }
 }

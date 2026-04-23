@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    <PackageReference Include="Google.GenAI" Version="1.6.1" />
     <PackageReference Include="HtmlSanitizer" Version="9.0.892" />
     <PackageReference Include="Markdig" Version="1.1.2" />
     <ProjectReference Include="..\SkillProof.Data\SkillProof.Data.csproj" />

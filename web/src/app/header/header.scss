@@ -1,6 +1,6 @@
 .avatar {
-  width: 40px;
-  height: 40px;
+  width: 25px;
+  height: 25px;
   border-radius: 50%;
   object-fit: cover;
   cursor: pointer;
@@ -11,4 +11,8 @@
   font-weight:bold;
   font-size: 1.3rem;
   color: #333;
+}
+
+.logo-1 {
+  cursor: pointer;
 }
