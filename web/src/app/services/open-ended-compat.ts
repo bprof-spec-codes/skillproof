@@ -10,6 +10,7 @@ export function normalizeQuestionResponse(question: QuestionResponseDto): Questi
   return {
     ...question,
     difficulty: normalizeDifficultyLevel(question.difficulty),
+    tags: normalizeTags(question.tags),
     openEnded,
     fillInTheBlank: question.fillInTheBlank ?? openEnded,
   };
@@ -67,4 +68,12 @@ function normalizeDifficultyLevel(value: DifficultyLevel | string | number): Dif
   }
 
   return DifficultyLevel.Junior;
+}
+
+function normalizeTags(value: unknown): string[] {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value.map((tag) => String(tag).trim()).filter((tag) => tag.length > 0);
 }

@@ -269,6 +269,7 @@ namespace SkillProof.Logic.Questions
                 Type = question.Type,
                 Language = question.Language,
                 Difficulty = question.Difficulty,
+                Tags = question.Tags ?? new List<string>(),
                 Title = question.Title,
                 QuestionText = question.QuestionText,
                 CreatedBy = question.CreatedBy,
