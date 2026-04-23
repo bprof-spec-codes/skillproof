@@ -1,28 +1,32 @@
 <div class="question-multiple-choice">
-  <p class="question-text mb-3">{{ question.questionText }}</p>
+  <p class="question-text">{{ question.questionText }}</p>
 
   <div class="options">
     <ng-container *ngIf="allowMultiple; else singleSelect">
       <label class="option" *ngFor="let opt of options; let i = index">
+        <span class="option-text">{{ opt }}</span>
         <input
           type="checkbox"
           [checked]="isSelected(i)"
           (change)="onMultiToggle(i, $any($event.target).checked)"
         />
-        {{ opt }}
       </label>
     </ng-container>
 
     <ng-template #singleSelect>
       <label class="option" *ngFor="let opt of options; let i = index">
+        <span class="option-text">{{ opt }}</span>
         <input
           type="radio"
           [name]="'mc-' + question.id"
           [checked]="isSelected(i)"
           (change)="onSingleSelect(i)"
         />
-        {{ opt }}
       </label>
     </ng-template>
   </div>
+
+  <p *ngIf="allowMultiple" class="selection-hint">
+    You can select more than one answer for this question.
+  </p>
 </div>
