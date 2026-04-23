@@ -1,9 +1,18 @@
 <div class="question-code-completion">
-  <p class="question-text mb-3">{{ question.questionText }}</p>
+  <p class="question-text">{{ question.questionText }}</p>
 
-  <pre class="code-snippet mb-3"><code>{{ codeSnippet }}</code></pre>
+  <pre class="code-snippet"><code><ng-container *ngIf="hasInlinePlaceholder; else plainSnippet"
+      >{{ preSnippet }}<input
+        type="text"
+        class="code-input"
+        [value]="responseText"
+        (input)="onInput($any($event.target).value)"
+        placeholder="..."
+      />{{ postSnippet }}</ng-container
+    ><ng-template #plainSnippet>{{ codeSnippet }}</ng-template></code></pre>
 
   <textarea
+    *ngIf="!hasInlinePlaceholder"
     class="answer-input"
     rows="6"
     [value]="responseText"
