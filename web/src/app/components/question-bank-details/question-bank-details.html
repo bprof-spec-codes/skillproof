@@ -32,7 +32,7 @@
     <hr />
 
     <div [ngSwitch]="question.type">
-      <div *ngSwitchCase="0">
+      <div *ngSwitchCase="QuestionType.MultipleChoice">
         <h5>Multiple Choice Payload</h5>
         <p class="mb-1"><strong>Allow Multiple Selection:</strong> {{ question.multipleChoice?.allowMultipleSelection ? 'Yes' : 'No' }}</p>
         <p class="mb-1"><strong>Options:</strong></p>
@@ -42,7 +42,7 @@
         <p class="mb-0"><strong>Correct Indexes:</strong> {{ question.multipleChoice?.correctOptionIndexes?.join(', ') }}</p>
       </div>
 
-      <div *ngSwitchCase="1">
+      <div *ngSwitchCase="QuestionType.CodeCompletion">
         <h5>Code Completion Payload</h5>
         <p class="mb-1"><strong>Code Snippet:</strong></p>
         <pre class="p-2 bg-light border rounded"><code>{{ question.codeCompletion?.codeSnippet }}</code></pre>
@@ -52,13 +52,13 @@
         </ul>
       </div>
 
-      <div *ngSwitchCase="3">
-        <h5>Fill In The Blank Payload</h5>
-        <p class="mb-1"><strong>Answer:</strong> {{ question.fillInTheBlank?.answer }}</p>
-        <p class="mb-0"><strong>Manual Feedback:</strong> {{ question.fillInTheBlank?.manualFeedback || '-' }}</p>
+      <div *ngSwitchCase="QuestionType.OpenEnded">
+        <h5>Open-Ended Payload</h5>
+        <p class="mb-1"><strong>Answer:</strong> {{ question.openEnded?.answer }}</p>
+        <p class="mb-0"><strong>Manual Feedback:</strong> {{ question.openEnded?.manualFeedback || '-' }}</p>
       </div>
 
-      <div *ngSwitchCase="2">
+      <div *ngSwitchCase="QuestionType.TrueFalse">
         <h5>True / False Payload</h5>
         <p class="mb-1"><strong>Correct Answer:</strong> {{ question.trueFalse?.correctAnswer ? 'True' : 'False' }}</p>
         <p class="mb-0"><strong>Explanation:</strong> {{ question.trueFalse?.explanation || '-' }}</p>

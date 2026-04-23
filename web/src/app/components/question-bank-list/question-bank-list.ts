@@ -27,7 +27,7 @@ export class QuestionBankList implements OnInit {
     { label: 'Multiple Choice', value: QuestionType.MultipleChoice },
     { label: 'Code Completion', value: QuestionType.CodeCompletion },
     { label: 'True / False', value: QuestionType.TrueFalse },
-    { label: 'Fill In The Blank', value: QuestionType.FillInTheBlank },
+    { label: 'Open-Ended', value: QuestionType.OpenEnded },
   ];
 
   readonly difficultyOptions = [

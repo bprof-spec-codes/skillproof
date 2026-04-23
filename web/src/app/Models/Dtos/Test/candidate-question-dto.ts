@@ -1,8 +1,8 @@
 import { DifficultyLevel } from '../../Enums/DifficultyLevel';
 import { QuestionType } from '../../Enums/QuestionType';
 import { CandidateCodeCompletionPayloadDto } from './candidate-code-completion-payload-dto';
-import { CandidateFillInTheBlankPayloadDto } from './candidate-fill-in-the-blank-payload-dto';
 import { CandidateMultipleChoicePayloadDto } from './candidate-multiple-choice-payload-dto';
+import { CandidateOpenEndedPayloadDto } from './candidate-open-ended-payload-dto';
 import { CandidateTrueFalsePayloadDto } from './candidate-true-false-payload-dto';
 
 export interface CandidateQuestionDto {
@@ -15,6 +15,8 @@ export interface CandidateQuestionDto {
 
   multipleChoice?: CandidateMultipleChoicePayloadDto;
   codeCompletion?: CandidateCodeCompletionPayloadDto;
-  fillInTheBlank?: CandidateFillInTheBlankPayloadDto;
+  openEnded?: CandidateOpenEndedPayloadDto;
+  // TODO(OpenEnded-cleanup): remove legacy wire property after backend contract rename.
+  fillInTheBlank?: CandidateOpenEndedPayloadDto;
   trueFalse?: CandidateTrueFalsePayloadDto;
 }
