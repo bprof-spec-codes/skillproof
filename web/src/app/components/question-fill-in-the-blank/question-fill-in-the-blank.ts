@@ -6,6 +6,7 @@ import { TestAnswerSubmitDto } from '../../Models/Dtos/Test/test-answer-submit-d
   selector: 'app-question-fill-in-the-blank',
   standalone: false,
   templateUrl: './question-fill-in-the-blank.html',
+  styleUrl: './question-fill-in-the-blank.scss',
 })
 export class QuestionFillInTheBlank {
   readonly maxLength = 500;

@@ -1,4 +1,4 @@
-<section class="test-take-page py-4">
+<section class="test-take-page">
   <div class="container">
     <div *ngIf="isLoading" class="state-block">
       Loading test...
@@ -15,54 +15,63 @@
     </div>
 
     <ng-container *ngIf="!isLoading && !errorMessage && !result && assessment && currentQuestion">
-      <header class="test-header mb-3">
-        <h2>{{ assessment.title }}</h2>
-        <p class="question-counter">Question {{ currentIndex + 1 }} / {{ assessment.questions.length }}</p>
-      </header>
+      <div class="test-layout">
+        <header class="test-header">
+          <button class="title-back-btn" type="button" (click)="goBack()" [disabled]="isFirstQuestion || isSubmitting" aria-label="Previous question">
+            <span aria-hidden="true">←</span>
+          </button>
+          <h2 class="test-title">{{ currentQuestion.title || assessment.title }}</h2>
+        </header>
 
-      <div class="question-block mb-4">
-        <h3 class="question-title">{{ currentQuestion.title }}</h3>
+        <div class="question-shell">
+          <div class="question-block">
+            <div [ngSwitch]="currentQuestion.type">
+              <app-question-true-false
+                *ngSwitchCase="QuestionType.TrueFalse"
+                [question]="currentQuestion"
+                [currentAnswer]="currentAnswerFor(currentQuestion.id)"
+                (answerChange)="onAnswerChange($event)"
+              ></app-question-true-false>
+              <app-question-multiple-choice
+                *ngSwitchCase="QuestionType.MultipleChoice"
+                [question]="currentQuestion"
+                [currentAnswer]="currentAnswerFor(currentQuestion.id)"
+                (answerChange)="onAnswerChange($event)"
+              ></app-question-multiple-choice>
+              <app-question-code-completion
+                *ngSwitchCase="QuestionType.CodeCompletion"
+                [question]="currentQuestion"
+                [currentAnswer]="currentAnswerFor(currentQuestion.id)"
+                (answerChange)="onAnswerChange($event)"
+              ></app-question-code-completion>
+              <app-question-fill-in-the-blank
+                *ngSwitchCase="QuestionType.FillInTheBlank"
+                [question]="currentQuestion"
+                [currentAnswer]="currentAnswerFor(currentQuestion.id)"
+                (answerChange)="onAnswerChange($event)"
+              ></app-question-fill-in-the-blank>
+            </div>
+          </div>
 
-        <div [ngSwitch]="currentQuestion.type">
-          <app-question-true-false
-            *ngSwitchCase="QuestionType.TrueFalse"
-            [question]="currentQuestion"
-            [currentAnswer]="currentAnswerFor(currentQuestion.id)"
-            (answerChange)="onAnswerChange($event)"
-          ></app-question-true-false>
-          <app-question-multiple-choice
-            *ngSwitchCase="QuestionType.MultipleChoice"
-            [question]="currentQuestion"
-            [currentAnswer]="currentAnswerFor(currentQuestion.id)"
-            (answerChange)="onAnswerChange($event)"
-          ></app-question-multiple-choice>
-          <app-question-code-completion
-            *ngSwitchCase="QuestionType.CodeCompletion"
-            [question]="currentQuestion"
-            [currentAnswer]="currentAnswerFor(currentQuestion.id)"
-            (answerChange)="onAnswerChange($event)"
-          ></app-question-code-completion>
-          <app-question-fill-in-the-blank
-            *ngSwitchCase="QuestionType.FillInTheBlank"
-            [question]="currentQuestion"
-            [currentAnswer]="currentAnswerFor(currentQuestion.id)"
-            (answerChange)="onAnswerChange($event)"
-          ></app-question-fill-in-the-blank>
+          <div class="navigation-row">
+            <button class="nav-btn nav-btn-secondary" type="button" (click)="goBack()" [disabled]="isFirstQuestion || isSubmitting">
+              <span aria-hidden="true">←</span>
+              <span>Back</span>
+            </button>
+
+            <p class="question-counter">{{ currentIndex + 1 }}/{{ assessment.questions.length }}</p>
+
+            <button *ngIf="!isLastQuestion" class="nav-btn nav-btn-primary" type="button" (click)="goNext()">
+              <span>Next</span>
+              <span aria-hidden="true">→</span>
+            </button>
+
+            <button *ngIf="isLastQuestion" class="nav-btn nav-btn-primary" type="button" (click)="onSubmit()" [disabled]="isSubmitting">
+              <span>{{ isSubmitting ? 'Submitting...' : 'Submit' }}</span>
+              <span aria-hidden="true">→</span>
+            </button>
+          </div>
         </div>
-      </div>
-
-      <div class="navigation-row">
-        <button class="btn btn-outline-secondary" type="button" (click)="goBack()" [disabled]="isFirstQuestion || isSubmitting">
-          Back
-        </button>
-
-        <button *ngIf="!isLastQuestion" class="btn btn-primary" type="button" (click)="goNext()">
-          Next
-        </button>
-
-        <button *ngIf="isLastQuestion" class="btn btn-success" type="button" (click)="onSubmit()" [disabled]="isSubmitting">
-          {{ isSubmitting ? 'Submitting...' : 'Submit' }}
-        </button>
       </div>
     </ng-container>
 

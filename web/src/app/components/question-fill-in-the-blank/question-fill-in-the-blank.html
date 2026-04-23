@@ -1,5 +1,5 @@
 <div class="question-fill-in-the-blank">
-  <p class="question-text mb-3">{{ question.questionText }}</p>
+  <p class="question-text">{{ question.questionText }}</p>
 
   <textarea
     class="answer-input"
@@ -7,7 +7,7 @@
     [attr.maxlength]="maxLength"
     [value]="responseText"
     (input)="onInput($any($event.target).value)"
-    placeholder="Write your answer..."
+    placeholder=""
   ></textarea>
 
   <div class="char-counter">{{ responseText.length }} / {{ maxLength }}</div>

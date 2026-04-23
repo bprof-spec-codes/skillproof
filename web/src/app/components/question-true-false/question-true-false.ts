@@ -6,6 +6,7 @@ import { TestAnswerSubmitDto } from '../../Models/Dtos/Test/test-answer-submit-d
   selector: 'app-question-true-false',
   standalone: false,
   templateUrl: './question-true-false.html',
+  styleUrl: './question-true-false.scss',
 })
 export class QuestionTrueFalse {
   @Input({ required: true }) question!: CandidateQuestionDto;
