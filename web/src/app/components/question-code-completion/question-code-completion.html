@@ -1,0 +1,13 @@
+<div class="question-code-completion">
+  <p class="question-text mb-3">{{ question.questionText }}</p>
+
+  <pre class="code-snippet mb-3"><code>{{ codeSnippet }}</code></pre>
+
+  <textarea
+    class="answer-input"
+    rows="6"
+    [value]="responseText"
+    (input)="onInput($any($event.target).value)"
+    placeholder="Write your answer..."
+  ></textarea>
+</div>

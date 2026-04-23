@@ -1,0 +1,25 @@
+<div class="question-true-false">
+  <p class="question-text mb-3">{{ question.questionText }}</p>
+
+  <div class="options">
+    <label class="option">
+      <input
+        type="radio"
+        [name]="'tf-' + question.id"
+        [checked]="selected === true"
+        (change)="onSelect(true)"
+      />
+      True
+    </label>
+
+    <label class="option">
+      <input
+        type="radio"
+        [name]="'tf-' + question.id"
+        [checked]="selected === false"
+        (change)="onSelect(false)"
+      />
+      False
+    </label>
+  </div>
+</div>

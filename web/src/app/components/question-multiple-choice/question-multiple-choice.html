@@ -1,0 +1,28 @@
+<div class="question-multiple-choice">
+  <p class="question-text mb-3">{{ question.questionText }}</p>
+
+  <div class="options">
+    <ng-container *ngIf="allowMultiple; else singleSelect">
+      <label class="option" *ngFor="let opt of options; let i = index">
+        <input
+          type="checkbox"
+          [checked]="isSelected(i)"
+          (change)="onMultiToggle(i, $any($event.target).checked)"
+        />
+        {{ opt }}
+      </label>
+    </ng-container>
+
+    <ng-template #singleSelect>
+      <label class="option" *ngFor="let opt of options; let i = index">
+        <input
+          type="radio"
+          [name]="'mc-' + question.id"
+          [checked]="isSelected(i)"
+          (change)="onSingleSelect(i)"
+        />
+        {{ opt }}
+      </label>
+    </ng-template>
+  </div>
+</div>

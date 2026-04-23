@@ -1,6 +1,8 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
-import { JobService } from '../services/job-service';
+import { JobService } from '../../services/job-service';
+import { MarkdownService } from '../../services/markdown-service';
+import { BehaviorSubject, Observable } from 'rxjs';
 
 @Component({
   selector: 'app-jobupload',
@@ -16,12 +18,18 @@ export class Jobupload {
   tags: string = '';
   description: string = '';
 
+  preViewmd: BehaviorSubject<string> = new BehaviorSubject<string>('')
+  isPreView: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false)
+  preViewmd$: Observable<string> = this.preViewmd.asObservable();
+  isPreView$: Observable<boolean> = this.isPreView.asObservable();
+
   error: string | null = null;
   loading: boolean = false;
 
   constructor(
     private jobService: JobService,
     private router: Router,
+    private markdownService: MarkdownService
   ) {}
 
   onSubmit() {
@@ -58,5 +66,17 @@ export class Jobupload {
         this.error = err?.error?.message || 'Failed to post the job advertisement.';
       },
     });
+  }
+
+  preView(): void {
+    if(this.description.trim().length == 0)
+      return
+    this.markdownService.preView(this.description).subscribe(res => {
+      console.log(res)
+      this.preViewmd.next(res)
+      this.isPreView.next(!this.isPreView.value)
+      console.log(this.preViewmd.value)
+    }
+    )
   }
 }

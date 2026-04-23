@@ -1,6 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
+using SkillProof.Entities.Dtos.Assesment;
 using SkillProof.Entities.Dtos.Job;
 using SkillProof.Entities.Dtos.Jobs;
+using SkillProof.Entities.Dtos.Questions;
+using SkillProof.Entities.Models;
 using SkillProof.Logic.Jobs;
 
 namespace SkillProof.Api.Controllers;
@@ -44,11 +47,32 @@ public class JobsController : ControllerBase
         var job = await _jobLogic.GetJobByIdAsync(id);
         return Ok(job);
     }
+    
+    [HttpGet("company/{companyId}")]
+    public async Task<IActionResult> GetJobsByCompany(string companyId)
+    {
+        if (string.IsNullOrWhiteSpace(companyId))
+        {
+            return BadRequest(new { message = "Company ID is required." });
+        }
+
+        var jobs = await _jobLogic.GetJobsByCompanyIdAsync(companyId);
+        return Ok(jobs);
+    }
 
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdateJob(string id, [FromBody] JobViewDto dto)
     {
-        var updatedJob = await _jobLogic.UpdateJobAsync(id, dto, dto.CompanyId);
+        var companyId = User.Claims.FirstOrDefault(c => 
+            c.Type == "CompanyId" || 
+            c.Type.EndsWith("CompanyId", StringComparison.OrdinalIgnoreCase))?.Value;
+
+        if (string.IsNullOrEmpty(companyId))
+        {
+            return BadRequest(new { message = "Company ID is missing from the authentication token." });
+        }
+
+        var updatedJob = await _jobLogic.UpdateJobAsync(id, dto, companyId);
         return Ok(updatedJob);
     }
 
@@ -58,4 +82,24 @@ public class JobsController : ControllerBase
         await _jobLogic.DeleteJobAsync(id, companyId);
         return NoContent();
     }
+
+    [HttpGet("GetTestToJob{id}")]
+
+    public async Task<ActionResult<ICollection<AssessmentViewDto>>> GetRndQuestions(string id)
+    {
+        var test = await _jobLogic.GetTestToJob(id);
+        return test == null ? NotFound() : Ok(test);
+    }
+
+    [HttpGet("{id}/test")]
+    public async Task<IActionResult> GetCandidateTest(string id)
+    {
+        var candidateTest = await _jobLogic.GetCandidateTestForJob(id);
+        if (candidateTest == null)
+        {
+            return NoContent();
+        }
+        return Ok(candidateTest);
+    }
+
 }

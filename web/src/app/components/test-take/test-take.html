@@ -1,0 +1,100 @@
+<section class="test-take-page py-4">
+  <div class="container">
+    <div *ngIf="isLoading" class="state-block">
+      Loading test...
+    </div>
+
+    <div *ngIf="!isLoading && errorMessage" class="state-block state-error">
+      <p class="mb-3">{{ errorMessage }}</p>
+      <button class="btn btn-outline-secondary" type="button" (click)="backToJob()">Back to Job</button>
+    </div>
+
+    <div *ngIf="!isLoading && !errorMessage && !result && !assessment" class="state-block">
+      <p class="mb-3">This job has no test attached.</p>
+      <button class="btn btn-outline-secondary" type="button" (click)="backToJob()">Back to Job</button>
+    </div>
+
+    <ng-container *ngIf="!isLoading && !errorMessage && !result && assessment && currentQuestion">
+      <header class="test-header mb-3">
+        <h2>{{ assessment.title }}</h2>
+        <p class="question-counter">Question {{ currentIndex + 1 }} / {{ assessment.questions.length }}</p>
+      </header>
+
+      <div class="question-block mb-4">
+        <h3 class="question-title">{{ currentQuestion.title }}</h3>
+
+        <div [ngSwitch]="currentQuestion.type">
+          <app-question-true-false
+            *ngSwitchCase="QuestionType.TrueFalse"
+            [question]="currentQuestion"
+            [currentAnswer]="currentAnswerFor(currentQuestion.id)"
+            (answerChange)="onAnswerChange($event)"
+          ></app-question-true-false>
+          <app-question-multiple-choice
+            *ngSwitchCase="QuestionType.MultipleChoice"
+            [question]="currentQuestion"
+            [currentAnswer]="currentAnswerFor(currentQuestion.id)"
+            (answerChange)="onAnswerChange($event)"
+          ></app-question-multiple-choice>
+          <app-question-code-completion
+            *ngSwitchCase="QuestionType.CodeCompletion"
+            [question]="currentQuestion"
+            [currentAnswer]="currentAnswerFor(currentQuestion.id)"
+            (answerChange)="onAnswerChange($event)"
+          ></app-question-code-completion>
+          <app-question-fill-in-the-blank
+            *ngSwitchCase="QuestionType.FillInTheBlank"
+            [question]="currentQuestion"
+            [currentAnswer]="currentAnswerFor(currentQuestion.id)"
+            (answerChange)="onAnswerChange($event)"
+          ></app-question-fill-in-the-blank>
+        </div>
+      </div>
+
+      <div class="navigation-row">
+        <button class="btn btn-outline-secondary" type="button" (click)="goBack()" [disabled]="isFirstQuestion || isSubmitting">
+          Back
+        </button>
+
+        <button *ngIf="!isLastQuestion" class="btn btn-primary" type="button" (click)="goNext()">
+          Next
+        </button>
+
+        <button *ngIf="isLastQuestion" class="btn btn-success" type="button" (click)="onSubmit()" [disabled]="isSubmitting">
+          {{ isSubmitting ? 'Submitting...' : 'Submit' }}
+        </button>
+      </div>
+    </ng-container>
+
+    <ng-container *ngIf="!isLoading && !errorMessage && result">
+      <div class="result-block">
+        <h2 class="result-title">
+          You got {{ result.score }} / {{ result.maxScore }} points
+          — {{ result.passed ? 'Passed' : 'Not passed' }}
+        </h2>
+
+        <ul class="result-list">
+          <li *ngFor="let qr of result.questionResults" class="result-item">
+            <div class="result-item-header">
+              <span class="result-icon" [class.correct]="qr.isCorrect" [class.incorrect]="!qr.isCorrect">
+                {{ qr.isCorrect ? '✓' : '✗' }}
+              </span>
+              <span class="result-question-title">{{ qr.questionTitle }}</span>
+              <span class="result-points">{{ qr.pointsAwarded }} / {{ qr.maxPoints }}</span>
+            </div>
+
+            <div *ngIf="qr.userResponse" class="result-user-response">
+              <strong>Your answer:</strong> {{ qr.userResponse }}
+            </div>
+
+            <div *ngIf="qr.aiFeedback && qr.aiFeedback !== '-'" class="result-ai-feedback">
+              <strong>Feedback:</strong> {{ qr.aiFeedback }}
+            </div>
+          </li>
+        </ul>
+
+        <button class="btn btn-outline-secondary" type="button" (click)="backToJob()">Back to Job</button>
+      </div>
+    </ng-container>
+  </div>
+</section>

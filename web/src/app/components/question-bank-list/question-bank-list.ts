@@ -132,7 +132,7 @@ export class QuestionBankList implements OnInit {
     const filter = new QuestionListFilterDto();
 
     if (this.filterType !== '') {
-      filter.type = Number(this.filterType) as QuestionType;
+      filter.type = this.filterType as QuestionType;
     }
 
     if (this.filterDifficulty !== '') {

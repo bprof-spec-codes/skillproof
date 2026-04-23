@@ -138,7 +138,7 @@ export class QuestionBankForm implements OnInit {
 
   get selectedType(): QuestionType {
     const rawType = this.form.getRawValue().type;
-    return Number(rawType) as QuestionType;
+    return rawType as QuestionType;
   }
 
   get multipleChoiceOptionsArray(): FormArray<FormControl<string>> {
@@ -260,7 +260,7 @@ export class QuestionBankForm implements OnInit {
   private buildCreateDto(createdBy: string): CreateQuestionRequestDto {
     const value = this.form.getRawValue();
     const dto = new CreateQuestionRequestDto();
-    dto.type = Number(value.type) as QuestionType;
+    dto.type = value.type as QuestionType;
     dto.language = value.language.trim();
     dto.difficulty = Number(value.difficulty) as DifficultyLevel;
     dto.title = value.title.trim();
@@ -275,7 +275,7 @@ export class QuestionBankForm implements OnInit {
   private buildUpdateDto(): UpdateQuestionRequestDto {
     const value = this.form.getRawValue();
     const dto = new UpdateQuestionRequestDto();
-    const selectedType = Number(value.type) as QuestionType;
+    const selectedType = value.type as QuestionType;
 
     dto.language = value.language.trim();
     dto.difficulty = Number(value.difficulty) as DifficultyLevel;
