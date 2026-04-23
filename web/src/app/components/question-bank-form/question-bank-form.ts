@@ -108,7 +108,7 @@ export class QuestionBankForm implements OnInit {
             this.form.patchValue({
               type: question.type,
               language: question.language,
-              difficulty: question.difficulty,
+              difficulty: this.coerceDifficultyLevel(question.difficulty),
               title: question.title,
               questionText: question.questionText,
               isActive: question.isActive,
@@ -263,7 +263,7 @@ export class QuestionBankForm implements OnInit {
     const dto = new CreateQuestionRequestDto();
     dto.type = value.type as QuestionType;
     dto.language = value.language.trim();
-    dto.difficulty = Number(value.difficulty) as DifficultyLevel;
+    dto.difficulty = this.coerceDifficultyLevel(value.difficulty);
     dto.title = value.title.trim();
     dto.questionText = value.questionText.trim();
     dto.createdBy = createdBy;
@@ -279,7 +279,7 @@ export class QuestionBankForm implements OnInit {
     const selectedType = value.type as QuestionType;
 
     dto.language = value.language.trim();
-    dto.difficulty = Number(value.difficulty) as DifficultyLevel;
+    dto.difficulty = this.coerceDifficultyLevel(value.difficulty);
     dto.title = value.title.trim();
     dto.questionText = value.questionText.trim();
     dto.isActive = !!value.isActive;
@@ -410,6 +410,26 @@ export class QuestionBankForm implements OnInit {
       .split(/\r?\n/)
       .map((item) => item.trim())
       .filter((item) => item !== '');
+  }
+
+  private coerceDifficultyLevel(value: unknown): DifficultyLevel {
+    if (typeof value === 'number' && DifficultyLevel[value] !== undefined) {
+      return value as DifficultyLevel;
+    }
+
+    if (typeof value === 'string') {
+      const mapped = DifficultyLevel[value as keyof typeof DifficultyLevel];
+      if (typeof mapped === 'number') {
+        return mapped as DifficultyLevel;
+      }
+
+      const numeric = Number(value);
+      if (!Number.isNaN(numeric) && DifficultyLevel[numeric] !== undefined) {
+        return numeric as DifficultyLevel;
+      }
+    }
+
+    return DifficultyLevel.Junior;
   }
 
   private createMultipleChoiceOptionControl(value = ''): FormControl<string> {
