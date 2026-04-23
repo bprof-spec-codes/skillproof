@@ -6,6 +6,7 @@ import { TestAnswerSubmitDto } from '../../Models/Dtos/Test/test-answer-submit-d
   selector: 'app-question-multiple-choice',
   standalone: false,
   templateUrl: './question-multiple-choice.html',
+  styleUrl: './question-multiple-choice.scss',
 })
 export class QuestionMultipleChoice {
   @Input({ required: true }) question!: CandidateQuestionDto;
