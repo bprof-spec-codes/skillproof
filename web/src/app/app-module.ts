@@ -6,7 +6,7 @@ import { App } from './app';
 import { Login } from './components/login/login';
 import { Register } from './components/register/register';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { HttpClientModule, provideHttpClient, withInterceptors } from '@angular/common/http';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { HomePage } from './home-page/home-page';
 import { errorInterceptor } from './interceptors/error-interceptor';
 import { Modal } from './components/modal/modal';
@@ -18,6 +18,12 @@ import { ProfileView } from './components/profile-view/profile-view';
 import { Jobupload } from './components/jobupload/jobupload';
 import { JobEdit } from './components/job-edit/job-edit';
 import { AssessmentCreate } from './components/assessment-create/assessment-create';
+import { JobDetail } from './components/job-detail/job-detail';
+import { TestTake } from './components/test-take/test-take';
+import { QuestionTrueFalse } from './components/question-true-false/question-true-false';
+import { QuestionMultipleChoice } from './components/question-multiple-choice/question-multiple-choice';
+import { QuestionCodeCompletion } from './components/question-code-completion/question-code-completion';
+import { QuestionFillInTheBlank } from './components/question-fill-in-the-blank/question-fill-in-the-blank';
 
 @NgModule({
   declarations: [
@@ -35,8 +41,14 @@ import { AssessmentCreate } from './components/assessment-create/assessment-crea
     Jobupload,
     JobEdit,
     AssessmentCreate,
+    JobDetail,
+    TestTake,
+    QuestionTrueFalse,
+    QuestionMultipleChoice,
+    QuestionCodeCompletion,
+    QuestionFillInTheBlank,
   ],
-  imports: [BrowserModule, AppRoutingModule, ReactiveFormsModule, HttpClientModule, FormsModule],
+  imports: [BrowserModule, AppRoutingModule, ReactiveFormsModule, FormsModule],
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideHttpClient(withInterceptors([errorInterceptor])),

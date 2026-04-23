@@ -1,0 +1,147 @@
+.job-detail-page {
+  background: #fdf0d5;
+  min-height: 100vh;
+}
+
+.job-detail-card {
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 2rem;
+  max-width: 960px;
+  margin: 0 auto;
+  position: relative;
+}
+
+.back-link {
+  color: #003049;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.back-link:hover {
+  text-decoration: underline;
+}
+
+.bookmark-wrap {
+  position: absolute;
+  top: 1.25rem;
+  right: 1.25rem;
+}
+
+.bookmark-icon {
+  font-size: 1.5rem;
+  color: #003049;
+}
+
+.job-title {
+  color: #003049;
+  font-size: 2rem;
+  font-weight: 700;
+  padding-right: 2rem;
+}
+
+.job-description {
+  color: rgba(0, 0, 0, 0.75);
+  line-height: 1.55;
+  font-size: 1.05rem;
+}
+
+.job-description h2 {
+  color: #003049;
+  font-size: 1.45rem;
+  font-weight: 700;
+  margin-top: 1.4rem;
+}
+
+.tags-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.tag-pill {
+  background: #ededed;
+  border-radius: 999px;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.9rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.employment-pill {
+  border: 1px solid #c1121f;
+}
+
+.footer-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: flex-end;
+  flex-wrap: wrap;
+}
+
+.company-name {
+  color: #003049;
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin-bottom: 0.4rem;
+}
+
+.meta-line {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  font-size: 0.95rem;
+}
+
+.actions {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.submit-btn {
+  background: #c1121f;
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  padding: 0.85rem 1.2rem;
+  font-weight: 700;
+}
+
+.share-btn {
+  border: 2px solid #c1121f;
+  color: #c1121f;
+  background: transparent;
+  border-radius: 10px;
+  width: 48px;
+  height: 48px;
+}
+
+.state-block {
+  padding: 2rem 1rem;
+  text-align: center;
+}
+
+.state-error {
+  color: #842029;
+}
+
+@media (max-width: 768px) {
+  .job-detail-card {
+    padding: 1.25rem;
+  }
+
+  .job-title {
+    font-size: 1.6rem;
+  }
+
+  .actions {
+    width: 100%;
+  }
+
+  .submit-btn {
+    flex: 1;
+  }
+}

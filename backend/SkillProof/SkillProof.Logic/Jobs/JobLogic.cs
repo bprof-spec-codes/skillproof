@@ -6,6 +6,7 @@ using SkillProof.Entities.Dtos.Assesment;
 using SkillProof.Entities.Dtos.Job;
 using SkillProof.Entities.Dtos.Jobs;
 using SkillProof.Entities.Dtos.Questions;
+using SkillProof.Entities.Dtos.Tests;
 using SkillProof.Entities.Enums;
 using SkillProof.Entities.Models;
 using SkillProof.Logic.Helper;
@@ -372,6 +373,70 @@ public class JobLogic : IJobLogic
             }).ToList()
 
         }).ToList();
+    }
+
+    public async Task<CandidateAssessmentDto?> GetCandidateTestForJob(string jobId)
+    {
+        var job = await _jobRepository.GetAll()
+            .Include(j => j.Assessments)
+                .ThenInclude(a => a.Questions)
+                    .ThenInclude(q => q.MultipleChoiceQuestion)
+            .Include(j => j.Assessments)
+                .ThenInclude(a => a.Questions)
+                    .ThenInclude(q => q.CodeCompletionQuestion)
+            .Include(j => j.Assessments)
+                .ThenInclude(a => a.Questions)
+                    .ThenInclude(q => q.FillInTheBlankQuestions)
+            .Include(j => j.Assessments)
+                .ThenInclude(a => a.Questions)
+                    .ThenInclude(q => q.TrueFalseQuestion)
+            .FirstOrDefaultAsync(j => j.Id == jobId);
+
+        if (job == null || job.Assessments.Count == 0)
+        {
+            return null;
+        }
+
+        var firstAssessment = job.Assessments.First();
+        var allQuestions = job.Assessments.SelectMany(a => a.Questions).ToList();
+
+        if (allQuestions.Count == 0)
+        {
+            return null;
+        }
+
+        return new CandidateAssessmentDto
+        {
+            Id = firstAssessment.Id,
+            Title = firstAssessment.Title,
+            DifficultyLevel = firstAssessment.DifficultyLevel,
+            Questions = allQuestions.Select(q => new CandidateQuestionDto
+            {
+                Id = q.Id,
+                Type = q.Type,
+                Title = q.Title,
+                QuestionText = q.QuestionText,
+                Language = q.Language,
+                Difficulty = q.Difficulty,
+
+                MultipleChoice = q.MultipleChoiceQuestion == null ? null : new CandidateMultipleChoicePayloadDto
+                {
+                    Options = string.IsNullOrWhiteSpace(q.MultipleChoiceQuestion.Options)
+                        ? new List<string>()
+                        : JsonSerializer.Deserialize<List<string>>(q.MultipleChoiceQuestion.Options) ?? new List<string>(),
+                    AllowMultipleSelection = q.MultipleChoiceQuestion.AllowMultipleSelection
+                },
+
+                CodeCompletion = q.CodeCompletionQuestion == null ? null : new CandidateCodeCompletionPayloadDto
+                {
+                    CodeSnippet = q.CodeCompletionQuestion.CodeSnippet
+                },
+
+                FillInTheBlank = q.FillInTheBlankQuestions == null ? null : new CandidateFillInTheBlankPayloadDto(),
+
+                TrueFalse = q.TrueFalseQuestion == null ? null : new CandidateTrueFalsePayloadDto()
+            }).ToList()
+        };
     }
 
 
