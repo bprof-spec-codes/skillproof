@@ -23,6 +23,7 @@ import { QuestionBankService } from '../../services/question-bank-service';
   styleUrl: './question-bank-form.scss',
 })
 export class QuestionBankForm implements OnInit {
+  readonly QuestionType = QuestionType;
   form: FormGroup;
 
   loading = false;

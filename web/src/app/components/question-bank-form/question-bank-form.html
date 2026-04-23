@@ -44,7 +44,7 @@
     <hr />
 
     <div [ngSwitch]="selectedType">
-      <div *ngSwitchCase="0" class="row g-3">
+      <div *ngSwitchCase="QuestionType.MultipleChoice" class="row g-3">
         <div class="col-12">
           <label class="form-label">Options</label>
 
@@ -91,7 +91,7 @@
         </div>
       </div>
 
-      <div *ngSwitchCase="1" class="row g-3">
+      <div *ngSwitchCase="QuestionType.CodeCompletion" class="row g-3">
         <div class="col-12">
           <label class="form-label">Code Snippet</label>
           <textarea class="form-control" rows="6" formControlName="codeSnippet"></textarea>
@@ -102,7 +102,7 @@
         </div>
       </div>
 
-      <div *ngSwitchCase="3" class="row g-3">
+      <div *ngSwitchCase="QuestionType.FillInTheBlank" class="row g-3">
         <div class="col-12">
           <label class="form-label">Answer</label>
           <input class="form-control" type="text" formControlName="fillInAnswer" />
@@ -113,7 +113,7 @@
         </div>
       </div>
 
-      <div *ngSwitchCase="2" class="row g-3">
+      <div *ngSwitchCase="QuestionType.TrueFalse" class="row g-3">
         <div class="col-12 col-md-6">
           <label class="form-label">Correct Answer</label>
           <select class="form-select" formControlName="trueFalseCorrectAnswer">
