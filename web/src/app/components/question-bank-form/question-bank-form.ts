@@ -6,8 +6,8 @@ import { CreateQuestionRequestDto } from '../../Models/Dtos/Question/create-ques
 import { UpdateQuestionRequestDto } from '../../Models/Dtos/Question/update-question-request-dto';
 import {
   CodeCompletionQuestionPayloadDto,
-  FillInTheBlankQuestionPayloadDto,
   MultipleChoiceQuestionPayloadDto,
+  OpenEndedQuestionPayloadDto,
   TrueFalseQuestionPayloadDto,
 } from '../../Models/Dtos/Question/question-type-payload-dtos';
 import { DifficultyLevel } from '../../Models/Enums/DifficultyLevel';
@@ -35,7 +35,7 @@ export class QuestionBankForm implements OnInit {
     { label: 'Multiple Choice', value: QuestionType.MultipleChoice },
     { label: 'Code Completion', value: QuestionType.CodeCompletion },
     { label: 'True / False', value: QuestionType.TrueFalse },
-    { label: 'Fill In The Blank', value: QuestionType.FillInTheBlank },
+    { label: 'Open-Ended', value: QuestionType.OpenEnded },
   ];
 
   readonly difficultyOptions = [
@@ -114,8 +114,8 @@ export class QuestionBankForm implements OnInit {
               isActive: question.isActive,
               codeSnippet: question.codeCompletion?.codeSnippet ?? '',
               acceptedAnswersText: question.codeCompletion?.acceptedAnswers?.join('\n') ?? '',
-              fillInAnswer: question.fillInTheBlank?.answer ?? '',
-              fillInManualFeedback: question.fillInTheBlank?.manualFeedback ?? '',
+              fillInAnswer: question.openEnded?.answer ?? '',
+              fillInManualFeedback: question.openEnded?.manualFeedback ?? '',
               trueFalseCorrectAnswer: question.trueFalse?.correctAnswer ?? false,
               trueFalseExplanation: question.trueFalse?.explanation ?? '',
             });
@@ -300,8 +300,11 @@ export class QuestionBankForm implements OnInit {
       return;
     }
 
-    if (type === QuestionType.FillInTheBlank) {
-      target.fillInTheBlank = this.buildFillInTheBlankPayload();
+    if (type === QuestionType.OpenEnded) {
+      const payload = this.buildOpenEndedPayload();
+      target.openEnded = payload;
+      // TODO(OpenEnded-cleanup): remove legacy write field after backend contract rename.
+      target.fillInTheBlank = payload;
       return;
     }
 
@@ -345,9 +348,9 @@ export class QuestionBankForm implements OnInit {
     return payload;
   }
 
-  private buildFillInTheBlankPayload(): FillInTheBlankQuestionPayloadDto {
+  private buildOpenEndedPayload(): OpenEndedQuestionPayloadDto {
     const value = this.form.getRawValue();
-    const payload = new FillInTheBlankQuestionPayloadDto();
+    const payload = new OpenEndedQuestionPayloadDto();
     payload.answer = value.fillInAnswer.trim();
     payload.manualFeedback = value.fillInManualFeedback?.trim() || undefined;
     return payload;
@@ -391,9 +394,9 @@ export class QuestionBankForm implements OnInit {
       return null;
     }
 
-    if (type === QuestionType.FillInTheBlank) {
+    if (type === QuestionType.OpenEnded) {
       if (!value.fillInAnswer || value.fillInAnswer.trim() === '') {
-        return 'Fill in the blank requires an answer.';
+        return 'Open-ended question requires an answer.';
       }
 
       return null;

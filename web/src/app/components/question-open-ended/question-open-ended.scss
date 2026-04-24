@@ -1,4 +1,4 @@
-.question-fill-in-the-blank {
+.question-open-ended {
   color: #003049;
   font-family: 'Open Sans', sans-serif;
   width: 100%;
@@ -40,7 +40,7 @@
 }
 
 @media (max-width: 768px) {
-  .question-fill-in-the-blank {
+  .question-open-ended {
     .question-text {
       margin-bottom: 1rem;
     }

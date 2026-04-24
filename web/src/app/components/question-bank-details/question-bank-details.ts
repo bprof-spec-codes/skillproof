@@ -13,6 +13,7 @@ import { QuestionBankService } from '../../services/question-bank-service';
   styleUrl: './question-bank-details.scss',
 })
 export class QuestionBankDetails implements OnInit {
+  readonly QuestionType = QuestionType;
   question: QuestionResponseDto | null = null;
   loading = false;
 
@@ -20,7 +21,7 @@ export class QuestionBankDetails implements OnInit {
     { label: 'Multiple Choice', value: QuestionType.MultipleChoice },
     { label: 'Code Completion', value: QuestionType.CodeCompletion },
     { label: 'True / False', value: QuestionType.TrueFalse },
-    { label: 'Fill In The Blank', value: QuestionType.FillInTheBlank },
+    { label: 'Open-Ended', value: QuestionType.OpenEnded },
   ];
 
   readonly difficultyOptions = [

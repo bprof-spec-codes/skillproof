@@ -3,12 +3,12 @@ import { CandidateQuestionDto } from '../../Models/Dtos/Test/candidate-question-
 import { TestAnswerSubmitDto } from '../../Models/Dtos/Test/test-answer-submit-dto';
 
 @Component({
-  selector: 'app-question-fill-in-the-blank',
+  selector: 'app-question-open-ended',
   standalone: false,
-  templateUrl: './question-fill-in-the-blank.html',
-  styleUrl: './question-fill-in-the-blank.scss',
+  templateUrl: './question-open-ended.html',
+  styleUrl: './question-open-ended.scss',
 })
-export class QuestionFillInTheBlank {
+export class QuestionOpenEnded {
   readonly maxLength = 500;
 
   @Input({ required: true }) question!: CandidateQuestionDto;

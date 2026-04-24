@@ -9,10 +9,13 @@ export class CodeCompletionQuestionPayloadDto {
   acceptedAnswers: string[] = [];
 }
 
-export class FillInTheBlankQuestionPayloadDto {
+export class OpenEndedQuestionPayloadDto {
   answer = '';
   manualFeedback?: string;
 }
+
+// TODO(OpenEnded-cleanup): remove legacy alias after backend contract rename.
+export class FillInTheBlankQuestionPayloadDto extends OpenEndedQuestionPayloadDto {}
 
 export class TrueFalseQuestionPayloadDto {
   correctAnswer = false;
