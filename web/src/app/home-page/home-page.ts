@@ -27,10 +27,10 @@ export class HomePage implements OnInit {
   filterTags = ''
   sort = ''
   readonly jobTypeOptions = [
-      { label: 'FullTime', value: EmploymentType.FullTime },
-      { label: 'Internship', value: EmploymentType.Internship },
-      { label: 'PartTime', value: EmploymentType.PartTime },
-      { label: 'Temporary', value: EmploymentType.Temporary },
+      { label: 'FullTime', value: 0 },
+      { label: 'Internship', value: 1 },
+      { label: 'PartTime', value: 2 },
+      { label: 'Temporary', value: 3 },
   ];
 
   readonly jobExperience = [
@@ -110,7 +110,7 @@ export class HomePage implements OnInit {
 
             job.tags?.forEach(tag => {
               const dist = levenshtein.get(fText, tag.toLowerCase());
-              if (dist <= 0) {
+              if (dist === 0) {
                 tagScore += 1;
               }
             });
@@ -126,8 +126,10 @@ export class HomePage implements OnInit {
             });
           }
 
-          if (this.filterType.length > 1) {
-            if (job.EmploymentType?.toString() === this.filterType) {
+          if (this.filterType !== '') {
+            const selectedType = Number(this.filterType);
+            const convertedType = EmploymentType[selectedType]
+            if (job.employmentType?.toString() == convertedType) {
               employmentTypeScore += 3;
             }
           }
@@ -182,7 +184,7 @@ export class HomePage implements OnInit {
   
 
   clearFilters(): void {
-     this.filterType = '';
+    this.filterType = '';
     this.filterExperience = '';
     this.filterTags = '';
     this.sort = '';
@@ -195,7 +197,10 @@ export class HomePage implements OnInit {
   }
   // Ezt loptam :)
   getTimeAgo(dateStr: string): string {
-    const date = new Date(dateStr);
+    const formattedDateStr = dateStr.includes('Z') || dateStr.includes('+') 
+                             ? dateStr 
+                             : `${dateStr.replace(' ', 'T')}Z`;
+    const date = new Date(formattedDateStr);
     const time = date.getTime();
 
     if (!dateStr || Number.isNaN(time)) {

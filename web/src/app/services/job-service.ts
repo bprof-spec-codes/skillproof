@@ -154,10 +154,8 @@ export class JobService {
       .map((t) => t.trim())
       .filter((t) => t.length > 0);
   }
-  /*
-  Nem látok ehhez api végpontot, szóval csak kommentelni tudom. Lehet hogy a getJobsByCompanyId-re gondoltál, de inkább nem piszkálom
   loadCompanyJobs(userId: string): void {
-    this.http.get<JobViewDto[]>(`${environment.apiUrls.getJobsOfCompany}/${userId}`)
+    this.http.get<JobViewDto[]>(`${environment.apiUrls}/getJobsOfCompany}/${userId}`)
     .subscribe({
       next: (jobs) => {
         console.log("Jobs loaded in successfully", jobs);
@@ -169,5 +167,4 @@ export class JobService {
       }
     });
    }
-  */
 }

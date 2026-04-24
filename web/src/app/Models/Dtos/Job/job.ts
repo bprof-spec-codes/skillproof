@@ -5,7 +5,7 @@ export class Job{
     companyId: string = ""
     title: string = ""
     description: string = ""
-    EmploymentType: EmploymentType | null = null
+    employmentType: EmploymentType | null = null
     location: string = ""
     tags: string = ""
     createdAt: string = ""
