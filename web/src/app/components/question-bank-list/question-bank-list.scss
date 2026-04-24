@@ -384,6 +384,21 @@
   text-align: right;
 }
 
+.qb-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  background: rgba(0, 0, 0, 0.34);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.qb-modal-dialog {
+  width: min(1240px, 100%);
+}
+
 @media (max-width: 1200px) {
   .qb-filter-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));

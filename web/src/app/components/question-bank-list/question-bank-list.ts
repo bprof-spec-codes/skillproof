@@ -28,6 +28,7 @@ export class QuestionBankList implements OnInit {
   showTagDropdown = false;
   groupByTagsEnabled = false;
   collapsedGroups: Record<string, boolean> = {};
+  showCreateModal = false;
 
   readonly questionTypeOptions = [
     { label: 'Multiple Choice', value: QuestionType.MultipleChoice },
@@ -62,6 +63,15 @@ export class QuestionBankList implements OnInit {
     }
 
     this.showTagDropdown = false;
+  }
+
+  @HostListener('document:keydown.escape')
+  onEscapeKey(): void {
+    if (!this.showCreateModal) {
+      return;
+    }
+
+    this.closeCreateModal();
   }
 
   get filteredTagSuggestions(): string[] {
@@ -207,7 +217,16 @@ export class QuestionBankList implements OnInit {
   }
 
   goToCreate(): void {
-    this.router.navigate(['/question-bank/create']);
+    this.showCreateModal = true;
+  }
+
+  closeCreateModal(): void {
+    this.showCreateModal = false;
+  }
+
+  onCreateModalSaved(): void {
+    this.closeCreateModal();
+    this.loadQuestions();
   }
 
   viewQuestion(id: string): void {

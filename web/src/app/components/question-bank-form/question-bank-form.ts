@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, NgZone, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, EventEmitter, Input, NgZone, OnInit, Output } from '@angular/core';
 import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { finalize } from 'rxjs';
@@ -23,6 +23,10 @@ import { QuestionBankService } from '../../services/question-bank-service';
   styleUrl: './question-bank-form.scss',
 })
 export class QuestionBankForm implements OnInit {
+  @Input() isModalMode = false;
+  @Output() closed = new EventEmitter<void>();
+  @Output() saved = new EventEmitter<string>();
+
   readonly QuestionType = QuestionType;
   form: FormGroup;
 
@@ -56,7 +60,6 @@ export class QuestionBankForm implements OnInit {
   ) {
     this.form = this.fb.group({
       type: [QuestionType.MultipleChoice, Validators.required],
-      language: ['', [Validators.required, Validators.maxLength(20)]],
       difficulty: [DifficultyLevel.Junior, Validators.required],
       title: ['', [Validators.required, Validators.maxLength(255)]],
       questionText: ['', Validators.required],
@@ -75,7 +78,6 @@ export class QuestionBankForm implements OnInit {
       acceptedAnswersText: [''],
 
       fillInAnswer: [''],
-      fillInManualFeedback: [''],
 
       trueFalseCorrectAnswer: [false],
       trueFalseExplanation: [''],
@@ -107,7 +109,6 @@ export class QuestionBankForm implements OnInit {
           this.ngZone.run(() => {
             this.form.patchValue({
               type: question.type,
-              language: question.language,
               difficulty: this.coerceDifficultyLevel(question.difficulty),
               title: question.title,
               questionText: question.questionText,
@@ -115,7 +116,6 @@ export class QuestionBankForm implements OnInit {
               codeSnippet: question.codeCompletion?.codeSnippet ?? '',
               acceptedAnswersText: question.codeCompletion?.acceptedAnswers?.join('\n') ?? '',
               fillInAnswer: question.openEnded?.answer ?? '',
-              fillInManualFeedback: question.openEnded?.manualFeedback ?? '',
               trueFalseCorrectAnswer: question.trueFalse?.correctAnswer ?? false,
               trueFalseExplanation: question.trueFalse?.explanation ?? '',
             });
@@ -148,6 +148,14 @@ export class QuestionBankForm implements OnInit {
 
   get multipleChoiceCorrectFlagsArray(): FormArray<FormControl<boolean>> {
     return this.form.get('multipleChoiceCorrectFlags') as FormArray<FormControl<boolean>>;
+  }
+
+  selectType(type: QuestionType): void {
+    if (this.isEditMode) {
+      return;
+    }
+
+    this.form.patchValue({ type });
   }
 
   addMultipleChoiceOption(): void {
@@ -204,6 +212,12 @@ export class QuestionBankForm implements OnInit {
                 duration: 2500,
                 type: 'success',
               });
+              if (this.isModalMode) {
+                this.saved.emit(updated.id);
+                this.closed.emit();
+                return;
+              }
+
               this.router.navigate(['/question-bank', updated.id]);
             });
           },
@@ -234,22 +248,33 @@ export class QuestionBankForm implements OnInit {
           });
         })
       )
-      .subscribe({
-        next: (created) => {
-          this.ngZone.run(() => {
+        .subscribe({
+          next: (created) => {
+            this.ngZone.run(() => {
             this.modalService.open({
               message: 'Question created successfully.',
               autoClose: true,
               duration: 2500,
               type: 'success',
             });
-            this.router.navigate(['/question-bank', created.id]);
-          });
-        },
-      });
+              if (this.isModalMode) {
+                this.saved.emit(created.id);
+                this.closed.emit();
+                return;
+              }
+
+              this.router.navigate(['/question-bank', created.id]);
+            });
+          },
+        });
   }
 
   cancel(): void {
+    if (this.isModalMode) {
+      this.closed.emit();
+      return;
+    }
+
     if (this.questionId) {
       this.router.navigate(['/question-bank', this.questionId]);
       return;
@@ -262,7 +287,6 @@ export class QuestionBankForm implements OnInit {
     const value = this.form.getRawValue();
     const dto = new CreateQuestionRequestDto();
     dto.type = value.type as QuestionType;
-    dto.language = value.language.trim();
     dto.difficulty = this.coerceDifficultyLevel(value.difficulty);
     dto.title = value.title.trim();
     dto.questionText = value.questionText.trim();
@@ -278,7 +302,6 @@ export class QuestionBankForm implements OnInit {
     const dto = new UpdateQuestionRequestDto();
     const selectedType = value.type as QuestionType;
 
-    dto.language = value.language.trim();
     dto.difficulty = this.coerceDifficultyLevel(value.difficulty);
     dto.title = value.title.trim();
     dto.questionText = value.questionText.trim();
@@ -352,7 +375,6 @@ export class QuestionBankForm implements OnInit {
     const value = this.form.getRawValue();
     const payload = new OpenEndedQuestionPayloadDto();
     payload.answer = value.fillInAnswer.trim();
-    payload.manualFeedback = value.fillInManualFeedback?.trim() || undefined;
     return payload;
   }
 

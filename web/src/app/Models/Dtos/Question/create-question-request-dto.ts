@@ -4,7 +4,7 @@ import { CodeCompletionQuestionPayloadDto, FillInTheBlankQuestionPayloadDto, Mul
 
 export class CreateQuestionRequestDto {
   type: QuestionType = QuestionType.MultipleChoice;
-  language = '';
+  language?: string;
   difficulty: DifficultyLevel = DifficultyLevel.Junior;
   title = '';
   questionText = '';

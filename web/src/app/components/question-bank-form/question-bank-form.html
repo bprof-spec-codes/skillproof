@@ -1,144 +1,133 @@
-<section class="container py-4" *ngIf="!loading; else loadingBlock">
-  <h2 class="mb-3">{{ isEditMode ? 'Edit Question' : 'Create Question' }}</h2>
+<section class="qbf-shell" [class.qbf-modal-shell]="isModalMode" *ngIf="!loading; else loadingBlock">
+  <div class="qbf-card" [class.qbf-card-modal]="isModalMode">
+    <header class="qbf-header">
+      <h2>{{ isEditMode ? 'Edit question' : 'Add new question' }}</h2>
+      <button class="qbf-close" *ngIf="isModalMode" type="button" (click)="cancel()" aria-label="Close">×</button>
+    </header>
 
-  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="card p-3">
-    <div class="row g-3">
-      <div class="col-12 col-md-6">
-        <label class="form-label">Type</label>
-        <select class="form-select" formControlName="type">
-          <option *ngFor="let option of questionTypeOptions" [value]="option.value">{{ option.label }}</option>
-        </select>
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="qbf-form">
+      <div class="qbf-main-fields">
+        <label class="qbf-label">Question title</label>
+        <input class="qbf-input" type="text" formControlName="title" maxlength="255" />
+
+        <label class="qbf-label">Question text</label>
+        <textarea class="qbf-input" rows="3" formControlName="questionText"></textarea>
+
+        <div class="qbf-row two-col">
+          <div>
+            <label class="qbf-label">Type of question</label>
+            <div class="qbf-type-grid" [class.disabled]="isEditMode">
+              <button
+                type="button"
+                class="qbf-type-item"
+                *ngFor="let option of questionTypeOptions"
+                [class.active]="selectedType === option.value"
+                [disabled]="isEditMode"
+                (click)="selectType(option.value)"
+              >
+                <span class="qbf-type-square"></span>
+                <span>{{ option.label }}</span>
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <label class="qbf-label">Difficulty</label>
+            <select class="qbf-input" formControlName="difficulty">
+              <option *ngFor="let option of difficultyOptions" [value]="option.value">{{ option.label }}</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="qbf-row" *ngIf="isEditMode">
+          <div>
+            <label class="qbf-label">Status</label>
+            <select class="qbf-input" formControlName="isActive">
+              <option [ngValue]="true">Active</option>
+              <option [ngValue]="false">Inactive</option>
+            </select>
+          </div>
+        </div>
       </div>
 
-      <div class="col-12 col-md-6">
-        <label class="form-label">Difficulty</label>
-        <select class="form-select" formControlName="difficulty">
-          <option *ngFor="let option of difficultyOptions" [value]="option.value">{{ option.label }}</option>
-        </select>
-      </div>
+      <div class="qbf-divider"></div>
 
-      <div class="col-12 col-md-6">
-        <label class="form-label">Language</label>
-        <input class="form-control" type="text" formControlName="language" maxlength="20" />
-      </div>
+      <div [ngSwitch]="selectedType" class="qbf-type-section">
+        <div *ngSwitchCase="QuestionType.MultipleChoice">
+          <label class="qbf-label">Options</label>
 
-      <div class="col-12 col-md-6" *ngIf="isEditMode">
-        <label class="form-label">Status</label>
-        <select class="form-select" formControlName="isActive">
-          <option [ngValue]="true">Active</option>
-          <option [ngValue]="false">Inactive</option>
-        </select>
-      </div>
-
-      <div class="col-12">
-        <label class="form-label">Title</label>
-        <input class="form-control" type="text" formControlName="title" maxlength="255" />
-      </div>
-
-      <div class="col-12">
-        <label class="form-label">Question Text</label>
-        <textarea class="form-control" rows="4" formControlName="questionText"></textarea>
-      </div>
-    </div>
-
-    <hr />
-
-    <div [ngSwitch]="selectedType">
-      <div *ngSwitchCase="QuestionType.MultipleChoice" class="row g-3">
-        <div class="col-12">
-          <label class="form-label">Options</label>
-
-          <div formArrayName="multipleChoiceOptions" class="d-flex flex-column gap-2">
-            <div
-              *ngFor="let optionControl of multipleChoiceOptionsArray.controls; let i = index"
-              class="input-group"
-            >
-              <span class="input-group-text">
-                <input
-                  class="form-check-input mt-0"
-                  type="checkbox"
-                  [formControl]="multipleChoiceCorrectFlagsArray.at(i)"
-                  [attr.aria-label]="'Correct answer for option ' + (i + 1)"
-                />
-              </span>
+          <div formArrayName="multipleChoiceOptions" class="qbf-option-list">
+            <div class="qbf-option-row" *ngFor="let optionControl of multipleChoiceOptionsArray.controls; let i = index">
+              <label class="qbf-correct-check" [attr.aria-label]="'Correct answer for option ' + (i + 1)">
+                <input type="checkbox" [formControl]="multipleChoiceCorrectFlagsArray.at(i)" />
+                <span>Correct</span>
+              </label>
 
               <input
-                class="form-control"
+                class="qbf-input"
                 type="text"
                 [formControlName]="i"
                 [placeholder]="'Option ' + (i + 1)"
               />
 
               <button
-                class="btn btn-outline-danger"
+                class="qbf-remove-btn"
                 type="button"
                 (click)="removeMultipleChoiceOption(i)"
                 [disabled]="multipleChoiceOptionsArray.length <= 2"
               >
-                -
+                ×
               </button>
             </div>
           </div>
 
-          <div class="d-flex justify-content-between align-items-center mt-2">
-            <small class="text-muted">
-              Mark the correct options with the checkbox. If more than one is checked, multiple selection will be enabled automatically.
-            </small>
-            <button class="btn btn-sm btn-outline-primary" type="button" (click)="addMultipleChoiceOption()">
-              + Add Option
-            </button>
+          <div class="qbf-helper-row">
+            <small>Mark correct answers with the checkbox. Multiple checks enable multiple selection.</small>
+            <button class="qbf-secondary-btn" type="button" (click)="addMultipleChoiceOption()">+ Add option</button>
           </div>
         </div>
-      </div>
 
-      <div *ngSwitchCase="QuestionType.CodeCompletion" class="row g-3">
-        <div class="col-12">
-          <label class="form-label">Code Snippet</label>
-          <textarea class="form-control" rows="6" formControlName="codeSnippet"></textarea>
-        </div>
-        <div class="col-12">
-          <label class="form-label">Accepted Answers (one per line)</label>
-          <textarea class="form-control" rows="4" formControlName="acceptedAnswersText"></textarea>
-        </div>
-      </div>
+        <div *ngSwitchCase="QuestionType.CodeCompletion">
+          <label class="qbf-label">Code snippet</label>
+          <textarea class="qbf-input" rows="6" formControlName="codeSnippet"></textarea>
 
-      <div *ngSwitchCase="QuestionType.OpenEnded" class="row g-3">
-        <div class="col-12">
-          <label class="form-label">Answer</label>
-          <input class="form-control" type="text" formControlName="fillInAnswer" />
+          <label class="qbf-label mt-3">Accepted answers (one per line)</label>
+          <textarea class="qbf-input" rows="4" formControlName="acceptedAnswersText"></textarea>
         </div>
-        <div class="col-12">
-          <label class="form-label">Manual Feedback (optional)</label>
-          <textarea class="form-control" rows="3" formControlName="fillInManualFeedback"></textarea>
-        </div>
-      </div>
 
-      <div *ngSwitchCase="QuestionType.TrueFalse" class="row g-3">
-        <div class="col-12 col-md-6">
-          <label class="form-label">Correct Answer</label>
-          <select class="form-select" formControlName="trueFalseCorrectAnswer">
+        <div *ngSwitchCase="QuestionType.OpenEnded">
+          <label class="qbf-label">Answer</label>
+          <input class="qbf-input" type="text" formControlName="fillInAnswer" />
+        </div>
+
+        <div *ngSwitchCase="QuestionType.TrueFalse">
+          <label class="qbf-label">Correct answer</label>
+          <select class="qbf-input" formControlName="trueFalseCorrectAnswer">
             <option [ngValue]="true">True</option>
             <option [ngValue]="false">False</option>
           </select>
-        </div>
-        <div class="col-12">
-          <label class="form-label">Explanation (optional)</label>
-          <textarea class="form-control" rows="3" formControlName="trueFalseExplanation"></textarea>
+
+          <label class="qbf-label mt-3">Explanation (optional)</label>
+          <textarea class="qbf-input" rows="3" formControlName="trueFalseExplanation"></textarea>
         </div>
       </div>
-    </div>
 
-    <div class="d-flex gap-2 mt-4">
-      <button class="btn btn-primary" type="submit" [disabled]="saving">
-        {{ saving ? 'Saving...' : (isEditMode ? 'Update Question' : 'Create Question') }}
-      </button>
-      <button class="btn btn-outline-secondary" type="button" (click)="cancel()" [disabled]="saving">Cancel</button>
-    </div>
-  </form>
+      <div class="qbf-divider"></div>
+
+      <div class="qbf-actions">
+        <button class="qbf-submit" type="submit" [disabled]="saving">
+          {{ saving ? 'Saving...' : (isEditMode ? 'Update' : 'Save') }}
+        </button>
+        <button class="qbf-cancel" type="button" (click)="cancel()" [disabled]="saving">Cancel</button>
+      </div>
+    </form>
+  </div>
 </section>
 
 <ng-template #loadingBlock>
-  <section class="container py-4">
-    <div class="alert alert-info">Loading question...</div>
+  <section class="qbf-shell" [class.qbf-modal-shell]="isModalMode">
+    <div class="qbf-card" [class.qbf-card-modal]="isModalMode">
+      <div class="qbf-loading">Loading question...</div>
+    </div>
   </section>
 </ng-template>
