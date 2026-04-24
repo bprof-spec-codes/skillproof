@@ -6,6 +6,7 @@ export class CreateQuestionRequestDto {
   type: QuestionType = QuestionType.MultipleChoice;
   language?: string;
   difficulty: DifficultyLevel = DifficultyLevel.Junior;
+  tags: string[] = [];
   title = '';
   questionText = '';
   createdBy = '';

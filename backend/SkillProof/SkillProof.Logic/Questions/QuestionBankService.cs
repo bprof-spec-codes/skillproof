@@ -39,7 +39,7 @@ namespace SkillProof.Logic.Questions
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow,
                     IsActive = true,
-                    Tags = request.Tags ?? new List<string>()
+                    Tags = NormalizeTags(request.Tags)
                 };
 
                 await using var transaction = await _dbContext.Database.BeginTransactionAsync(cancellationToken);
@@ -106,6 +106,7 @@ namespace SkillProof.Logic.Questions
 
             entity.Language = NormalizeLanguage(request.Language);
             entity.Difficulty = request.Difficulty;
+            entity.Tags = NormalizeTags(request.Tags);
             entity.Title = request.Title;
             entity.QuestionText = request.QuestionText;
             entity.IsActive = request.IsActive;
@@ -335,6 +336,20 @@ namespace SkillProof.Logic.Questions
             }
 
             return trimmed;
+        }
+
+        private static List<string> NormalizeTags(List<string>? tags)
+        {
+            if (tags == null || tags.Count == 0)
+            {
+                return new List<string>();
+            }
+
+            return tags
+                .Where(tag => !string.IsNullOrWhiteSpace(tag))
+                .Select(tag => tag.Trim())
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
         }
     }
 }

@@ -80,6 +80,41 @@
   border-color: #003049;
 }
 
+.qbf-tags-box {
+  border: 2px solid #003049;
+  border-radius: 14px;
+  padding: 0.55rem 0.7rem;
+}
+
+.qbf-tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-bottom: 0.35rem;
+}
+
+.qbf-tag-pill {
+  border: 1px solid rgba(0, 48, 73, 0.25);
+  border-radius: 999px;
+  background: rgba(102, 155, 188, 0.2);
+  color: #003049;
+  font-weight: 700;
+  font-size: 0.84rem;
+  padding: 0.2rem 0.55rem;
+}
+
+.qbf-tag-input {
+  border: 0;
+  width: 100%;
+  color: #003049;
+  font-size: 1rem;
+  background: transparent;
+}
+
+.qbf-tag-input:focus {
+  outline: none;
+}
+
 .qbf-row.two-col {
   display: grid;
   grid-template-columns: 1.8fr 1fr;

@@ -13,6 +13,31 @@
         <label class="qbf-label">Question text</label>
         <textarea class="qbf-input" rows="3" formControlName="questionText"></textarea>
 
+        <label class="qbf-label">Tags</label>
+        <div class="qbf-tags-box">
+          <div class="qbf-tag-list" *ngIf="tags.length > 0">
+            <button
+              class="qbf-tag-pill"
+              type="button"
+              *ngFor="let tag of tags"
+              (click)="removeTag(tag)"
+              [attr.aria-label]="'Remove tag ' + tag"
+            >
+              {{ tag }} <strong>&times;</strong>
+            </button>
+          </div>
+
+          <input
+            class="qbf-tag-input"
+            type="text"
+            [ngModel]="tagInputText"
+            [ngModelOptions]="{ standalone: true }"
+            (ngModelChange)="onTagInputChange($event)"
+            (keydown)="onTagInputKeydown($event)"
+            placeholder="Type a tag and press comma"
+          />
+        </div>
+
         <div class="qbf-row two-col">
           <div>
             <label class="qbf-label">Type of question</label>

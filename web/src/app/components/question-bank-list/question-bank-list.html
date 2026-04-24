@@ -159,7 +159,7 @@
     </div>
   </div>
 
-  <div class="qb-modal-backdrop" *ngIf="showCreateModal" (click)="closeCreateModal()">
+  <div class="qb-modal-backdrop" *ngIf="showCreateModal">
     <div class="qb-modal-dialog" (click)="$event.stopPropagation()">
       <app-question-bank-form
         [isModalMode]="true"

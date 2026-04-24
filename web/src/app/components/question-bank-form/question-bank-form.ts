@@ -34,6 +34,8 @@ export class QuestionBankForm implements OnInit {
   saving = false;
   isEditMode = false;
   questionId: string | null = null;
+  tagInputText = '';
+  tags: string[] = [];
 
   readonly questionTypeOptions = [
     { label: 'Multiple Choice', value: QuestionType.MultipleChoice },
@@ -124,6 +126,7 @@ export class QuestionBankForm implements OnInit {
               question.multipleChoice?.options ?? [],
               question.multipleChoice?.correctOptionIndexes ?? []
             );
+            this.tags = this.normalizeTags(question.tags ?? []);
 
             this.form.get('type')?.disable();
             this.cdr.detectChanges();
@@ -173,6 +176,8 @@ export class QuestionBankForm implements OnInit {
   }
 
   onSubmit(): void {
+    this.commitPendingTag();
+
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
@@ -291,6 +296,7 @@ export class QuestionBankForm implements OnInit {
     dto.title = value.title.trim();
     dto.questionText = value.questionText.trim();
     dto.createdBy = createdBy;
+    dto.tags = [...this.tags];
 
     this.attachTypePayload(dto, dto.type);
 
@@ -306,6 +312,7 @@ export class QuestionBankForm implements OnInit {
     dto.title = value.title.trim();
     dto.questionText = value.questionText.trim();
     dto.isActive = !!value.isActive;
+    dto.tags = [...this.tags];
 
     this.attachTypePayload(dto, selectedType);
 
@@ -477,5 +484,77 @@ export class QuestionBankForm implements OnInit {
       this.multipleChoiceOptionsArray.push(this.createMultipleChoiceOptionControl());
       this.multipleChoiceCorrectFlagsArray.push(this.createMultipleChoiceCorrectControl());
     }
+  }
+
+  onTagInputKeydown(event: KeyboardEvent): void {
+    if (event.key === ',' || event.key === 'Enter') {
+      event.preventDefault();
+      this.commitPendingTag();
+      return;
+    }
+
+    if (event.key === 'Backspace' && this.tagInputText.trim() === '' && this.tags.length > 0) {
+      this.removeTag(this.tags[this.tags.length - 1]);
+    }
+  }
+
+  onTagInputChange(raw: string): void {
+    this.tagInputText = raw;
+
+    if (!raw.includes(',')) {
+      return;
+    }
+
+    const parts = raw.split(',');
+    const completed = parts.slice(0, -1);
+    const trailing = parts[parts.length - 1] ?? '';
+
+    completed.forEach((part) => this.addTag(part));
+    this.tagInputText = trailing;
+  }
+
+  removeTag(tag: string): void {
+    const normalized = this.normalizeTag(tag);
+    this.tags = this.tags.filter((item) => this.normalizeTag(item) !== normalized);
+  }
+
+  private commitPendingTag(): void {
+    this.addTag(this.tagInputText);
+    this.tagInputText = '';
+  }
+
+  private addTag(rawTag: string): void {
+    const trimmed = rawTag.trim();
+    if (trimmed === '') {
+      return;
+    }
+
+    const normalized = this.normalizeTag(trimmed);
+    const exists = this.tags.some((tag) => this.normalizeTag(tag) === normalized);
+    if (exists) {
+      return;
+    }
+
+    this.tags = [...this.tags, trimmed];
+  }
+
+  private normalizeTags(rawTags: string[]): string[] {
+    const unique = new Map<string, string>();
+
+    rawTags.forEach((tag) => {
+      const trimmed = String(tag).trim();
+      const normalized = this.normalizeTag(trimmed);
+      if (normalized === '' || unique.has(normalized)) {
+        return;
+      }
+
+      unique.set(normalized, trimmed);
+    });
+
+    return Array.from(unique.values());
+  }
+
+  private normalizeTag(value: string): string {
+    return value.trim().toLocaleLowerCase();
   }
 }

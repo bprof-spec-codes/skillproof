@@ -4,6 +4,7 @@ import { CodeCompletionQuestionPayloadDto, FillInTheBlankQuestionPayloadDto, Mul
 export class UpdateQuestionRequestDto {
   language?: string;
   difficulty: DifficultyLevel = DifficultyLevel.Junior;
+  tags: string[] = [];
   title = '';
   questionText = '';
   isActive = true;
