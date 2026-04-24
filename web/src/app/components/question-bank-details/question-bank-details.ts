@@ -77,6 +77,18 @@ export class QuestionBankDetails implements OnChanges, OnInit {
     return this.difficultyOptions.find((option) => option.value === difficulty)?.label ?? String(difficulty);
   }
 
+  isCorrectOption(index: number): boolean {
+    return this.question?.multipleChoice?.correctOptionIndexes?.includes(index) ?? false;
+  }
+
+  getOpenEndedAnswer(): string {
+    return this.question?.openEnded?.answer ?? this.question?.fillInTheBlank?.answer ?? '-';
+  }
+
+  getOpenEndedManualFeedback(): string {
+    return this.question?.openEnded?.manualFeedback ?? this.question?.fillInTheBlank?.manualFeedback ?? '-';
+  }
+
   private loadQuestion(): void {
     const id = this.questionId ?? this.route.snapshot.paramMap.get('id');
     if (!id) {
