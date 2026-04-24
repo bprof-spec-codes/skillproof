@@ -1,85 +1,141 @@
-<section class="container py-4" *ngIf="!loading; else loadingBlock">
-  <div *ngIf="question; else noDataBlock" class="card p-3">
-    <div class="d-flex justify-content-between align-items-start mb-3">
-      <div>
-        <h2 class="mb-1">{{ question.title }}</h2>
-        <div class="text-muted">{{ getQuestionTypeLabel(question.type) }} | {{ getDifficultyLabel(question.difficulty) }}</div>
-      </div>
-      <span [class]="question.isActive ? 'badge text-bg-success' : 'badge text-bg-secondary'">
-        {{ question.isActive ? 'Active' : 'Inactive' }}
-      </span>
-    </div>
-
-    <div class="row g-3">
-      <div class="col-12 col-md-6">
-        <strong>Language:</strong> {{ question.language }}
-      </div>
-      <div class="col-12 col-md-6">
-        <strong>Created By:</strong> {{ question.createdBy }}
-      </div>
-      <div class="col-12 col-md-6">
-        <strong>Created At:</strong> {{ question.createdAt | date: 'medium' }}
-      </div>
-      <div class="col-12 col-md-6">
-        <strong>Updated At:</strong> {{ question.updatedAt | date: 'medium' }}
-      </div>
-      <div class="col-12">
-        <strong>Question Text:</strong>
-        <p class="mb-0 mt-1">{{ question.questionText }}</p>
-      </div>
-    </div>
-
-    <hr />
-
-    <div [ngSwitch]="question.type">
-      <div *ngSwitchCase="0">
-        <h5>Multiple Choice Payload</h5>
-        <p class="mb-1"><strong>Allow Multiple Selection:</strong> {{ question.multipleChoice?.allowMultipleSelection ? 'Yes' : 'No' }}</p>
-        <p class="mb-1"><strong>Options:</strong></p>
-        <ul>
-          <li *ngFor="let option of question.multipleChoice?.options; let i = index">{{ i }} - {{ option }}</li>
-        </ul>
-        <p class="mb-0"><strong>Correct Indexes:</strong> {{ question.multipleChoice?.correctOptionIndexes?.join(', ') }}</p>
+<section class="qbd-shell" [class.qbd-modal-shell]="isModalMode" *ngIf="!loading; else loadingBlock">
+  <div class="qbd-card" [class.qbd-card-modal]="isModalMode" *ngIf="question; else noDataBlock">
+    <header class="qbd-header">
+      <div class="qbd-title-block">
+        <span class="qbd-kicker">{{ getQuestionTypeLabel(question.type) }}</span>
+        <h2>{{ question.title }}</h2>
+        <p class="qbd-question-text">{{ question.questionText }}</p>
       </div>
 
-      <div *ngSwitchCase="1">
-        <h5>Code Completion Payload</h5>
-        <p class="mb-1"><strong>Code Snippet:</strong></p>
-        <pre class="p-2 bg-light border rounded"><code>{{ question.codeCompletion?.codeSnippet }}</code></pre>
-        <p class="mb-1"><strong>Accepted Answers:</strong></p>
-        <ul>
-          <li *ngFor="let answer of question.codeCompletion?.acceptedAnswers">{{ answer }}</li>
-        </ul>
+      <div class="qbd-header-actions">
+        <span [class]="question.isActive ? 'qbd-status active' : 'qbd-status inactive'">
+          {{ question.isActive ? 'Active' : 'Inactive' }}
+        </span>
+        <button class="qbd-close" *ngIf="isModalMode" type="button" (click)="goBack()" aria-label="Close">×</button>
+      </div>
+    </header>
+
+    <div class="qbd-body">
+      <div class="qbd-info-grid">
+        <section class="qbd-section qbd-panel">
+          <div class="qbd-section-heading">
+            <h3>Overview</h3>
+          </div>
+
+          <div class="qbd-meta-grid">
+            <div class="qbd-meta-item">
+              <span>Difficulty</span>
+              <strong>{{ getDifficultyLabel(question.difficulty) }}</strong>
+            </div>
+            <div class="qbd-meta-item">
+              <span>Created by</span>
+              <strong>{{ createdByDisplay }}</strong>
+            </div>
+            <div class="qbd-meta-item">
+              <span>Created at</span>
+              <strong>{{ question.createdAt | date: 'medium' }}</strong>
+            </div>
+            <div class="qbd-meta-item">
+              <span>Updated at</span>
+              <strong>{{ question.updatedAt | date: 'medium' }}</strong>
+            </div>
+          </div>
+        </section>
+
+        <section class="qbd-section qbd-panel">
+          <div class="qbd-section-heading">
+            <h3>Tags</h3>
+            <span>{{ question.tags.length }} tag{{ question.tags.length === 1 ? '' : 's' }}</span>
+          </div>
+
+          <div class="qbd-tag-list" *ngIf="question.tags.length > 0; else noTagsBlock">
+            <span class="qbd-tag-pill" *ngFor="let tag of question.tags">{{ tag }}</span>
+          </div>
+        </section>
       </div>
 
-      <div *ngSwitchCase="3">
-        <h5>Fill In The Blank Payload</h5>
-        <p class="mb-1"><strong>Answer:</strong> {{ question.fillInTheBlank?.answer }}</p>
-        <p class="mb-0"><strong>Manual Feedback:</strong> {{ question.fillInTheBlank?.manualFeedback || '-' }}</p>
-      </div>
+      <section class="qbd-section">
+        <div class="qbd-section-heading">
+          <h3>Answer data</h3>
+          <span>{{ getQuestionTypeLabel(question.type) }}</span>
+        </div>
 
-      <div *ngSwitchCase="2">
-        <h5>True / False Payload</h5>
-        <p class="mb-1"><strong>Correct Answer:</strong> {{ question.trueFalse?.correctAnswer ? 'True' : 'False' }}</p>
-        <p class="mb-0"><strong>Explanation:</strong> {{ question.trueFalse?.explanation || '-' }}</p>
-      </div>
-    </div>
+        <div [ngSwitch]="question.type" class="qbd-payload">
+          <div *ngSwitchCase="QuestionType.MultipleChoice">
+            <div class="qbd-answer-summary">
+              <span>Allow multiple selection</span>
+              <strong>{{ question.multipleChoice?.allowMultipleSelection ? 'Yes' : 'No' }}</strong>
+            </div>
 
-    <div class="d-flex gap-2 mt-4">
-      <button class="btn btn-outline-secondary" type="button" (click)="goBack()">Back</button>
-      <button class="btn btn-primary" type="button" (click)="editQuestion()">Edit</button>
+            <div class="qbd-option-list">
+              <div
+                class="qbd-option-row"
+                *ngFor="let option of question.multipleChoice?.options; let i = index"
+                [class.correct]="isCorrectOption(i)"
+              >
+                <span class="qbd-option-index">{{ i + 1 }}</span>
+                <span class="qbd-option-text">{{ option }}</span>
+                <span class="qbd-correct-pill" *ngIf="isCorrectOption(i)">Correct</span>
+              </div>
+            </div>
+          </div>
+
+          <div *ngSwitchCase="QuestionType.CodeCompletion">
+            <label class="qbd-label">Code snippet</label>
+            <pre class="qbd-code"><code>{{ question.codeCompletion?.codeSnippet || '-' }}</code></pre>
+
+            <label class="qbd-label">Accepted answers</label>
+            <div class="qbd-answer-list" *ngIf="(question.codeCompletion?.acceptedAnswers?.length ?? 0) > 0; else noAcceptedAnswersBlock">
+              <span class="qbd-answer-pill" *ngFor="let answer of question.codeCompletion?.acceptedAnswers">{{ answer }}</span>
+            </div>
+          </div>
+
+          <div *ngSwitchCase="QuestionType.OpenEnded">
+            <div class="qbd-answer-box">
+              <span>Answer</span>
+              <strong>{{ getOpenEndedAnswer() }}</strong>
+            </div>
+          </div>
+
+          <div *ngSwitchCase="QuestionType.TrueFalse">
+            <div class="qbd-answer-box">
+              <span>Correct answer</span>
+              <strong>{{ question.trueFalse?.correctAnswer ? 'True' : 'False' }}</strong>
+            </div>
+            <div class="qbd-answer-box">
+              <span>Explanation</span>
+              <strong>{{ question.trueFalse?.explanation || '-' }}</strong>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div class="qbd-actions">
+        <button class="qbd-primary" type="button" (click)="editQuestion()">Edit</button>
+        <button class="qbd-secondary" type="button" (click)="goBack()">
+          {{ isModalMode ? 'Close' : 'Back' }}
+        </button>
+      </div>
     </div>
   </div>
 </section>
 
 <ng-template #loadingBlock>
-  <section class="container py-4">
-    <div class="alert alert-info">Loading question details...</div>
+  <section class="qbd-shell" [class.qbd-modal-shell]="isModalMode">
+    <div class="qbd-card" [class.qbd-card-modal]="isModalMode">
+      <div class="qbd-muted-box">Loading question details...</div>
+    </div>
   </section>
 </ng-template>
 
 <ng-template #noDataBlock>
-  <section class="container py-4">
-    <div class="alert alert-warning">Question not found.</div>
-  </section>
+  <div class="qbd-muted-box">Question not found.</div>
+</ng-template>
+
+<ng-template #noTagsBlock>
+  <div class="qbd-muted-box">No tags assigned.</div>
+</ng-template>
+
+<ng-template #noAcceptedAnswersBlock>
+  <div class="qbd-muted-box">No accepted answers.</div>
 </ng-template>

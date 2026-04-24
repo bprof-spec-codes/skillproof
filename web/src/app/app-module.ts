@@ -18,16 +18,14 @@ import { ProfileView } from './components/profile-view/profile-view';
 import { Jobupload } from './components/jobupload/jobupload';
 import { JobEdit } from './components/job-edit/job-edit';
 import { AssessmentCreate } from './components/assessment-create/assessment-create';
-<<<<<<< Updated upstream
 import { JobDetail } from './components/job-detail/job-detail';
 import { TestTake } from './components/test-take/test-take';
 import { QuestionTrueFalse } from './components/question-true-false/question-true-false';
 import { QuestionMultipleChoice } from './components/question-multiple-choice/question-multiple-choice';
 import { QuestionCodeCompletion } from './components/question-code-completion/question-code-completion';
 import { QuestionFillInTheBlank } from './components/question-fill-in-the-blank/question-fill-in-the-blank';
-=======
 import { CompanyHome } from './components/company-home/company-home';
->>>>>>> Stashed changes
+import { QuestionOpenEnded } from './components/question-open-ended/question-open-ended';
 
 @NgModule({
   declarations: [
@@ -45,16 +43,14 @@ import { CompanyHome } from './components/company-home/company-home';
     Jobupload,
     JobEdit,
     AssessmentCreate,
-<<<<<<< Updated upstream
     JobDetail,
     TestTake,
     QuestionTrueFalse,
     QuestionMultipleChoice,
     QuestionCodeCompletion,
     QuestionFillInTheBlank,
-=======
     CompanyHome,
->>>>>>> Stashed changes
+    QuestionOpenEnded,
   ],
   imports: [BrowserModule, AppRoutingModule, ReactiveFormsModule, FormsModule],
   providers: [

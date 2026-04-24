@@ -11,6 +11,7 @@ namespace SkillProof.Logic.Questions
     public class QuestionBankService : IQuestionBankService
     {
         private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
+        private const string DefaultLanguage = "General";
 
         private readonly SkillProofDbContext _dbContext;
 
@@ -30,7 +31,7 @@ namespace SkillProof.Logic.Questions
                 var entity = new QuestionEntity
                 {
                     Type = request.Type,
-                    Language = request.Language,
+                    Language = NormalizeLanguage(request.Language),
                     Difficulty = request.Difficulty,
                     Title = request.Title,
                     QuestionText = request.QuestionText,
@@ -38,7 +39,7 @@ namespace SkillProof.Logic.Questions
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow,
                     IsActive = true,
-                    Tags = request.Tags ?? new List<string>()
+                    Tags = NormalizeTags(request.Tags)
                 };
 
                 await using var transaction = await _dbContext.Database.BeginTransactionAsync(cancellationToken);
@@ -103,8 +104,9 @@ namespace SkillProof.Logic.Questions
 
             ValidatePayload(entity.Type, request.MultipleChoice, request.CodeCompletion, request.FillInTheBlank, request.TrueFalse);
 
-            entity.Language = request.Language;
+            entity.Language = NormalizeLanguage(request.Language);
             entity.Difficulty = request.Difficulty;
+            entity.Tags = NormalizeTags(request.Tags);
             entity.Title = request.Title;
             entity.QuestionText = request.QuestionText;
             entity.IsActive = request.IsActive;
@@ -269,6 +271,7 @@ namespace SkillProof.Logic.Questions
                 Type = question.Type,
                 Language = question.Language,
                 Difficulty = question.Difficulty,
+                Tags = question.Tags ?? new List<string>(),
                 Title = question.Title,
                 QuestionText = question.QuestionText,
                 CreatedBy = question.CreatedBy,
@@ -317,6 +320,36 @@ namespace SkillProof.Logic.Questions
             {
                 return default;
             }
+        }
+
+        private static string NormalizeLanguage(string? language)
+        {
+            if (string.IsNullOrWhiteSpace(language))
+            {
+                return DefaultLanguage;
+            }
+
+            var trimmed = language.Trim();
+            if (trimmed.Length > 20)
+            {
+                return trimmed[..20];
+            }
+
+            return trimmed;
+        }
+
+        private static List<string> NormalizeTags(List<string>? tags)
+        {
+            if (tags == null || tags.Count == 0)
+            {
+                return new List<string>();
+            }
+
+            return tags
+                .Where(tag => !string.IsNullOrWhiteSpace(tag))
+                .Select(tag => tag.Trim())
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
         }
     }
 }

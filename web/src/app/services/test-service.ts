@@ -5,6 +5,7 @@ import { environment } from '../../environments/environment.development';
 import { CandidateAssessmentDto } from '../Models/Dtos/Test/candidate-assessment-dto';
 import { TestResultDto } from '../Models/Dtos/Test/test-result-dto';
 import { TestSubmitDto } from '../Models/Dtos/Test/test-submit-dto';
+import { normalizeCandidateAssessment } from './open-ended-compat';
 
 @Injectable({
   providedIn: 'root',
@@ -18,7 +19,7 @@ export class TestService {
   getCandidateTestForJob(jobId: string): Observable<CandidateAssessmentDto | null> {
     return this.http
       .get<CandidateAssessmentDto>(`${this.jobsUrl}/${jobId}/test`, { observe: 'response' })
-      .pipe(map((response) => (response.status === 204 ? null : response.body)));
+      .pipe(map((response) => normalizeCandidateAssessment(response.status === 204 ? null : response.body)));
   }
 
   submitTest(dto: TestSubmitDto): Observable<TestResultDto> {

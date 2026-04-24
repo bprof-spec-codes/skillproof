@@ -44,12 +44,12 @@
                 [currentAnswer]="currentAnswerFor(currentQuestion.id)"
                 (answerChange)="onAnswerChange($event)"
               ></app-question-code-completion>
-              <app-question-fill-in-the-blank
-                *ngSwitchCase="QuestionType.FillInTheBlank"
+              <app-question-open-ended
+                *ngSwitchCase="QuestionType.OpenEnded"
                 [question]="currentQuestion"
                 [currentAnswer]="currentAnswerFor(currentQuestion.id)"
                 (answerChange)="onAnswerChange($event)"
-              ></app-question-fill-in-the-blank>
+              ></app-question-open-ended>
             </div>
           </div>
 
