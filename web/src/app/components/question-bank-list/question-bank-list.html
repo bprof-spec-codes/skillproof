@@ -168,4 +168,14 @@
       ></app-question-bank-form>
     </div>
   </div>
+
+  <div class="qb-modal-backdrop" *ngIf="viewedQuestionId">
+    <div class="qb-modal-dialog qb-details-dialog" (click)="$event.stopPropagation()">
+      <app-question-bank-details
+        [isModalMode]="true"
+        [questionId]="viewedQuestionId"
+        (closed)="closeViewModal()"
+      ></app-question-bank-details>
+    </div>
+  </div>
 </section>

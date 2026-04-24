@@ -29,6 +29,7 @@ export class QuestionBankList implements OnInit {
   groupByTagsEnabled = false;
   collapsedGroups: Record<string, boolean> = {};
   showCreateModal = false;
+  viewedQuestionId: string | null = null;
 
   readonly questionTypeOptions = [
     { label: 'Multiple Choice', value: QuestionType.MultipleChoice },
@@ -67,11 +68,13 @@ export class QuestionBankList implements OnInit {
 
   @HostListener('document:keydown.escape')
   onEscapeKey(): void {
-    if (!this.showCreateModal) {
-      return;
+    if (this.viewedQuestionId) {
+      this.closeViewModal();
     }
 
-    this.closeCreateModal();
+    if (this.showCreateModal) {
+      this.closeCreateModal();
+    }
   }
 
   get filteredTagSuggestions(): string[] {
@@ -230,7 +233,11 @@ export class QuestionBankList implements OnInit {
   }
 
   viewQuestion(id: string): void {
-    this.router.navigate(['/question-bank', id]);
+    this.viewedQuestionId = id;
+  }
+
+  closeViewModal(): void {
+    this.viewedQuestionId = null;
   }
 
   editQuestion(id: string): void {

@@ -1,13 +1,22 @@
-<section class="container py-4" *ngIf="!loading; else loadingBlock">
+<section [class]="isModalMode ? 'qb-details-modal' : 'container py-4'" *ngIf="!loading; else loadingBlock">
   <div *ngIf="question; else noDataBlock" class="card p-3">
     <div class="d-flex justify-content-between align-items-start mb-3">
       <div>
         <h2 class="mb-1">{{ question.title }}</h2>
         <div class="text-muted">{{ getQuestionTypeLabel(question.type) }} | {{ getDifficultyLabel(question.difficulty) }}</div>
       </div>
-      <span [class]="question.isActive ? 'badge text-bg-success' : 'badge text-bg-secondary'">
-        {{ question.isActive ? 'Active' : 'Inactive' }}
-      </span>
+      <div class="d-flex align-items-start gap-2">
+        <span [class]="question.isActive ? 'badge text-bg-success' : 'badge text-bg-secondary'">
+          {{ question.isActive ? 'Active' : 'Inactive' }}
+        </span>
+        <button
+          *ngIf="isModalMode"
+          class="btn-close"
+          type="button"
+          aria-label="Close"
+          (click)="goBack()"
+        ></button>
+      </div>
     </div>
 
     <div class="row g-3">
@@ -66,20 +75,22 @@
     </div>
 
     <div class="d-flex gap-2 mt-4">
-      <button class="btn btn-outline-secondary" type="button" (click)="goBack()">Back</button>
+      <button class="btn btn-outline-secondary" type="button" (click)="goBack()">
+        {{ isModalMode ? 'Close' : 'Back' }}
+      </button>
       <button class="btn btn-primary" type="button" (click)="editQuestion()">Edit</button>
     </div>
   </div>
 </section>
 
 <ng-template #loadingBlock>
-  <section class="container py-4">
+  <section [class]="isModalMode ? 'qb-details-modal' : 'container py-4'">
     <div class="alert alert-info">Loading question details...</div>
   </section>
 </ng-template>
 
 <ng-template #noDataBlock>
-  <section class="container py-4">
+  <section [class]="isModalMode ? 'qb-details-modal' : 'container py-4'">
     <div class="alert alert-warning">Question not found.</div>
   </section>
 </ng-template>
