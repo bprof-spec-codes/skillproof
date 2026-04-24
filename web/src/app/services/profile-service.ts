@@ -17,9 +17,12 @@ export class ProfileService {
     private http: HttpClient,
   ) {}
 
+  getProfile(userId: string): Observable<ProfileViewDto> {
+    return this.http.get<ProfileViewDto>(`${environment.apiUrls.getProfile}/${userId}`);
+  }
+
   loadProfile(userId: string): void {
-    this.http
-      .get<ProfileViewDto>(`${environment.apiUrls.getProfile}/${userId}`)
+    this.getProfile(userId)
       .subscribe({
         next: (profile) => {
           console.log("PROFILE LOADED:", profile);

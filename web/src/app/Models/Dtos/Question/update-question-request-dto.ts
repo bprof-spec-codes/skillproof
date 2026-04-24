@@ -2,8 +2,9 @@ import { DifficultyLevel } from "../../Enums/DifficultyLevel";
 import { CodeCompletionQuestionPayloadDto, FillInTheBlankQuestionPayloadDto, MultipleChoiceQuestionPayloadDto, OpenEndedQuestionPayloadDto, TrueFalseQuestionPayloadDto } from "./question-type-payload-dtos";
 
 export class UpdateQuestionRequestDto {
-  language = '';
+  language?: string;
   difficulty: DifficultyLevel = DifficultyLevel.Junior;
+  tags: string[] = [];
   title = '';
   questionText = '';
   isActive = true;
