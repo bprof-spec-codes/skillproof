@@ -13,6 +13,8 @@ export class JobService {
   apiUrl = `${environment.apiUrl}/Jobs`;
   jobs = new BehaviorSubject<JobViewDto[]>([]);
   jobs$ = this.jobs.asObservable();
+  private _currentCompanyJobs$ = new BehaviorSubject<JobViewDto[] | null> (null);
+  public currentCompanyJobs$ = this._currentCompanyJobs$.asObservable();
 
   constructor(private http: HttpClient) {
     this.getAllJobs();
@@ -123,6 +125,7 @@ export class JobService {
     });
   }
 
+<<<<<<< Updated upstream
   private normalizeTags(tags: unknown): string[] {
     if (Array.isArray(tags)) {
       return tags.map((t) => String(t).trim()).filter((t) => t.length > 0);
@@ -152,4 +155,19 @@ export class JobService {
       .map((t) => t.trim())
       .filter((t) => t.length > 0);
   }
+=======
+  loadCompanyJobs(userId: string): void {
+    this.http.get<JobViewDto[]>(`${environment.apiUrls.getJobsOfCompany}/${userId}`)
+    .subscribe({
+      next: (jobs) => {
+        console.log("Jobs loaded in successfully", jobs);
+        this._currentCompanyJobs$.next(jobs);
+      },
+      error: (err) => {
+        console.error(err);
+        this._currentCompanyJobs$.next(null);
+      }
+    });
+   }
+>>>>>>> Stashed changes
 }

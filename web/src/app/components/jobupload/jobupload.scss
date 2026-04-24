@@ -1,7 +1,7 @@
 /* Változók - a Merit arculati színei */
-$bg-color: #f7eedf;
+$bg-color: #FDF0D5;
 $card-bg: #ffffff;
-$text-main: #1a2b3c;
+$text-main: #003049;
 $text-muted: #5e6c79;
 $btn-blue: #002b49;
 $btn-blue-hover: #001f36;
@@ -212,4 +212,8 @@ $red-accent: #b91c22;
 /* Ha azt akarod, hogy a p, h1, ul elemek szépen nézzenek ki benne */
 .preview-content :first-child {
   margin-top: 0;
+}
+
+.click {
+    cursor: pointer;
 }

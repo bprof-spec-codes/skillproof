@@ -17,6 +17,8 @@ namespace SkillProof.Entities.Dtos.Jobs
         public string Title { get; set; }
 
         public string Description { get; set; }
+        
+        public string ShortDescription { get; set; }
 
         public string Location { get; set; }
 

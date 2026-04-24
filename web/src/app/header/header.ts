@@ -3,6 +3,7 @@ import { AuthService } from '../services/auth-service';
 import { ProfileViewDto } from '../Models/User/profile-view-dto';
 import { ProfileService } from '../services/profile-service';
 import { Observable, Subscription } from 'rxjs';
+import { DashboardRoutingService } from '../services/dashboardRouting';
 
 @Component({
   selector: 'app-header',
@@ -14,6 +15,7 @@ export class Header implements OnInit {
   constructor(
     public authService: AuthService,
     private profileService: ProfileService,
+    private dashRouteService: DashboardRoutingService
   ) {}
 
   profile$!: Observable<ProfileViewDto | null>;
@@ -28,5 +30,9 @@ export class Header implements OnInit {
     this.isLoggedIn = this.authService.isLoggedIn();
     this.isAdmin = this.authService.getRoles().some((r) => r === 'Admin');
     this.isEmployer = this.authService.getRoles().some((r) => r === 'Employer');
+  }
+
+  goHome(){
+    this.dashRouteService.routeToDashboard();
   }
 }

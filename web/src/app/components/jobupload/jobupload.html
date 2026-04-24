@@ -1,6 +1,6 @@
 <main class="container mt-4">
   <div class="back-link mb-4">
-    <a routerLink="/">&larr; Back to Dashboard</a>
+    <a class="click" (click)="goHome()">&larr; Back to Dashboard</a>
   </div>
 
   <div class="form-card">
@@ -17,19 +17,20 @@
       <div class="form-row">
         <div class="form-group">
           <label for="location">Location</label>
-          <input type="text" id="location" name="location" placeholder="e.g. Budapest XI. or Remote" [(ngModel)]="location" required>
+          <input type="text" id="location" name="location" placeholder="e.g. Budapest XI. or Remote"
+            [(ngModel)]="location" required>
         </div>
 
         <div class="form-group">
           <label for="employment-type">Employment Type</label>
-            <select id="employment-type" name="employmentType" [(ngModel)]="employmentType">
-              <option value="0">Full-time</option>
-              <option value="1">Part-time</option>
-              <option value="2">Internship</option>
-              <option value="3">Temporary</option>
-            </select>
-          </div>
+          <select id="employment-type" name="employmentType" [(ngModel)]="employmentType">
+            <option value="0">Full-time</option>
+            <option value="1">Part-time</option>
+            <option value="2">Internship</option>
+            <option value="3">Temporary</option>
+          </select>
         </div>
+      </div>
 
       <div class="form-group">
         <label for="salary">Salary / Payment (Optional)</label>
@@ -41,33 +42,42 @@
         <input type="text" id="tags" name="tags" placeholder="e.g. Angular, C#, Frontend" [(ngModel)]="tags">
       </div>
 
-      @if(isPreView$ | async){
-        <div class="form-group">
-          <label>Job Description Preview</label>
-          
-          <div class="preview-content" [innerHTML]="preViewmd | async"></div>
+      <div class="form-group">
+        <label for="shorDescription">Job Short Description</label>
+        <textarea class="preview-textarea" id="description" name="shortDescription" rows="3"
+          placeholder="Describe the role in short...." [(ngModel)]="shortDescription" required></textarea>
+      </div>
 
-          <div class="prev-container">
-            <button type="button" class="btn btn-primary" (click)="preView()">
-                Back
-            </button>
-          </div>
+      @if(isPreView$ | async){
+      <div class="form-group">
+        <label>Job Description Preview</label>
+
+        <div class="preview-content" [innerHTML]="preViewmd | async"></div>
+
+        <div class="prev-container">
+          <button type="button" class="btn btn-primary" (click)="preView()">
+            Back
+          </button>
         </div>
+      </div>
       }@else{
-        <div class="form-group">
-          <label for="description">Job Description</label>
-          <textarea class="preview-textarea" id="description" name="description" rows="6" placeholder="Describe the role, responsibilities, and requirements..." [(ngModel)]="description" required></textarea>
-          <div class="prev-container">
-            <button type="button" class="btn btn-primary" (click)="preView()">
-                PreView
-            </button>
-          </div>
+      <div class="form-group">
+        <label for="description">Job Description</label>
+        <textarea class="preview-textarea" id="description" name="description" rows="6"
+          placeholder="Describe the role, responsibilities, and requirements..." [(ngModel)]="description"
+          required></textarea>
+        <div class="prev-container">
+          <button type="button" class="btn btn-primary" (click)="preView()">
+            PreView
+          </button>
         </div>
+      </div>
       }
+
       @if (error) {
-        <div class="mb-3 text-center">
-          <p class="text-danger fw-bold">{{ error }}</p>
-        </div>
+      <div class="mb-3 text-center">
+        <p class="text-danger fw-bold">{{ error }}</p>
+      </div>
       }
 
       <button type="submit" class="submit-btn" [disabled]="loading">

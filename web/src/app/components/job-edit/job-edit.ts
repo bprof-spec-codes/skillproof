@@ -3,6 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { BehaviorSubject } from 'rxjs';
 import { JobService } from '../../services/job-service';
 import { AssessmentService } from '../../services/assesmentservice';
+import { DashboardRoutingService } from '../../services/dashboardRouting';
 
 
 @Component({
@@ -20,6 +21,7 @@ export class JobEdit implements OnInit {
   salary = '';
   tags = '';
   description = '';
+  shortDescription ='';
   error = '';
   loading = false;
 
@@ -39,6 +41,7 @@ export class JobEdit implements OnInit {
     private jobService: JobService,
     private assessmentService: AssessmentService,
     private cdr: ChangeDetectorRef,
+    private dashRoute: DashboardRoutingService
   ) {}
 
   ngOnInit(): void {
@@ -53,6 +56,7 @@ export class JobEdit implements OnInit {
           this.employmentType = job.EmploymentType ?? 0;
           this.tags = job.tags ? job.tags.join(', ') : '';
           this.description = job.description;
+          this.shortDescription = job.shortDescription;
           this.selectedAssessments = job.assessments || [];
           this.cdr.detectChanges();
         },
@@ -110,6 +114,7 @@ export class JobEdit implements OnInit {
       location: this.location,
       employmentType: Number(this.employmentType),
       description: this.description,
+      shortDescription: this.shortDescription,
       tags: tagsArray,
       assessmentIds: this.selectedAssessments.map((a) => a.id),
     };
@@ -123,5 +128,9 @@ export class JobEdit implements OnInit {
       this.error = 'An error occurred while updating the job.';
       this.loading = false;
     }
+  }
+
+  goHome() {
+    this.dashRoute.routeToDashboard();
   }
 }
