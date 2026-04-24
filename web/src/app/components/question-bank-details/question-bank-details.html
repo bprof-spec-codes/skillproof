@@ -4,7 +4,7 @@
       <div class="qbd-title-block">
         <span class="qbd-kicker">{{ getQuestionTypeLabel(question.type) }}</span>
         <h2>{{ question.title }}</h2>
-        <p>{{ question.questionText }}</p>
+        <p class="qbd-question-text">{{ question.questionText }}</p>
       </div>
 
       <div class="qbd-header-actions">
@@ -16,49 +16,43 @@
     </header>
 
     <div class="qbd-body">
-      <section class="qbd-section">
-        <div class="qbd-section-heading">
-          <h3>Overview</h3>
-        </div>
+      <div class="qbd-info-grid">
+        <section class="qbd-section qbd-panel">
+          <div class="qbd-section-heading">
+            <h3>Overview</h3>
+          </div>
 
-        <div class="qbd-meta-grid">
-          <div class="qbd-meta-item">
-            <span>Difficulty</span>
-            <strong>{{ getDifficultyLabel(question.difficulty) }}</strong>
+          <div class="qbd-meta-grid">
+            <div class="qbd-meta-item">
+              <span>Difficulty</span>
+              <strong>{{ getDifficultyLabel(question.difficulty) }}</strong>
+            </div>
+            <div class="qbd-meta-item">
+              <span>Created by</span>
+              <strong>{{ createdByDisplay }}</strong>
+            </div>
+            <div class="qbd-meta-item">
+              <span>Created at</span>
+              <strong>{{ question.createdAt | date: 'medium' }}</strong>
+            </div>
+            <div class="qbd-meta-item">
+              <span>Updated at</span>
+              <strong>{{ question.updatedAt | date: 'medium' }}</strong>
+            </div>
           </div>
-          <div class="qbd-meta-item">
-            <span>Language</span>
-            <strong>{{ question.language || '-' }}</strong>
-          </div>
-          <div class="qbd-meta-item">
-            <span>Created by</span>
-            <strong>{{ question.createdBy || '-' }}</strong>
-          </div>
-          <div class="qbd-meta-item">
-            <span>Created at</span>
-            <strong>{{ question.createdAt | date: 'medium' }}</strong>
-          </div>
-          <div class="qbd-meta-item">
-            <span>Updated at</span>
-            <strong>{{ question.updatedAt | date: 'medium' }}</strong>
-          </div>
-          <div class="qbd-meta-item">
-            <span>Question ID</span>
-            <strong>{{ question.id }}</strong>
-          </div>
-        </div>
-      </section>
+        </section>
 
-      <section class="qbd-section">
-        <div class="qbd-section-heading">
-          <h3>Tags</h3>
-          <span>{{ question.tags.length }} tag{{ question.tags.length === 1 ? '' : 's' }}</span>
-        </div>
+        <section class="qbd-section qbd-panel">
+          <div class="qbd-section-heading">
+            <h3>Tags</h3>
+            <span>{{ question.tags.length }} tag{{ question.tags.length === 1 ? '' : 's' }}</span>
+          </div>
 
-        <div class="qbd-tag-list" *ngIf="question.tags.length > 0; else noTagsBlock">
-          <span class="qbd-tag-pill" *ngFor="let tag of question.tags">{{ tag }}</span>
-        </div>
-      </section>
+          <div class="qbd-tag-list" *ngIf="question.tags.length > 0; else noTagsBlock">
+            <span class="qbd-tag-pill" *ngFor="let tag of question.tags">{{ tag }}</span>
+          </div>
+        </section>
+      </div>
 
       <section class="qbd-section">
         <div class="qbd-section-heading">
@@ -100,10 +94,6 @@
             <div class="qbd-answer-box">
               <span>Answer</span>
               <strong>{{ getOpenEndedAnswer() }}</strong>
-            </div>
-            <div class="qbd-answer-box">
-              <span>Manual feedback</span>
-              <strong>{{ getOpenEndedManualFeedback() }}</strong>
             </div>
           </div>
 

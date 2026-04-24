@@ -4,6 +4,7 @@ import { finalize } from 'rxjs';
 import { QuestionResponseDto } from '../../Models/Dtos/Question/question-response-dto';
 import { DifficultyLevel } from '../../Models/Enums/DifficultyLevel';
 import { QuestionType } from '../../Models/Enums/QuestionType';
+import { ProfileService } from '../../services/profile-service';
 import { QuestionBankService } from '../../services/question-bank-service';
 
 @Component({
@@ -19,6 +20,7 @@ export class QuestionBankDetails implements OnChanges, OnInit {
 
   readonly QuestionType = QuestionType;
   question: QuestionResponseDto | null = null;
+  createdByDisplay = '-';
   loading = false;
 
   readonly questionTypeOptions = [
@@ -37,6 +39,7 @@ export class QuestionBankDetails implements OnChanges, OnInit {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
+    private profileService: ProfileService,
     private questionBankService: QuestionBankService,
     private ngZone: NgZone,
     private cdr: ChangeDetectorRef
@@ -99,6 +102,7 @@ export class QuestionBankDetails implements OnChanges, OnInit {
     }
 
     this.question = null;
+    this.createdByDisplay = '-';
     this.loading = true;
     this.questionBankService
       .getById(id)
@@ -114,8 +118,10 @@ export class QuestionBankDetails implements OnChanges, OnInit {
         next: (question) => {
           this.ngZone.run(() => {
             this.question = question;
+            this.createdByDisplay = question.createdBy || '-';
             this.cdr.detectChanges();
           });
+          this.loadCreatorName(question.createdBy);
         },
         error: () => {
           this.ngZone.run(() => {
@@ -124,5 +130,20 @@ export class QuestionBankDetails implements OnChanges, OnInit {
           });
         },
       });
+  }
+
+  private loadCreatorName(userId: string): void {
+    if (!userId) {
+      return;
+    }
+
+    this.profileService.getProfile(userId).subscribe({
+      next: (profile) => {
+        this.ngZone.run(() => {
+          this.createdByDisplay = profile.fullName || profile.email || userId;
+          this.cdr.detectChanges();
+        });
+      },
+    });
   }
 }
