@@ -24,6 +24,7 @@ import { QuestionBankService } from '../../services/question-bank-service';
 })
 export class QuestionBankForm implements OnInit {
   @Input() isModalMode = false;
+  @Input() questionId: string | null = null;
   @Output() closed = new EventEmitter<void>();
   @Output() saved = new EventEmitter<string>();
 
@@ -33,7 +34,6 @@ export class QuestionBankForm implements OnInit {
   loading = false;
   saving = false;
   isEditMode = false;
-  questionId: string | null = null;
   tagInputText = '';
   tags: string[] = [];
 
@@ -87,7 +87,7 @@ export class QuestionBankForm implements OnInit {
   }
 
   ngOnInit(): void {
-    const id = this.route.snapshot.paramMap.get('id');
+    const id = this.questionId ?? this.route.snapshot.paramMap.get('id');
     this.isEditMode = !!id;
     this.questionId = id;
 

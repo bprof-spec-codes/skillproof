@@ -1,5 +1,4 @@
 import { ChangeDetectorRef, Component, HostListener, NgZone, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
 import { finalize } from 'rxjs';
 import { QuestionResponseDto } from '../../Models/Dtos/Question/question-response-dto';
 import { DifficultyLevel } from '../../Models/Enums/DifficultyLevel';
@@ -30,6 +29,7 @@ export class QuestionBankList implements OnInit {
   collapsedGroups: Record<string, boolean> = {};
   showCreateModal = false;
   viewedQuestionId: string | null = null;
+  editedQuestionId: string | null = null;
 
   readonly questionTypeOptions = [
     { label: 'Multiple Choice', value: QuestionType.MultipleChoice },
@@ -47,7 +47,6 @@ export class QuestionBankList implements OnInit {
   constructor(
     private questionBankService: QuestionBankService,
     private modalService: ModalService,
-    private router: Router,
     private ngZone: NgZone,
     private cdr: ChangeDetectorRef
   ) {}
@@ -70,6 +69,10 @@ export class QuestionBankList implements OnInit {
   onEscapeKey(): void {
     if (this.viewedQuestionId) {
       this.closeViewModal();
+    }
+
+    if (this.editedQuestionId) {
+      this.closeEditModal();
     }
 
     if (this.showCreateModal) {
@@ -241,7 +244,21 @@ export class QuestionBankList implements OnInit {
   }
 
   editQuestion(id: string): void {
-    this.router.navigate(['/question-bank', id, 'edit']);
+    this.editedQuestionId = id;
+  }
+
+  closeEditModal(): void {
+    this.editedQuestionId = null;
+  }
+
+  onEditModalSaved(): void {
+    this.closeEditModal();
+    this.loadQuestions();
+  }
+
+  openEditFromView(id: string): void {
+    this.closeViewModal();
+    this.editQuestion(id);
   }
 
   deleteQuestion(id: string): void {

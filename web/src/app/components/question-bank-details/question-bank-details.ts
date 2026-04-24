@@ -17,6 +17,7 @@ export class QuestionBankDetails implements OnChanges, OnInit {
   @Input() isModalMode = false;
   @Input() questionId: string | null = null;
   @Output() closed = new EventEmitter<void>();
+  @Output() editRequested = new EventEmitter<string>();
 
   readonly QuestionType = QuestionType;
   question: QuestionResponseDto | null = null;
@@ -66,6 +67,11 @@ export class QuestionBankDetails implements OnChanges, OnInit {
 
   editQuestion(): void {
     if (!this.question) {
+      return;
+    }
+
+    if (this.isModalMode) {
+      this.editRequested.emit(this.question.id);
       return;
     }
 
