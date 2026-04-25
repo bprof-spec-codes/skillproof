@@ -164,7 +164,8 @@
 .ac-card-meta span,
 .ac-tag-pill,
 .ac-selected-badge,
-.ac-random-badge {
+.ac-random-badge,
+.ac-selection-source-badge {
   background: var(--ac-tag-bg);
   border: 1px solid rgba(0, 48, 73, 0.15);
   border-radius: 999px;
@@ -185,6 +186,7 @@
 .ac-selected-item,
 .ac-random-item,
 .ac-tag-group-card {
+  position: relative;
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   gap: 0.75rem;
@@ -197,6 +199,14 @@
 
 .ac-random-item {
   grid-template-columns: minmax(0, 1fr) 86px auto;
+}
+
+.ac-selected-item.random-source {
+  padding-bottom: 2rem;
+}
+
+.ac-selected-item p {
+  overflow-wrap: anywhere;
 }
 
 .ac-meta-line,
@@ -218,6 +228,14 @@
 }
 
 .ac-random-badge {
+  background: rgba(102, 155, 188, 0.2);
+  color: var(--ac-ink);
+}
+
+.ac-selection-source-badge {
+  position: absolute;
+  right: 0.75rem;
+  bottom: 0.6rem;
   background: rgba(102, 155, 188, 0.2);
   color: var(--ac-ink);
 }

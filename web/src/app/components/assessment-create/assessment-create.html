@@ -56,66 +56,33 @@
 
         <section class="ac-selection-block">
           <div class="ac-block-title">
-            <h4>Fixed questions</h4>
-            <span>{{ selectedQuestions.length }}</span>
+            <h4>Questions</h4>
+            <span>{{ plannedQuestions.length }}</span>
           </div>
 
-          @if (selectedQuestions.length > 0) {
+          @if (plannedQuestions.length > 0) {
             <div class="ac-selected-list">
-              @for (question of selectedQuestions; track question.id) {
-                <article class="ac-selected-item">
+              @for (entry of plannedQuestions; track entry.source + '-' + entry.question.id + '-' + (entry.randomTag ?? '')) {
+                <article class="ac-selected-item" [class.random-source]="entry.source === 'random'">
                   <div>
-                    <strong>{{ question.title }}</strong>
-                    <p>{{ getQuestionPreview(question) }}</p>
+                    <strong>{{ entry.question.title }}</strong>
+                    <p>{{ getQuestionPreview(entry.question) }}</p>
                     <div class="ac-meta-line">
-                      <span>{{ getQuestionTypeLabel(question.type) }}</span>
-                      <span>{{ getDifficultyLabel(question.difficulty) }}</span>
+                      <span>{{ getQuestionTypeLabel(entry.question.type) }}</span>
+                      <span>{{ getDifficultyLabel(entry.question.difficulty) }}</span>
                     </div>
                   </div>
-                  <button type="button" class="ac-icon-btn danger" (click)="removeQuestion(question.id)" aria-label="Remove question">
+                  <button type="button" class="ac-icon-btn danger" (click)="removePlannedQuestion(entry)" aria-label="Remove question">
                     &times;
                   </button>
+                  @if (entry.source === 'random' && entry.randomTag) {
+                    <span class="ac-selection-source-badge">Random: {{ entry.randomTag }}</span>
+                  }
                 </article>
               }
             </div>
           } @else {
-            <div class="ac-empty-box">No fixed questions selected.</div>
-          }
-        </section>
-
-        <section class="ac-selection-block">
-          <div class="ac-block-title">
-            <h4>Random groups</h4>
-            <span>{{ randomTagRules.length }}</span>
-          </div>
-
-          @if (randomTagRules.length > 0) {
-            <div class="ac-random-list">
-              @for (rule of randomTagRules; track rule.tag) {
-                <article class="ac-random-item">
-                  <div>
-                    <strong>{{ rule.tag }}</strong>
-                    <p>{{ rule.count }} of {{ getRuleMaxCount(rule.tag) }} available questions</p>
-                  </div>
-                  <label>
-                    <span>Count</span>
-                    <input
-                      type="number"
-                      min="1"
-                      [max]="getRuleMaxCount(rule.tag)"
-                      [ngModel]="rule.count"
-                      [ngModelOptions]="{ standalone: true }"
-                      (ngModelChange)="updateRandomRuleCount(rule.tag, $event)"
-                    />
-                  </label>
-                  <button type="button" class="ac-icon-btn danger" (click)="removeRandomRule(rule.tag)" aria-label="Remove random group">
-                    &times;
-                  </button>
-                </article>
-              }
-            </div>
-          } @else {
-            <div class="ac-empty-box">No random tag groups added.</div>
+            <div class="ac-empty-box">No questions selected.</div>
           }
         </section>
       </aside>

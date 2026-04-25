@@ -24,6 +24,12 @@ interface ResolvedRandomRule {
   questions: QuestionResponseDto[];
 }
 
+interface PlannedQuestion {
+  question: QuestionResponseDto;
+  source: 'fixed' | 'random';
+  randomTag?: string;
+}
+
 @Component({
   selector: 'app-assessment-create',
   standalone: false,
@@ -158,6 +164,23 @@ export class AssessmentCreate implements OnInit {
     return this.selectedQuestions.length + this.randomTagRules.reduce((sum, rule) => sum + rule.count, 0);
   }
 
+  get plannedQuestions(): PlannedQuestion[] {
+    const fixedQuestions = this.selectedQuestions.map((question) => ({
+      question,
+      source: 'fixed' as const,
+    }));
+
+    const randomQuestions = this.resolveRandomRulesFromPreview().flatMap((entry) =>
+      entry.questions.map((question) => ({
+        question,
+        source: 'random' as const,
+        randomTag: entry.rule.tag,
+      }))
+    );
+
+    return [...fixedQuestions, ...randomQuestions];
+  }
+
   get hasAssessmentQuestions(): boolean {
     return this.totalQuestionCount > 0;
   }
@@ -213,6 +236,17 @@ export class AssessmentCreate implements OnInit {
     this.selectedQuestions = this.selectedQuestions.filter((q) => q.id !== id);
     this.questionPickerError = '';
     this.refreshRandomPreview();
+  }
+
+  removePlannedQuestion(entry: PlannedQuestion): void {
+    if (entry.source === 'fixed') {
+      this.removeQuestion(entry.question.id);
+      return;
+    }
+
+    if (entry.randomTag) {
+      this.removeRandomPreviewQuestion(entry.question.id, entry.randomTag);
+    }
   }
 
   toggleQuestion(question: QuestionResponseDto): void {
@@ -277,6 +311,31 @@ export class AssessmentCreate implements OnInit {
     const { [normalizedTag]: _removed, ...nextPreview } = this.randomPreviewQuestionIds;
     this.randomPreviewQuestionIds = nextPreview;
     this.questionPickerError = '';
+    this.refreshRandomPreview();
+  }
+
+  removeRandomPreviewQuestion(questionId: string, tag: string): void {
+    const normalizedTag = this.normalizeTag(tag);
+    const currentRule = this.randomTagRules.find((rule) => this.normalizeTag(rule.tag) === normalizedTag);
+    if (!currentRule) {
+      return;
+    }
+
+    const nextCount = currentRule.count - 1;
+    if (nextCount <= 0) {
+      this.removeRandomRule(tag);
+      return;
+    }
+
+    this.randomPreviewQuestionIds = {
+      ...this.randomPreviewQuestionIds,
+      [normalizedTag]: (this.randomPreviewQuestionIds[normalizedTag] ?? []).filter((id) => id !== questionId),
+    };
+    this.randomTagRules = this.randomTagRules.map((rule) =>
+      this.normalizeTag(rule.tag) === normalizedTag ? { ...rule, count: nextCount } : rule
+    );
+    this.questionPickerError = '';
+    this.clampRandomRules();
     this.refreshRandomPreview();
   }
 
