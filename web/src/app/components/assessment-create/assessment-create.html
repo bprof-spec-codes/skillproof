@@ -223,31 +223,41 @@
                 <article class="ac-tag-group-card" [class.reserved]="group.reserved > 0">
                   <div>
                     <strong>{{ group.tag }}</strong>
-                    <p>{{ group.available }} available of {{ group.total }} active</p>
+                    <p>{{ group.available }} unreserved of {{ group.total }} active</p>
                     @if (group.reserved > 0) {
-                      <span>{{ group.reserved }} reserved for random selection</span>
+                      <span>{{ group.reserved }} selected from this tag</span>
                     }
                   </div>
                   <div class="ac-tag-group-actions">
                     <label>
-                      <span>Count</span>
+                      <span>Total</span>
                       <input
                         type="number"
-                        min="1"
-                        [max]="group.available"
+                        [min]="hasRandomRule(group.tag) ? 0 : 1"
+                        [max]="getRandomGroupMaxCount(group.tag)"
                         [ngModel]="getRandomGroupDraftCount(group.tag)"
                         [ngModelOptions]="{ standalone: true }"
                         (ngModelChange)="setRandomGroupDraftCount(group.tag, $event)"
                       />
                     </label>
-                    <button
-                      type="button"
-                      class="ac-secondary-btn compact"
-                      [disabled]="group.available <= 0"
-                      (click)="addRandomRule(group.tag, getRandomGroupDraftCount(group.tag))"
-                    >
-                      Add
-                    </button>
+                    @if (!hasRandomRule(group.tag)) {
+                      <button
+                        type="button"
+                        class="ac-secondary-btn compact"
+                        [disabled]="getRandomGroupMaxCount(group.tag) <= 0"
+                        (click)="addRandomRule(group.tag, getRandomGroupDraftCount(group.tag))"
+                      >
+                        Add
+                      </button>
+                    } @else {
+                      <button
+                        type="button"
+                        class="ac-secondary-btn compact danger-outline"
+                        (click)="removeRandomRule(group.tag)"
+                      >
+                        Remove all
+                      </button>
+                    }
                   </div>
                 </article>
               }

@@ -263,22 +263,27 @@ export class AssessmentCreate implements OnInit {
   }
 
   addRandomRule(tag: string, requestedCount?: string | number): void {
-    const group = this.getTagGroup(tag);
-    if (!group || group.available <= 0) {
+    const maxCount = this.getRandomGroupMaxCount(tag);
+    const existing = this.randomTagRules.find((rule) => this.normalizeTag(rule.tag) === this.normalizeTag(tag));
+
+    if (maxCount <= 0 && !existing) {
       this.questionPickerError = `There are no more available questions with the "${tag}" tag.`;
       return;
     }
 
     const parsedCount = requestedCount === undefined ? 1 : Math.floor(Number(requestedCount));
-    const countToAdd = Math.max(1, Math.min(Number.isFinite(parsedCount) ? parsedCount : 1, group.available));
-    const existing = this.randomTagRules.find((rule) => this.normalizeTag(rule.tag) === this.normalizeTag(tag));
+    const targetCount = Math.max(0, Math.min(Number.isFinite(parsedCount) ? parsedCount : 1, maxCount));
+
     if (existing) {
-      this.updateRandomRuleCount(existing.tag, existing.count + countToAdd);
+      this.updateRandomRuleCount(existing.tag, targetCount);
       return;
     }
 
-    this.randomTagRules = [...this.randomTagRules, { tag, count: countToAdd }];
-    this.setRandomGroupDraftCount(tag, 1);
+    if (targetCount === 0) {
+      return;
+    }
+
+    this.randomTagRules = [...this.randomTagRules, { tag, count: targetCount }];
     this.questionPickerError = '';
     this.refreshRandomPreview();
   }
@@ -286,10 +291,7 @@ export class AssessmentCreate implements OnInit {
   updateRandomRuleCount(tag: string, value: string | number): void {
     const numericValue = Number(value);
     const nextCount = Number.isFinite(numericValue) ? Math.floor(numericValue) : 0;
-    const currentRule = this.randomTagRules.find((rule) => this.normalizeTag(rule.tag) === this.normalizeTag(tag));
-    const currentCount = currentRule?.count ?? 0;
-    const group = this.getTagGroup(tag);
-    const maxCount = (group?.available ?? 0) + currentCount;
+    const maxCount = this.getRandomGroupMaxCount(tag);
     const clampedCount = Math.max(0, Math.min(nextCount, maxCount));
 
     if (clampedCount === 0) {
@@ -353,19 +355,43 @@ export class AssessmentCreate implements OnInit {
 
   getRandomGroupDraftCount(tag: string): number {
     const key = this.normalizeTag(tag);
-    const group = this.getTagGroup(tag);
+    const existing = this.randomTagRules.find((rule) => this.normalizeTag(rule.tag) === key);
+    if (existing) {
+      return existing.count;
+    }
+
     const value = this.randomGroupDraftCounts[key] ?? 1;
-    return Math.max(1, Math.min(value, Math.max(group?.available ?? 1, 1)));
+    return Math.max(1, Math.min(value, Math.max(this.getRandomGroupMaxCount(tag), 1)));
   }
 
-  setRandomGroupDraftCount(tag: string, value: string | number): void {
+  getRandomGroupMaxCount(tag: string): number {
+    return this.getAvailableQuestionCountForRule(tag);
+  }
+
+  hasRandomRule(tag: string): boolean {
+    const normalizedTag = this.normalizeTag(tag);
+    return this.randomTagRules.some((rule) => this.normalizeTag(rule.tag) === normalizedTag);
+  }
+
+  setRandomGroupDraftCount(tag: string, value: string | number | null): void {
+    if (value === '' || value === null) {
+      return;
+    }
+
     const key = this.normalizeTag(tag);
-    const group = this.getTagGroup(tag);
+    const existing = this.randomTagRules.find((rule) => this.normalizeTag(rule.tag) === key);
     const parsedValue = Math.floor(Number(value));
-    const max = Math.max(group?.available ?? 1, 1);
+    const max = this.getRandomGroupMaxCount(tag);
+    const nextValue = Math.max(existing ? 0 : 1, Math.min(Number.isFinite(parsedValue) ? parsedValue : 1, Math.max(max, 1)));
+
+    if (existing) {
+      this.updateRandomRuleCount(tag, nextValue);
+      return;
+    }
+
     this.randomGroupDraftCounts = {
       ...this.randomGroupDraftCounts,
-      [key]: Math.max(1, Math.min(Number.isFinite(parsedValue) ? parsedValue : 1, max)),
+      [key]: nextValue,
     };
   }
 

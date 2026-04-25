@@ -258,6 +258,11 @@
   color: var(--ac-danger) !important;
 }
 
+.danger-outline {
+  border-color: rgba(193, 33, 38, 0.45);
+  color: var(--ac-danger);
+}
+
 .ac-empty-box,
 .ac-alert,
 .ac-picker-alert {
@@ -496,7 +501,7 @@
 
 .ac-tag-group-actions {
   display: grid;
-  grid-template-columns: 72px auto;
+  grid-template-columns: minmax(72px, 1fr) auto;
   gap: 0.45rem;
   align-items: end;
 }
