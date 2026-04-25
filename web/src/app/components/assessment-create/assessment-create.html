@@ -76,7 +76,7 @@
                     &times;
                   </button>
                   @if (entry.source === 'random' && entry.randomTag) {
-                    <span class="ac-selection-source-badge">Random: {{ entry.randomTag }}</span>
+                    <span class="ac-selection-source-badge">From tag: {{ entry.randomTag }}</span>
                   }
                 </article>
               }
@@ -213,7 +213,7 @@
 
         <aside class="ac-tag-groups">
           <div class="ac-side-heading">
-            <h4>Random from tags</h4>
+            <h4>Select by tags</h4>
             <p>Choose how many questions should be picked when saving.</p>
           </div>
 
@@ -261,7 +261,7 @@
       <footer class="ac-modal-footer">
         <div>
           <strong>{{ selectedQuestions.length }}</strong> fixed,
-          <strong>{{ randomTagRules.length }}</strong> random group{{ randomTagRules.length === 1 ? '' : 's' }}
+          <strong>{{ randomTagRules.length }}</strong> from tag{{ randomTagRules.length === 1 ? '' : 's' }}
         </div>
         <button type="button" class="ac-primary-btn" (click)="closeQuestionModal()">Done</button>
       </footer>

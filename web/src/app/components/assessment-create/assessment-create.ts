@@ -377,7 +377,7 @@ export class AssessmentCreate implements OnInit {
     const rule = this.randomTagRules.find((entry) =>
       (this.randomPreviewQuestionIds[this.normalizeTag(entry.tag)] ?? []).includes(questionId)
     );
-    return rule ? `Random: ${rule.tag}` : '';
+    return rule ? `From tag: ${rule.tag}` : '';
   }
 
   onFilterChange(): void {
