@@ -323,19 +323,38 @@ namespace SkillProof.Logic.User
 
         public async Task UpdateSkillsToUser(string id, UpdateSkillToUser dto)
         {
-            var user = await _userManager.Users.FirstOrDefaultAsync(u => u.Id == id);
+            if (dto == null || dto.Skills == null || !dto.Skills.Any())
+                throw new ArgumentException("No skills provided");
 
-            if (user == null) {
+            var user = await _userManager.FindByIdAsync(id);
 
+            if (user == null)
                 throw new KeyNotFoundException("User not found");
-            }
-            else
-            {
-                user.Skills = dto.Skills;
 
-                await _userManager.UpdateAsync(user);
+
+            var existingSkills = user.Skills?
+                .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                .Select(s => s.Trim())
+                .ToList() ?? new List<string>();
+
+            
+            foreach (var skill in dto.Skills)
+            {
+                var cleanSkill = skill.Trim();
+
+                if (!existingSkills.Any(s => s.Equals(cleanSkill, StringComparison.OrdinalIgnoreCase)))
+                {
+                    existingSkills.Add(cleanSkill);
+                }
             }
-                
+
+            
+            user.Skills = string.Join(", ", existingSkills);
+
+            var result = await _userManager.UpdateAsync(user);
+
+            if (!result.Succeeded)
+                throw new Exception(string.Join(", ", result.Errors.Select(e => e.Description)));
         }
     }
 }

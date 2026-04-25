@@ -99,11 +99,13 @@ namespace SkillProof.Api.Controllers
                 return Ok(tests);
         }
 
-        [HttpPost("UpdateSkills/{id}")]
+        [HttpPut("UpdateSkills/{id}")]
 
         public async Task<IActionResult> UpdateSkillsToUser(string id, [FromBody] UpdateSkillToUser dto)
         {
-            await _userLogic.
+            await _userLogic.UpdateSkillsToUser(id, dto);
+
+            return Ok();
         }
     }
 }

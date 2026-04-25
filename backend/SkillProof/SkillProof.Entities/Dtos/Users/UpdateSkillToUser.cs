@@ -8,6 +8,6 @@ namespace SkillProof.Entities.Dtos.Users
 {
     public class UpdateSkillToUser
     {
-        public string? Skills { get; set; }
+        public List<string> Skills { get; set; }
     }
 }
