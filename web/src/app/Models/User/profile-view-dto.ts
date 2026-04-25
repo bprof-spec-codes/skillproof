@@ -6,4 +6,5 @@ export interface ProfileViewDto {
   headline: string;
   bio: string;
   companyId: string;
+  skills: string[]; 
 }

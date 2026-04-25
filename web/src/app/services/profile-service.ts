@@ -45,7 +45,7 @@ export class ProfileService {
     this._currentProfile$.next(null);
   }
 
-  loadUserTests(userId: string): void {
+  /*loadUserTests(userId: string): void {
    this.http.get<UserTestsDto[]>(`${environment.apiUrls.getProfileTests}/${userId}`)
    .subscribe({
      next: (tests) => {
@@ -57,7 +57,7 @@ export class ProfileService {
        this._currentProfileTests$.next(null);
      }
    });
- }
+ }*/
 
  
 

@@ -25,6 +25,17 @@
         <div>{{ profile.bio }}</div>
       </div>
 
+      <div class="mb-3" *ngIf="profile.skills?.length">
+        <strong>Skills:</strong>
+        <div class="d-flex flex-wrap gap-2 mt-2">
+          @for (skill of profile.skills; track skill) {
+            <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2">
+              {{ skill }}
+            </span>
+          }
+        </div>
+      </div>
+
       <div class="text-end">
         <button class="btn btn-outline-primary" routerLink="/editProfile">
           <i class="bi bi-person-gear me-1"></i>Edit Profile
