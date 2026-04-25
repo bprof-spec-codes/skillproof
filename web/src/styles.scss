@@ -13,15 +13,18 @@ $primary: 'Open Sans', sans-serif;
 $font-weight-semibold: 700;
 $primary-color: #003049;
 
-html, body, h1 {
+html,
+body,
+main,
+h1 {
   font-family: $primary;
   font-weight: $font-weight-semibold;
   color: $primary-color;
-  
+
 }
 
 .background {
-    background-color: $background;
+  background-color: $background;
 }
 
 //Header:
@@ -30,13 +33,19 @@ header {
 }
 
 .header-font {
-    color: $primary-color;
-    font-family: $primary;
-    font-weight: $font-weight-semibold;
+  color: $primary-color;
+  font-family: $primary;
+  font-weight: $font-weight-semibold;
 }
 
-.header-font:hover{
-    color: #669BBC;
+.header-font-alt {
+  color: $primary-color;
+  font-family: $primary;
+  font-weight: $font-weight-semibold;
+}
+
+.header-font:hover {
+  color: #669BBC;
 }
 
 .divider {
@@ -45,7 +54,7 @@ header {
 }
 
 .logo {
-    height: 60px;
+  height: 60px;
 }
 
 .header-icon {
@@ -90,7 +99,7 @@ header {
   background: #fff;
 }
 
-.search-part + .search-part {
+.search-part+.search-part {
   border-left: 1px solid #003049;
 }
 
@@ -176,7 +185,7 @@ header {
 }
 
 @media (max-width: 991.98px) {
-  .search-part + .search-part {
+  .search-part+.search-part {
     border-left: 0;
     border-top: 1px solid #003049;
   }
@@ -291,12 +300,3 @@ button {
   min-height: calc(100vh - 92px);
   padding-bottom: 25px;
 }
-
-
-
-
-
-
-
-
-

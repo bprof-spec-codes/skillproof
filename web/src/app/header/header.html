@@ -1,13 +1,27 @@
 <header class="py-3 bg-transparent border-0">
   <div class="container-fluid px-lg-5 d-flex align-items-center justify-content-between">
-    <a class="navbar-brand d-flex align-items-center gap-2 m-0" routerLink="/">
-      <img src="Assets/Logo.svg" alt="Merit" class="logo" />
+    <a class="navbar-brand d-flex align-items-center gap-2 m-0" (click)="goHome()">
+      <img src="Assets/Logo.svg" alt="Merit" class="logo logo-1" />
     </a>
 
     <nav class="d-flex align-items-center gap-lg-3">
       @if (profile$ | async; as profile) {
+        @if (isEmployer) {
+          <a class="text-decoration-none header-font" routerLink="/question-banks">
+            <i class="bi bi-question-square me-2 header-icon"></i>Question banks
+          </a>
+
+          <a class="text-decoration-none header-font" routerLink="/applicants">
+            <i class="bi bi-envelope me-2 header-icon"></i>Applicants
+          </a>
+
+          <a class="text-decoration-none header-font position-relative" routerLink="/notifications" aria-label="Notifications">
+            <i class="bi bi-bell header-icon"></i>
+          </a>
+        }
+
         <div class="dropdown d-flex align-items-center gap-2">
-          <span class="username">
+          <span class="header-font-alt">
             {{ profile.fullName }}
           </span>
 

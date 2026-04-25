@@ -5,6 +5,7 @@ export class Job{
     companyId: string = ""
     title: string = ""
     description: string = ""
+    shortDescription: string = ""
     EmploymentType: EmploymentType | null = null
     location: string = ""
     tags: string = ""

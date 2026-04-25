@@ -1,3 +1,4 @@
+using SkillProof.Entities.Dtos.Tests;
 using SkillProof.Entities.Dtos.Users;
 
 namespace SkillProof.Logic.User;
@@ -13,4 +14,5 @@ public interface IUserLogic
     Task<LoginResultDto> LoginAsync(LoginUser dto);
     Task GrantAdminRoleAsync(string userId);
     Task RevokeRoleAsync(string userId);
+    Task<IEnumerable<UserTestsDto>> GetUserTestsAsync(string userId);
 }

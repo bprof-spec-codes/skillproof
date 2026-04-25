@@ -91,5 +91,12 @@ namespace SkillProof.Api.Controllers
                 await _userLogic.RevokeRoleAsync(userId);
                 return Ok(new { message = "Roles revoked successfully." });
         }
+
+        [HttpGet("UserTests/{userId}")]
+        public async Task<IActionResult> GetUserTests(string userId)
+        {
+                var tests = await _userLogic.GetUserTestsAsync(userId);
+                return Ok(tests);
+        }
     }
 }

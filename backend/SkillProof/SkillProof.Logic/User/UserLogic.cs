@@ -1,16 +1,17 @@
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
-using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using SkillProof.Data.Repositorys;
+using SkillProof.Entities.Dtos.Tests;
 using SkillProof.Entities.Dtos.Users;
 using SkillProof.Entities.Helper;
 using SkillProof.Entities.Models;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
+using System.Text.RegularExpressions;
 
 namespace SkillProof.Logic.User
 {
@@ -296,6 +297,27 @@ namespace SkillProof.Logic.User
                 expires: DateTime.UtcNow.AddMinutes(expiryInMinutes),
                 signingCredentials: new SigningCredentials(signinKey, SecurityAlgorithms.HmacSha256)
             );
+        }
+
+        public async Task<IEnumerable<UserTestsDto>> GetUserTestsAsync(string userId)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+
+            if (user == null)
+            {
+                throw new KeyNotFoundException("User not found.");
+            }
+            var result = new List<UserTestsDto>();
+
+            foreach (var test in user.Tests)
+            {
+                result.Add(new UserTestsDto
+                {
+                    DifficultyLevel = test.DifficultyLevel,
+                    Passed = test.Passed
+                });
+            }
+            return result;
         }
     }
 }

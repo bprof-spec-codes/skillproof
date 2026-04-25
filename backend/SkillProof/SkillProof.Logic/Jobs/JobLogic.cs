@@ -50,6 +50,7 @@ public class JobLogic : IJobLogic
             CompanyId = companyId,
             Title = model.Title,
             Description = _markdownService.ToHtml(model.Description),
+            ShortDescription = model.ShortDescription,
             Location = model.Location,
             Tags = model.Tags,
             EmploymentType = model.EmploymentType,
@@ -75,6 +76,7 @@ public class JobLogic : IJobLogic
             CompanyId = newJob.CompanyId,
             Title = newJob.Title,
             Description = newJob.Description,
+            ShortDescription = newJob.ShortDescription,
             Location = newJob.Location,
             Tags = newJob.Tags,
             EmploymentType = newJob.EmploymentType,
@@ -94,6 +96,7 @@ public class JobLogic : IJobLogic
                 CompanyId = j.CompanyId,
                 Title = j.Title,
                 Description = j.Description,
+                ShortDescription = j.ShortDescription,
                 Location = j.Location,
                 Tags = j.Tags,
                 EmploymentType = j.EmploymentType,
@@ -139,6 +142,7 @@ public class JobLogic : IJobLogic
             CompanyId = job.CompanyId,
             Title = job.Title,
             Description = job.Description,
+            ShortDescription = job.ShortDescription,
             Location = job.Location,
             Tags = job.Tags,
             EmploymentType = job.EmploymentType,
@@ -183,6 +187,7 @@ public class JobLogic : IJobLogic
                 CompanyId = j.CompanyId,
                 Title = j.Title,
                 Description = j.Description,
+                ShortDescription = j.ShortDescription,
                 Location = j.Location,
                 Tags = j.Tags,
                 EmploymentType = j.EmploymentType,
@@ -229,6 +234,7 @@ public class JobLogic : IJobLogic
 
         job.Title = model.Title;
         job.Description = model.Description;
+        job.ShortDescription = model.ShortDescription;
         job.Location = model.Location;
         job.Tags = model.Tags;
         job.EmploymentType = model.EmploymentType;
@@ -254,6 +260,7 @@ public class JobLogic : IJobLogic
             CompanyId = job.CompanyId,
             Title = job.Title,
             Description = job.Description,
+            ShortDescription = job.ShortDescription,
             Location = job.Location,
             Tags = job.Tags,
             EmploymentType = job.EmploymentType,
@@ -440,4 +447,30 @@ public class JobLogic : IJobLogic
     }
 
 
+    public async Task<IEnumerable<JobViewDto>> GetJobsOfCompanyAsync(string currentUserId)
+    {
+        var user = await _userManager.FindByIdAsync(currentUserId);
+        if (user == null || user.CompanyId == null)
+        {
+            throw new UnauthorizedAccessException("User profile not found or not associated with a company.");
+        }
+
+        return await _jobRepository.GetAll()
+            .Where(j => j.CompanyId == user.CompanyId)
+            .Select(j => new JobViewDto
+            {
+                CompanyId = j.CompanyId,
+                Title = j.Title,
+                Description = j.Description,
+                ShortDescription = j.ShortDescription,
+                Location = j.Location,
+                Tags = j.Tags,
+                EmploymentType = j.EmploymentType,
+                CreatedAt = j.CreatedAt,
+                Id = j.Id
+            })
+            .ToListAsync();
+    }
+
+    
 }

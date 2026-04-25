@@ -4,6 +4,7 @@ export class JobCreateDto{
     companyId: string = ""
     title: string = ""
     description: string = ""
+    shortDescription = ""
     EmploymentType: EmploymentType | null = null
     location: string = ""
     tags: string[] = []
