@@ -105,13 +105,18 @@ export class AssessmentCreate implements OnInit {
 
   get tagGroups(): TagGroupSummary[] {
     const groups = new Map<string, { tag: string; questions: QuestionResponseDto[] }>();
+    const normalizedSelectedTags = new Set(this.selectedFilterTags.map((tag) => this.normalizeTag(tag)));
     const reservedQuestionIds = new Set(
       this.resolveRandomRules(false).flatMap((entry) => entry.questions.map((question) => question.id))
     );
 
-    this.availableQuestions.forEach((question) => {
+    this.targetDifficultyQuestions.forEach((question) => {
       this.getUniqueTags(question).forEach((tag) => {
         const key = this.normalizeTag(tag);
+        if (normalizedSelectedTags.size > 0 && !normalizedSelectedTags.has(key)) {
+          return;
+        }
+
         const existing = groups.get(key);
         if (existing) {
           existing.questions.push(question);
@@ -155,6 +160,32 @@ export class AssessmentCreate implements OnInit {
 
   get hasAssessmentQuestions(): boolean {
     return this.totalQuestionCount > 0;
+  }
+
+  private get targetDifficultyQuestions(): QuestionResponseDto[] {
+    const targetDifficulty = String(this.difficultyLevel);
+    return this.availableQuestions.filter((question) => String(question.difficulty) === targetDifficulty);
+  }
+
+  onTargetDifficultyChange(): void {
+    this.selectedQuestions = this.selectedQuestions.filter(
+      (question) => String(question.difficulty) === String(this.difficultyLevel)
+    );
+    this.rebuildAvailableTags();
+    this.applyFilters();
+    this.clampRandomRules();
+    this.refreshRandomPreview();
+    this.questionPickerError = '';
+  }
+
+  onModalDialogClick(event: MouseEvent): void {
+    event.stopPropagation();
+    const target = event.target as HTMLElement | null;
+    if (!target || target.closest('.ac-tag-filter')) {
+      return;
+    }
+
+    this.showTagDropdown = false;
   }
 
   openQuestionModal(): void {
@@ -250,8 +281,7 @@ export class AssessmentCreate implements OnInit {
   }
 
   getRuleMaxCount(tag: string): number {
-    const currentRule = this.randomTagRules.find((rule) => this.normalizeTag(rule.tag) === this.normalizeTag(tag));
-    return this.getAvailableQuestionCountForRule(tag) + (currentRule?.count ?? 0);
+    return this.getAvailableQuestionCountForRule(tag);
   }
 
   getTagAvailableCount(tag: string): number {
@@ -437,7 +467,7 @@ export class AssessmentCreate implements OnInit {
     const selectedDifficulty = this.filterDifficulty.trim();
     const normalizedSelectedTags = this.selectedFilterTags.map((tag) => this.normalizeTag(tag));
 
-    this.filteredQuestions = this.availableQuestions.filter((question) => {
+    this.filteredQuestions = this.targetDifficultyQuestions.filter((question) => {
       if (selectedType !== '' && question.type !== selectedType) {
         return false;
       }
@@ -461,7 +491,7 @@ export class AssessmentCreate implements OnInit {
   private rebuildAvailableTags(): void {
     const tagsByNormalizedValue = new Map<string, string>();
 
-    this.availableQuestions.forEach((question) => {
+    this.targetDifficultyQuestions.forEach((question) => {
       this.getUniqueTags(question).forEach((tag) => {
         const normalizedTag = this.normalizeTag(tag);
         if (normalizedTag === '' || tagsByNormalizedValue.has(normalizedTag)) {
@@ -496,7 +526,7 @@ export class AssessmentCreate implements OnInit {
     const usedIds = new Set(this.selectedQuestions.map((question) => question.id));
 
     return this.randomTagRules.map((rule) => {
-      const candidates = this.availableQuestions.filter((question) => {
+      const candidates = this.targetDifficultyQuestions.filter((question) => {
         if (usedIds.has(question.id)) {
           return false;
         }
@@ -557,7 +587,7 @@ export class AssessmentCreate implements OnInit {
     return this.randomTagRules.map((rule) => {
       const ids = this.randomPreviewQuestionIds[this.normalizeTag(rule.tag)] ?? [];
       const questions = ids
-        .map((id) => this.availableQuestions.find((question) => question.id === id))
+        .map((id) => this.targetDifficultyQuestions.find((question) => question.id === id))
         .filter((question): question is QuestionResponseDto => Boolean(question));
 
       return { rule, questions };
@@ -589,7 +619,7 @@ export class AssessmentCreate implements OnInit {
 
   private getQuestionsByTag(tag: string): QuestionResponseDto[] {
     const normalizedTag = this.normalizeTag(tag);
-    return this.availableQuestions.filter((question) =>
+    return this.targetDifficultyQuestions.filter((question) =>
       this.getUniqueTags(question).some((questionTag) => this.normalizeTag(questionTag) === normalizedTag)
     );
   }

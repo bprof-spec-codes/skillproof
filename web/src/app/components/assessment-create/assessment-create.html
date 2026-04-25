@@ -5,9 +5,6 @@
         <h2>Create Test Template</h2>
         <p>Build a reusable assessment from fixed questions and randomized tag groups.</p>
       </div>
-      <button class="ac-primary-btn" type="button" (click)="openQuestionModal()">
-        Browse Question Bank
-      </button>
     </header>
 
     <form class="ac-layout" (ngSubmit)="onSubmit()">
@@ -29,7 +26,7 @@
 
         <label class="ac-field">
           <span>Target Difficulty</span>
-          <select [(ngModel)]="difficultyLevel" name="difficulty">
+          <select [(ngModel)]="difficultyLevel" name="difficulty" (ngModelChange)="onTargetDifficultyChange()">
             <option [value]="0">Junior</option>
             <option [value]="1">Medior</option>
             <option [value]="2">Senior</option>
@@ -54,7 +51,7 @@
             <h3>Selected Questions</h3>
             <p>{{ totalQuestionCount }} question{{ totalQuestionCount === 1 ? '' : 's' }} planned</p>
           </div>
-          <button class="ac-secondary-btn compact" type="button" (click)="openQuestionModal()">Add</button>
+          <button class="ac-secondary-btn compact" type="button" (click)="openQuestionModal()">Browse Question Bank</button>
         </div>
 
         <section class="ac-selection-block">
@@ -128,7 +125,7 @@
 
 @if (showQuestionModal) {
   <div class="ac-modal-backdrop" (click)="closeQuestionModal()">
-    <section class="ac-modal-dialog" (click)="$event.stopPropagation()">
+    <section class="ac-modal-dialog" (click)="onModalDialogClick($event)">
       <header class="ac-modal-header">
         <div>
           <h3>Question Bank</h3>
