@@ -105,7 +105,7 @@ namespace SkillProof.Api.Controllers
         {
             await _userLogic.UpdateSkillsToUser(id, dto);
 
-            return Ok();
+            return NoContent();
         }
     }
 }

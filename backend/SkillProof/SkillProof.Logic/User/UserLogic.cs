@@ -142,7 +142,12 @@ namespace SkillProof.Logic.User
                     FullName = user.FirstName + " " + user.LastName,
                     Image = Convert.ToBase64String(user.ProfilePicture),
                     Headline = user.Headline,
-                    Bio = user.Bio
+                    Bio = user.Bio,
+
+                    Skills = user.Skills?
+                        .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                        .Select(s => s.Trim())
+                        .ToList() ?? new List<string>()
                 });
             }
 
@@ -165,7 +170,11 @@ namespace SkillProof.Logic.User
                 Image = Convert.ToBase64String(user.ProfilePicture),
                 Bio = user.Bio,
                 Headline = user.Headline,
-                CompanyId = user.CompanyId
+                CompanyId = user.CompanyId,
+                Skills = user.Skills?
+                        .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                        .Select(s => s.Trim())
+                        .ToList() ?? new List<string>()
             };
         }
 

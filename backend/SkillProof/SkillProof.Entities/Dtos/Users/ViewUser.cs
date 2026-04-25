@@ -10,6 +10,6 @@
         public string Bio { get; set; } = string.Empty;
         public string? CompanyId { get; set; }
 
-        public string? Skills { get; set; }
+        public List<string>? Skills { get; set; }
     }
 }
