@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -318,6 +319,23 @@ namespace SkillProof.Logic.User
                 });
             }
             return result;
+        }
+
+        public async Task UpdateSkillsToUser(string id, UpdateSkillToUser dto)
+        {
+            var user = await _userManager.Users.FirstOrDefaultAsync(u => u.Id == id);
+
+            if (user == null) {
+
+                throw new KeyNotFoundException("User not found");
+            }
+            else
+            {
+                user.Skills = dto.Skills;
+
+                await _userManager.UpdateAsync(user);
+            }
+                
         }
     }
 }
