@@ -341,24 +341,13 @@ namespace SkillProof.Logic.User
                 throw new KeyNotFoundException("User not found");
 
 
-            var existingSkills = user.Skills?
-                .Split(',', StringSplitOptions.RemoveEmptyEntries)
-                .Select(s => s.Trim())
-                .ToList() ?? new List<string>();
+            var cleanedSkills = dto.Skills
+            .Select(s => s?.Trim())
+            .Where(s => !string.IsNullOrWhiteSpace(s))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
 
-            
-            foreach (var skill in dto.Skills)
-            {
-                var cleanSkill = skill.Trim();
-
-                if (!existingSkills.Any(s => s.Equals(cleanSkill, StringComparison.OrdinalIgnoreCase)))
-                {
-                    existingSkills.Add(cleanSkill);
-                }
-            }
-
-            
-            user.Skills = string.Join(", ", existingSkills);
+            user.Skills = string.Join(", ", cleanedSkills);          
 
             var result = await _userManager.UpdateAsync(user);
 
