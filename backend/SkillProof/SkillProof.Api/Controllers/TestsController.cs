@@ -28,4 +28,25 @@ public class TestsController : ControllerBase
         var result = await _testLogic.SubmitTestAsync(dto, userId);
         return Ok(result);
     }
+
+    [HttpGet("GetUserTestQuestions")]
+    public async Task<ActionResult<List<UserTestReviewDto>>> GetUserTestQuestions(string userId, string jobId)
+    {
+        var result = await _testLogic.GetUserTestQuestionsAsync(jobId, userId);
+        return Ok(result);
+    }
+
+    [HttpGet("GetTestUsers")]
+    public async Task<ActionResult<List<string?>>> GetTestUsers(string jobId)
+    {
+        var result = await _testLogic.GetTestUsersAsync(jobId);
+        return Ok(result);
+    }
+
+    [HttpPut("ManualFeedbackAsync")]
+    public async Task<ActionResult<TestResultDto>> ManualFeedback([FromBody] string? feedback, double score, string testAnswerId)
+    {
+        var result = await _testLogic.ManualFeedbackAsync(feedback, score, testAnswerId);
+        return Ok(result);
+    }
 }
