@@ -332,9 +332,7 @@ namespace SkillProof.Logic.User
 
         public async Task UpdateSkillsToUser(string id, UpdateSkillToUser dto)
         {
-            if (dto == null || dto.Skills == null || !dto.Skills.Any())
-                throw new ArgumentException("No skills provided");
-
+            
             var user = await _userManager.FindByIdAsync(id);
 
             if (user == null)

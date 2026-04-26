@@ -36,7 +36,7 @@
         <input type="file" class="form-control" (change)="onFileSelected($event)">
       </div>
 
-      <div class="text-end">
+      <div class="text-center" style="padding: 0.8rem;">
         <button class="btn btn-primary" type="submit">
           Save Changes
         </button>
@@ -44,36 +44,40 @@
 
     </form>
 
-  </div>
+    <div class="mt-4">
+      <label>Skills</label>
 
-  <div class="mt-4">
-    <label>Skills</label>
+      <input
+        class="form-control"
+        [ngModel]="skillInput"
+        (ngModelChange)="skillInput = $event"
+        (keydown.enter)="addSkill()"
+        placeholder="Type a skill and press Enter"
+      />
 
-    <input
-      class="form-control"
-      [ngModel]="skillInput"
-      (ngModelChange)="skillInput = $event"
-      (keydown.enter)="addSkill()"
-      placeholder="Type a skill and press Enter"
-    />
+      <div class="mt-3 d-flex flex-wrap gap-2">
+        <span
+          *ngFor="let skill of skills; let i = index"
+          class="badge bg-secondary"
+        >
+          {{ skill }}
+          <button
+            type="button"
+            class="btn-close btn-close-white ms-2"
+            (click)="removeSkill(i)"
+          ></button>
+        </span>
+      </div>
 
-    <div class="mt-3 d-flex flex-wrap gap-2">
-      <span
-        *ngFor="let skill of skills; let i = index"
-        class="badge bg-secondary"
-      >
-        {{ skill }}
-        <button
-          type="button"
-          class="btn-close btn-close-white ms-2"
-          (click)="removeSkill(i)"
-        ></button>
-      </span>
+      <div class="text-center mt-3" style="padding: 0.8rem;">
+        <button class="btn btn-success" (click)="saveSkills()">
+          Save Skills
+        </button>
+      </div>
     </div>
 
-    <button class="btn btn-success mt-3" (click)="saveSkills()">
-      Save Skills
-    </button>
   </div>
+
+  
 
 </div>

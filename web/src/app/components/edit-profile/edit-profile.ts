@@ -46,7 +46,9 @@ export class EditProfile implements OnInit {
           bio: profile.bio
         });
 
-        this.skills = profile.skills || [];
+        if (this.skills.length === 0) {
+          this.skills = profile.skills || [];
+        }
       }
     });
   }
@@ -133,6 +135,8 @@ export class EditProfile implements OnInit {
     const userId = this.authService.getUserId();
 
     if (!userId) return;
+
+    console.log("SENDING SKILLS:", this.skills);
 
     this.profileService.updateSkills(userId, this.skills).subscribe({
       next: () => console.log('Skills saved'),
