@@ -24,7 +24,7 @@ jobs:
       SSH_HOST: test.skillproof.hu
       SSH_USER: root
       # --- SECRET-ek (Repo Settings → Secrets and variables → Actions) ---
-      # SSH_KEY, SSH_PASS, DB_CONN_TEST, DESIRED_PORT_TEST
+      # SSH_KEY, SSH_PASS, DB_CONN_TEST, DESIRED_PORT_TEST, API_KEY
 
     steps:
       - name: Checkout
@@ -107,7 +107,8 @@ jobs:
                 --arg frontend "${{ env.FRONTEND_URL }}" \
                 --arg jwtkey "${{ secrets.JWT_KEY }}" \
                 --arg port "${{ secrets.DESIRED_PORT_TEST }}" \
-                '.db.conn = $conn | .settings.frontend = $frontend | .settings.port = $port | .Jwt.Key = $jwtkey' \
+                --arg apikey "${{ secrets.API_KEY }}" \
+                '.db.conn = $conn | .settings.frontend = $frontend | .settings.port = $port | .Jwt.Key = $jwtkey | .Gemini.ApiKey = $apikey' \
                 "$NEW_RELEASE/appsettings.json" | sudo tee "$NEW_RELEASE/appsettings.json.tmp" > /dev/null
               sudo mv "$NEW_RELEASE/appsettings.json.tmp" "$NEW_RELEASE/appsettings.json"
             else
