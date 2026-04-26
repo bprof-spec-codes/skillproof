@@ -19,7 +19,15 @@ namespace SkillProof.Entities.Models
 
         [Required]
         public bool IsCorrect { get; set; }
+
+        [Required]
+        public double Score { get; set; }
+
         public string AiFeedback { get; set; }
+        public string? ManualFeedback { get; set; }
+
+        [Required]
+        public bool Inspected { get; set; }
 
         public virtual Questions Question { get; set; }
         public virtual Tests Test { get; set; }

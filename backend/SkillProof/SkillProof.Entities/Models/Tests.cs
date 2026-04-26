@@ -21,7 +21,7 @@ namespace SkillProof.Entities.Models
         public bool Passed { get; set; }
 
         [Required]
-        public int Score { get; set; }
+        public double Score { get; set; }
         public DateTime CompletedAt { get; set; } = DateTime.UtcNow;
 
         public virtual JobApplication? JobApplication { get; set; }
