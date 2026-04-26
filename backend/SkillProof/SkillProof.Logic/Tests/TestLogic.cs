@@ -8,6 +8,8 @@ using System.Text.Json;
 using QuestionEntity = SkillProof.Entities.Models.Questions;
 using TestEntity = SkillProof.Entities.Models.Tests;
 using TestAnswerEntity = SkillProof.Entities.Models.TestAnswers;
+using SkillProof.Logic.Gemini;
+using SkillProof.Entities.Models.Gemini;
 
 namespace SkillProof.Logic.Tests;
 
@@ -18,11 +20,13 @@ public class TestLogic : ITestLogic
 
     private readonly IRepository<Job> _jobRepository;
     private readonly SkillProofDbContext _ctx;
+    private readonly IGeminiService _geminiService;
 
-    public TestLogic(IRepository<Job> jobRepository, SkillProofDbContext ctx)
+    public TestLogic(IRepository<Job> jobRepository, SkillProofDbContext ctx, IGeminiService geminiService)
     {
         _jobRepository = jobRepository;
         _ctx = ctx;
+        _geminiService = geminiService;
     }
 
     public async Task<TestResultDto> SubmitTestAsync(TestSubmitDto dto, string userId)
@@ -66,6 +70,8 @@ public class TestLogic : ITestLogic
             .Include(j => j.Assessments)
                 .ThenInclude(a => a.Questions)
                     .ThenInclude(q => q.TrueFalseQuestion)
+            .Include(j => j.Assessments)
+                .ThenInclude(t => t.TestAttempts)
             .FirstOrDefaultAsync(j => j.Id == dto.JobId);
 
         if (job == null)
@@ -109,15 +115,16 @@ public class TestLogic : ITestLogic
             Passed = false,
             TestAnswers = new List<TestAnswerEntity>()
         };
+        job.Assessments.First().TestAttempts.Add(test);
 
         var questionResults = new List<QuestionResultDto>();
-        var totalScore = 0;
+        double totalScore = 0;
 
         foreach (var question in allQuestions)
         {
             answersByQuestionId.TryGetValue(question.Id, out var submitted);
 
-            var scored = ScoreQuestion(question, submitted);
+            var scored = ScoreQuestion(question, submitted, _geminiService);
 
             var answerEntity = new TestAnswerEntity
             {
@@ -126,6 +133,8 @@ public class TestLogic : ITestLogic
                 TestId = test.Id,
                 FreeTextResponse = scored.FreeTextResponse,
                 IsCorrect = scored.IsCorrect,
+                Score = scored.Points,
+                Inspected = false,
                 AiFeedback = scored.AiFeedback
             };
 
@@ -171,7 +180,7 @@ public class TestLogic : ITestLogic
             existingApplication.Status = JobApplicationStatus.TestCompleted;
             jobApplication = existingApplication;
         }
-
+        
         _ctx.Tests.Add(test);
         await _ctx.SaveChangesAsync();
 
@@ -187,16 +196,16 @@ public class TestLogic : ITestLogic
         };
     }
 
-    private sealed record ScoredAnswer(int Points, bool IsCorrect, string FreeTextResponse, string AiFeedback);
+    private sealed record ScoredAnswer(double Points, bool IsCorrect, string FreeTextResponse, string AiFeedback);
 
-    private static ScoredAnswer ScoreQuestion(QuestionEntity question, TestAnswerSubmitDto? submitted)
+    private static ScoredAnswer ScoreQuestion(QuestionEntity question, TestAnswerSubmitDto? submitted, IGeminiService geminiService)
     {
         return question.Type switch
         {
             QuestionType.MultipleChoice => ScoreMultipleChoice(question, submitted),
             QuestionType.TrueFalse => ScoreTrueFalse(question, submitted),
             QuestionType.CodeCompletion => ScoreCodeCompletion(question, submitted),
-            QuestionType.FillInTheBlank => ScoreFillInTheBlank(submitted),
+            QuestionType.FillInTheBlank => ScoreFillInTheBlank(question, submitted, geminiService),
             _ => new ScoredAnswer(0, false, string.Empty, AiFeedbackNotApplicable)
         };
     }
@@ -253,9 +262,19 @@ public class TestLogic : ITestLogic
         return new ScoredAnswer(isCorrect ? 1 : 0, isCorrect, text, AiFeedbackNotApplicable);
     }
 
-    private static ScoredAnswer ScoreFillInTheBlank(TestAnswerSubmitDto? submitted)
+    private static ScoredAnswer ScoreFillInTheBlank(QuestionEntity question, TestAnswerSubmitDto? submitted, IGeminiService geminiService)
     {
         var text = submitted?.TextAnswer ?? string.Empty;
-        return new ScoredAnswer(1, true, text, AiFeedbackPending);
+        GradingRequest request = new GradingRequest
+        {
+            Question = question.QuestionText,
+            StudentAnswer = text,
+        };
+        double score = geminiService.EvaluateAnswerAsync(request).GetAwaiter().GetResult();
+        
+        bool isCorrect = score >= 0.5;
+        return new ScoredAnswer(score, isCorrect, text, AiFeedbackPending);
     }
+
+    
 }
