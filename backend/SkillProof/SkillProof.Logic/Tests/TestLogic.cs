@@ -276,5 +276,112 @@ public class TestLogic : ITestLogic
         return new ScoredAnswer(score, isCorrect, text, AiFeedbackPending);
     }
 
-    
+    public async Task<List<UserTestReviewDto>> GetUserTestQuestionsAsync(string jobId, string userId)
+    {
+        if (jobId == null || string.IsNullOrWhiteSpace(jobId))
+        {
+            throw new ArgumentException("Job id is required.");
+        }
+        var job = await _jobRepository.GetAll()
+            .Include(j => j.Assessments)
+                .ThenInclude(Assessments => Assessments.TestAttempts)
+                    .ThenInclude(TestAttempts => TestAttempts.TestAnswers)
+                        .ThenInclude(TestAnswers => TestAnswers.Question)
+            .FirstOrDefaultAsync(j => j.Id == jobId);
+
+        if (job == null)
+        {
+            throw new KeyNotFoundException($"Job '{jobId}' not found.");
+        }
+
+        if (job.Assessments.Count == 0)
+        {
+            throw new ArgumentException("This job has no assessment attached.");
+        }
+
+        var attempt = job.Assessments.SelectMany(a => a.TestAttempts).FirstOrDefault(a => a.UserId == userId);
+
+        if (attempt == null)
+        {
+            throw new ArgumentException($"There are no test attempt for the assessments attached to this job with this user: {userId}.");
+        }
+
+        var reviews = attempt.TestAnswers.Select(testAnswers => new UserTestReviewDto
+        {
+            TestAnswerId = testAnswers.Id,
+            QuestionText = testAnswers.Question.QuestionText,
+            UserResponse = testAnswers.FreeTextResponse,
+            Score = testAnswers.Score,
+            Inspected = testAnswers.Inspected,
+            UserId = userId
+        }).ToList();
+        return reviews;
+    }
+
+    public async Task<FeedbackResponseDto> ManualFeedbackAsync(string? feedback, double score, string testAnswerId)
+    {
+        if (testAnswerId == null || string.IsNullOrWhiteSpace(testAnswerId))
+        {
+            throw new ArgumentException("Test answer id is required.");
+        }
+
+        var testAnwser = await _ctx.TestAnswers
+             .Include(a => a.Question)
+             .FirstOrDefaultAsync(a => a.Id == testAnswerId);
+
+        if (testAnwser == null)
+        {
+            throw new KeyNotFoundException($"Test answer '{testAnswerId}' not found.");
+        }
+
+        if (!(testAnwser.Question.Type == QuestionType.FillInTheBlank))
+        {
+            throw new ArgumentException("Manual feedback can only be provided for fill-in-the-blank questions.");
+        }
+
+        testAnwser.Score = score;
+        testAnwser.IsCorrect = score >= 0.5;
+        testAnwser.Inspected = true;
+        if (!string.IsNullOrWhiteSpace(feedback))
+        {
+            testAnwser.FreeTextResponse = feedback;
+        }
+
+        var result = new FeedbackResponseDto
+        {
+            TestAnswerId = testAnwser.Id,
+            QuestionText = testAnwser.Question.QuestionText,
+            UserResponse = testAnwser.FreeTextResponse,
+            Score = testAnwser.Score,
+            Inspected = testAnwser.Inspected
+        };
+
+        await _ctx.SaveChangesAsync();
+        return result;
+    }
+
+    public async Task<List<string?>> GetTestUsersAsync(string jobId)
+    {
+        if (jobId == null || string.IsNullOrWhiteSpace(jobId))
+        {
+            throw new ArgumentException("Job id is required.");
+        }
+        var job = await _jobRepository.GetAll()
+            .Include(j => j.Assessments)
+                .ThenInclude(Assessments => Assessments.TestAttempts)
+            .FirstOrDefaultAsync(j => j.Id == jobId);
+
+        if (job == null)
+        {
+            throw new KeyNotFoundException($"Job '{jobId}' not found.");
+        }
+
+        List<string?> userIds = job.Assessments
+            .SelectMany(a => a.TestAttempts)
+            .Select(t => t.UserId)
+            .Distinct()
+            .ToList();
+
+        return userIds;
+    }
 }
