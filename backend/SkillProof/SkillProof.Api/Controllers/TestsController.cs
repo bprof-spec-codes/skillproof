@@ -44,7 +44,7 @@ public class TestsController : ControllerBase
     }
 
     [HttpPut("ManualFeedbackAsync")]
-    public async Task<ActionResult<TestResultDto>> ManualFeedback([FromBody] string? feedback, double score, string testAnswerId)
+    public async Task<ActionResult<FeedbackResponseDto>> ManualFeedback([FromBody] string? feedback, double score, string testAnswerId)
     {
         var result = await _testLogic.ManualFeedbackAsync(feedback, score, testAnswerId);
         return Ok(result);
