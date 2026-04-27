@@ -24,6 +24,8 @@ export class EditProfile implements OnInit {
 
   form!: FormGroup;
   selectedImageBase64: string | null = null;
+  skills: string[] = [];
+  skillInput: string = '';
 
   ngOnInit(): void {
     this.form = this.fb.group({
@@ -43,6 +45,10 @@ export class EditProfile implements OnInit {
           headline: profile.headline,
           bio: profile.bio
         });
+
+        if (this.skills.length === 0) {
+          this.skills = profile.skills || [];
+        }
       }
     });
   }
@@ -104,6 +110,38 @@ export class EditProfile implements OnInit {
           console.error(err);
         }
       });
+  }
+
+  addSkill(): void {
+    const value = this.skillInput.trim();
+
+    if (!value) return;
+
+    // duplikáció ellen
+    if (this.skills.includes(value)) {
+      this.skillInput = '';
+      return;
+    }
+
+    this.skills.push(value);
+    this.skillInput = '';
+  }
+
+  removeSkill(index: number): void {
+    this.skills.splice(index, 1);
+  }
+
+  saveSkills(): void {
+    const userId = this.authService.getUserId();
+
+    if (!userId) return;
+
+    console.log("SENDING SKILLS:", this.skills);
+
+    this.profileService.updateSkills(userId, this.skills).subscribe({
+      next: () => console.log('Skills saved'),
+      error: (err) => console.error(err)
+    });
   }
 
 

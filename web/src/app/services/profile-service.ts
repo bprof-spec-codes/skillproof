@@ -45,7 +45,23 @@ export class ProfileService {
     this._currentProfile$.next(null);
   }
 
-  loadUserTests(userId: string): void {
+  updateSkills(userId: string, skills: string[]): Observable<any> {
+    return this.http.put(`${environment.apiUrls.updateSkills}/${userId}`, { skills }).pipe(
+      tap(() => {
+        const current = this._currentProfile$.value;
+        if (current) {
+          this._currentProfile$.next({
+            ...current,
+            skills: skills
+          });
+        }
+      })
+    );
+  }
+
+
+
+  /*loadUserTests(userId: string): void {
    this.http.get<UserTestsDto[]>(`${environment.apiUrls.getProfileTests}/${userId}`)
    .subscribe({
      next: (tests) => {
@@ -57,7 +73,7 @@ export class ProfileService {
        this._currentProfileTests$.next(null);
      }
    });
- }
+ }*/
 
  
 

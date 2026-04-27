@@ -25,6 +25,8 @@ import { QuestionMultipleChoice } from './components/question-multiple-choice/qu
 import { QuestionCodeCompletion } from './components/question-code-completion/question-code-completion';
 import { CompanyHome } from './components/company-home/company-home';
 import { QuestionOpenEnded } from './components/question-open-ended/question-open-ended';
+import { Router, RouterModule } from '@angular/router';
+import { CommonModule } from '@angular/common';
 
 @NgModule({
   declarations: [
@@ -50,7 +52,7 @@ import { QuestionOpenEnded } from './components/question-open-ended/question-ope
     CompanyHome,
     QuestionOpenEnded,
   ],
-  imports: [BrowserModule, AppRoutingModule, ReactiveFormsModule, FormsModule],
+  imports: [BrowserModule, AppRoutingModule, ReactiveFormsModule, FormsModule, RouterModule, CommonModule],
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideHttpClient(withInterceptors([errorInterceptor])),

@@ -15,4 +15,5 @@ public interface IUserLogic
     Task GrantAdminRoleAsync(string userId);
     Task RevokeRoleAsync(string userId);
     Task<IEnumerable<UserTestsDto>> GetUserTestsAsync(string userId);
+    Task UpdateSkillsToUser(string id, UpdateSkillToUser dto);
 }
