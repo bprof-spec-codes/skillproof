@@ -6,6 +6,7 @@ export class JobViewDto {
   companyId: string = '';
   title: string = '';
   description: string = '';
+  employmentType: EmploymentType | null = null;
   shortDescription = "";
   EmploymentType: EmploymentType | null = null;
   location: string = '';

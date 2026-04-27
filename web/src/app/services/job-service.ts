@@ -25,10 +25,7 @@ export class JobService {
       .get<Job[]>(this.apiUrl)
       .pipe(
         map((result) => {
-          return result.map((job) => ({
-            ...job,
-            tags: this.normalizeTags(job.tags),
-          })) as JobViewDto[];
+          return result.map((job) => this.normalizeJob(job));
         }),
       )
       .subscribe({
@@ -44,10 +41,7 @@ export class JobService {
   getJobsByCompanyId(companyId: string): Observable<JobViewDto[]> {
     return this.http.get<Job[]>(`${this.apiUrl}/company/${companyId}`).pipe(
       map((result) => {
-        return result.map((job) => ({
-          ...job,
-          tags: this.normalizeTags(job.tags),
-        })) as JobViewDto[];
+        return result.map((job) => this.normalizeJob(job));
       }),
     );
   }
@@ -76,7 +70,7 @@ export class JobService {
   getJobById(id: string): Observable<JobViewDto> {
     return this.http.get<Job>(`${this.apiUrl}/${id}`).pipe(
       map((job) => {
-        return { ...job, tags: this.normalizeTags(job.tags) } as JobViewDto;
+        return this.normalizeJob(job);
       }),
     );
   }
@@ -156,7 +150,9 @@ export class JobService {
   }
 
   loadCompanyJobs(userId: string): void {
-    this.http.get<JobViewDto[]>(`${environment.apiUrls.getJobsOfCompany}/${userId}`)
+    this.http.get<Job[]>(`${environment.apiUrls.getJobsOfCompany}/${userId}`).pipe(
+      map((jobs) => jobs.map((job) => this.normalizeJob(job))),
+    )
     .subscribe({
       next: (jobs) => {
         console.log("Jobs loaded in successfully", jobs);
@@ -168,4 +164,15 @@ export class JobService {
       }
     });
    }
+
+  private normalizeJob(job: Job): JobViewDto {
+    const employmentType = job.employmentType ?? job.EmploymentType ?? null;
+
+    return {
+      ...job,
+      employmentType,
+      EmploymentType: employmentType,
+      tags: this.normalizeTags(job.tags),
+    } as JobViewDto;
+  }
 }

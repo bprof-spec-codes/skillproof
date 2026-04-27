@@ -53,7 +53,7 @@ export class JobEdit implements OnInit {
           this.companyId = job.companyId ?? '';
           this.title = job.title;
           this.location = job.location;
-          this.employmentType = job.EmploymentType ?? 0;
+          this.employmentType = job.employmentType ?? 0;
           this.tags = job.tags ? job.tags.join(', ') : '';
           this.description = job.description;
           this.shortDescription = job.shortDescription;

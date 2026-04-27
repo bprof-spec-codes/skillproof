@@ -112,7 +112,10 @@ export class JobDetail implements OnInit, OnDestroy {
   }
 
   getTimeAgo(dateStr: string): string {
-    const date = new Date(dateStr);
+     const formattedDateStr = dateStr.includes('Z') || dateStr.includes('+') 
+                             ? dateStr 
+                             : `${dateStr.replace(' ', 'T')}Z`;
+    const date = new Date(formattedDateStr);
     const time = date.getTime();
 
     if (!dateStr || Number.isNaN(time)) {
