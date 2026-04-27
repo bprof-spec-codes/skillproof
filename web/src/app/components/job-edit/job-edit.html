@@ -1,6 +1,6 @@
 <main class="container mt-4 position-relative">
   <div class="back-link mb-4">
-    <a routerLink="/profile">&larr; Back to Profile</a>
+    <a class="click" (click)="goHome()">&larr; Back to Profile</a>
   </div>
 
   <div class="form-card">
@@ -39,6 +39,12 @@
       <div class="form-group">
         <label for="tags">Tags (comma separated)</label>
         <input type="text" id="tags" name="tags" placeholder="e.g. Angular, C#, Frontend" [(ngModel)]="tags">
+      </div>
+
+      <div class="form-group">
+        <label for="shorDescription">Job Short Description</label>
+        <textarea class="preview-textarea" id="description" name="shortDescription" rows="3"
+          placeholder="Describe the role in short...." [(ngModel)]="shortDescription" required></textarea>
       </div>
 
       @if(isPreView$ | async){

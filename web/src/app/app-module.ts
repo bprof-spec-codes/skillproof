@@ -23,7 +23,10 @@ import { TestTake } from './components/test-take/test-take';
 import { QuestionTrueFalse } from './components/question-true-false/question-true-false';
 import { QuestionMultipleChoice } from './components/question-multiple-choice/question-multiple-choice';
 import { QuestionCodeCompletion } from './components/question-code-completion/question-code-completion';
+import { CompanyHome } from './components/company-home/company-home';
 import { QuestionOpenEnded } from './components/question-open-ended/question-open-ended';
+import { Router, RouterModule } from '@angular/router';
+import { CommonModule } from '@angular/common';
 
 @NgModule({
   declarations: [
@@ -46,9 +49,10 @@ import { QuestionOpenEnded } from './components/question-open-ended/question-ope
     QuestionTrueFalse,
     QuestionMultipleChoice,
     QuestionCodeCompletion,
+    CompanyHome,
     QuestionOpenEnded,
   ],
-  imports: [BrowserModule, AppRoutingModule, ReactiveFormsModule, FormsModule],
+  imports: [BrowserModule, AppRoutingModule, ReactiveFormsModule, FormsModule, RouterModule, CommonModule],
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideHttpClient(withInterceptors([errorInterceptor])),

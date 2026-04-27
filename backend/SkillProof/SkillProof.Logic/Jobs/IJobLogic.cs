@@ -20,4 +20,5 @@ public interface IJobLogic
 
     Task<CandidateAssessmentDto?> GetCandidateTestForJob(string jobId);
 
+    Task<IEnumerable<JobViewDto>> GetJobsOfCompanyAsync(string currentUserId);
 }

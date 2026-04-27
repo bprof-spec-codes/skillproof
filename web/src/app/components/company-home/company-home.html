@@ -1,0 +1,74 @@
+<div class="d-flex align-items-center justify-content-center">
+  <div class="container text-center">
+    <button class="login-btn button-medium mb-4" routerLink="/job-upload">Create an advertisement <i
+        class="bi bi-plus"></i></button>
+
+    <div class="row text-start pb-5 mt-4">
+      <div class="col-lg-7 col-md-6 mb-4 d-flex flex-column gap-3">
+        @if (companyJobs$ | async; as jobs) {
+        @if (jobs.length > 0) {
+        @for (job of jobs; track job.id) {
+        <div class="card border-0 radius" [class.border-0]="selectedJob?.id !== job.id"
+          [class.border]="selectedJob?.id === job.id" [class.border-highlight]="selectedJob?.id === job.id"
+          [class.shadow-sm]="selectedJob?.id === job.id" (click)="selectJob(job)">
+          <div class="card-body p-4">
+
+            <h4 class="fw-bold color mb-2">{{job.title}}</h4>
+            <p class="text-muted small mb-3">{{job.shortDescription}}</p>
+
+            <div class="text-secondary small d-flex flex-column gap-1">
+              <span><i class="bi bi-geo-alt text-danger"></i> {{job.location}}</span>
+              <span><i class="bi bi-clock text-danger"></i>{{ getTimeAgo(job.createdAt) }}</span>
+            </div>
+          </div>
+        </div>
+        }
+        }
+        }
+
+      </div>
+
+      <div class="col-lg-4 col-md-6">
+        @if (selectedJob) {
+        <div class="card border-0" style="border-radius: 16px;">
+          <div class="card-body p-4">
+
+            <div class="d-flex justify-content-between align-items-start mb-4">
+              <h2 class="fw-bold color mb-0">{{selectedJob.title}}</h2>
+              <a class="btn btn-link text-danger p-0" [routerLink]="['/editJob', selectedJob.id]">
+                <i class="bi bi-pencil"></i>
+              </a>
+            </div>
+
+            <div class="small">
+              <p class="weight mb-2">{{selectedJob.shortDescription}}</p>
+            </div>
+
+            <hr class="divider">
+            <h6 class="fw-bold mb-3">Job characteristics</h6>
+            <div class="d-flex gap-2 mb-4">
+              <span class="badge bg-light text-dark border p-2"><i class="bi bi-briefcase text-danger"></i>
+                Full-time</span>
+              <span class="badge bg-light text-dark border p-2"><i
+                  class="bi bi-laptop text-danger"></i>{{selectedJob.EmploymentType}}</span>
+            </div>
+
+            <hr class="divider">
+            <h6 class="fw-bold mb-2">Office location</h6>
+            <p class="small text-muted mb-0">{{selectedJob.location}}</p>
+
+          </div>
+        </div>
+        } @else {
+        <div class="card sample border-0" style="border-radius: 16px;">
+          <div class="card-body p-4">
+          </div>
+        </div>
+        }
+      </div>
+
+    </div>
+
+
+  </div>
+</div>

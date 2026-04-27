@@ -1,16 +1,18 @@
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
-using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using SkillProof.Data.Repositorys;
+using SkillProof.Entities.Dtos.Tests;
 using SkillProof.Entities.Dtos.Users;
 using SkillProof.Entities.Helper;
 using SkillProof.Entities.Models;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
+using System.Text.RegularExpressions;
 
 namespace SkillProof.Logic.User
 {
@@ -140,7 +142,12 @@ namespace SkillProof.Logic.User
                     FullName = user.FirstName + " " + user.LastName,
                     Image = Convert.ToBase64String(user.ProfilePicture),
                     Headline = user.Headline,
-                    Bio = user.Bio
+                    Bio = user.Bio,
+
+                    Skills = user.Skills?
+                        .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                        .Select(s => s.Trim())
+                        .ToList() ?? new List<string>()
                 });
             }
 
@@ -163,7 +170,11 @@ namespace SkillProof.Logic.User
                 Image = Convert.ToBase64String(user.ProfilePicture),
                 Bio = user.Bio,
                 Headline = user.Headline,
-                CompanyId = user.CompanyId
+                CompanyId = user.CompanyId,
+                Skills = user.Skills?
+                        .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                        .Select(s => s.Trim())
+                        .ToList() ?? new List<string>()
             };
         }
 
@@ -296,6 +307,50 @@ namespace SkillProof.Logic.User
                 expires: DateTime.UtcNow.AddMinutes(expiryInMinutes),
                 signingCredentials: new SigningCredentials(signinKey, SecurityAlgorithms.HmacSha256)
             );
+        }
+
+        public async Task<IEnumerable<UserTestsDto>> GetUserTestsAsync(string userId)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+
+            if (user == null)
+            {
+                throw new KeyNotFoundException("User not found.");
+            }
+            var result = new List<UserTestsDto>();
+
+            foreach (var test in user.Tests)
+            {
+                result.Add(new UserTestsDto
+                {
+                    DifficultyLevel = test.DifficultyLevel,
+                    Passed = test.Passed
+                });
+            }
+            return result;
+        }
+
+        public async Task UpdateSkillsToUser(string id, UpdateSkillToUser dto)
+        {
+            
+            var user = await _userManager.FindByIdAsync(id);
+
+            if (user == null)
+                throw new KeyNotFoundException("User not found");
+
+
+            var cleanedSkills = dto.Skills
+            .Select(s => s?.Trim())
+            .Where(s => !string.IsNullOrWhiteSpace(s))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+            user.Skills = string.Join(", ", cleanedSkills);          
+
+            var result = await _userManager.UpdateAsync(user);
+
+            if (!result.Succeeded)
+                throw new Exception(string.Join(", ", result.Errors.Select(e => e.Description)));
         }
     }
 }

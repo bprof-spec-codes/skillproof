@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { JobService } from '../../services/job-service';
 import { MarkdownService } from '../../services/markdown-service';
 import { BehaviorSubject, Observable } from 'rxjs';
+import { DashboardRoutingService } from '../../services/dashboardRouting';
 
 @Component({
   selector: 'app-jobupload',
@@ -17,6 +18,7 @@ export class Jobupload {
   salary: string = '';
   tags: string = '';
   description: string = '';
+  shortDescription: string = "";
 
   preViewmd: BehaviorSubject<string> = new BehaviorSubject<string>('')
   isPreView: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false)
@@ -29,7 +31,8 @@ export class Jobupload {
   constructor(
     private jobService: JobService,
     private router: Router,
-    private markdownService: MarkdownService
+    private markdownService: MarkdownService,
+    private dashboardRoutingService: DashboardRoutingService
   ) {}
 
   onSubmit() {
@@ -53,6 +56,7 @@ export class Jobupload {
       employmentType: Number(this.employmentType),
       salary: this.salary,
       description: this.description,
+      shortDescription: this.shortDescription,
       tags: tagsArray,
     };
 
@@ -78,5 +82,9 @@ export class Jobupload {
       console.log(this.preViewmd.value)
     }
     )
+  }
+
+  goHome(){
+    this.dashboardRoutingService.routeToDashboard();
   }
 }

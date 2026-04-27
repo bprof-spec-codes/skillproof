@@ -409,6 +409,10 @@ namespace SkillProof.Data.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<string>("ShortDescription")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Tags")
                         .IsRequired()
                         .HasMaxLength(500)
@@ -679,6 +683,9 @@ namespace SkillProof.Data.Migrations
                     b.Property<byte[]>("ProfilePicture")
                         .IsRequired()
                         .HasColumnType("varbinary(max)");
+
+                    b.Property<string>("Skills")
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasIndex("CompanyId");
 

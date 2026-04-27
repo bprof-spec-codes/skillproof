@@ -4,6 +4,7 @@ import { JobService } from '../../services/job-service';
 import { Observable, filter, switchMap, of } from 'rxjs';
 import { ProfileViewDto } from '../../Models/User/profile-view-dto';
 import { JobViewDto } from '../../Models/Dtos/Job/JobView-dto';
+import { UserTestsDto } from '../../Models/Dtos/User/userTests-dto';
 
 @Component({
   selector: 'app-profile-view',
@@ -14,6 +15,7 @@ import { JobViewDto } from '../../Models/Dtos/Job/JobView-dto';
 export class ProfileView implements OnInit {
   profile$!: Observable<ProfileViewDto | null>;
   companyJobs$!: Observable<JobViewDto[]>;
+  profileTests$!: Observable<UserTestsDto[] | null>;
 
   constructor(
     private profileService: ProfileService,
@@ -22,6 +24,7 @@ export class ProfileView implements OnInit {
 
   ngOnInit(): void {
     this.profile$ = this.profileService.currentProfile$;
+    this.profileTests$ = this.profileService.currentProfileTests$;
 
     this.companyJobs$ = this.profile$.pipe(
       filter((profile): profile is ProfileViewDto => profile !== null),
@@ -41,4 +44,5 @@ export class ProfileView implements OnInit {
       console.error('Failed to delete job.', error);
     }
   }
+
 }

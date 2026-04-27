@@ -4,6 +4,8 @@ import { ProfileViewDto } from '../Models/User/profile-view-dto';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { environment } from '../../environments/environment.development';
 import { AuthService } from './auth-service';
+import { UserTestsDto } from '../Models/Dtos/User/userTests-dto';
+import { JobViewDto } from '../Models/Dtos/Job/JobView-dto';
 
 @Injectable({
   providedIn: 'root',
@@ -12,14 +14,21 @@ export class ProfileService {
 
   private _currentProfile$ = new BehaviorSubject<ProfileViewDto | null>(null);
   public currentProfile$ = this._currentProfile$.asObservable();
+  private _currentProfileTests$ = new BehaviorSubject<UserTestsDto[] | null>(null);
+  public currentProfileTests$ = this._currentProfileTests$.asObservable();
+
+
 
   constructor(
     private http: HttpClient,
   ) {}
 
+  getProfile(userId: string): Observable<ProfileViewDto> {
+    return this.http.get<ProfileViewDto>(`${environment.apiUrls.getProfile}/${userId}`);
+  }
+
   loadProfile(userId: string): void {
-    this.http
-      .get<ProfileViewDto>(`${environment.apiUrls.getProfile}/${userId}`)
+    this.getProfile(userId)
       .subscribe({
         next: (profile) => {
           console.log("PROFILE LOADED:", profile);
@@ -35,5 +44,37 @@ export class ProfileService {
   clearProfile() {
     this._currentProfile$.next(null);
   }
+
+  updateSkills(userId: string, skills: string[]): Observable<any> {
+    return this.http.put(`${environment.apiUrls.updateSkills}/${userId}`, { skills }).pipe(
+      tap(() => {
+        const current = this._currentProfile$.value;
+        if (current) {
+          this._currentProfile$.next({
+            ...current,
+            skills: skills
+          });
+        }
+      })
+    );
+  }
+
+
+
+  /*loadUserTests(userId: string): void {
+   this.http.get<UserTestsDto[]>(`${environment.apiUrls.getProfileTests}/${userId}`)
+   .subscribe({
+     next: (tests) => {
+       console.log("Tests loaded in successfuly", tests);
+       this._currentProfileTests$.next(tests);
+     },
+     error: (err) => {
+       console.error(err);
+       this._currentProfileTests$.next(null);
+     }
+   });
+ }*/
+
+ 
 
 }

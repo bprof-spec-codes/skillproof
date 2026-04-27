@@ -13,6 +13,7 @@ import { JobEdit } from './components/job-edit/job-edit';
 import { AssessmentCreate } from './components/assessment-create/assessment-create';
 import { JobDetail } from './components/job-detail/job-detail';
 import { TestTake } from './components/test-take/test-take';
+import { CompanyHome } from './components/company-home/company-home';
 
 const routes: Routes = [
   { path: '', redirectTo: 'home', pathMatch: 'full' },
@@ -30,6 +31,7 @@ const routes: Routes = [
   { path: 'job/:id', component: JobDetail },
   { path: 'job/:id/test', component: TestTake },
   { path: 'assessments/create', component: AssessmentCreate},
+  { path: 'company', component: CompanyHome},
   { path: '**', redirectTo: 'home', pathMatch: 'full' },
 ];
 
