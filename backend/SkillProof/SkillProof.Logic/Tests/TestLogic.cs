@@ -350,7 +350,7 @@ public class TestLogic : ITestLogic
         testAnwser.Inspected = true;
         if (!string.IsNullOrWhiteSpace(feedback))
         {
-            testAnwser.FreeTextResponse = feedback;
+            testAnwser.ManualFeedback = feedback;
         }
 
         var result = new FeedbackResponseDto
@@ -373,7 +373,7 @@ public class TestLogic : ITestLogic
             throw new ArgumentException("Job id is required.");
         }
         var job = await _jobRepository.GetAll()
-            .Include(j => j.JobApplications) // <-- Changed this
+            .Include(j => j.JobApplications)
             .FirstOrDefaultAsync(j => j.Id == jobId);
 
         if (job == null)
@@ -381,7 +381,6 @@ public class TestLogic : ITestLogic
             throw new KeyNotFoundException($"Job '{jobId}' not found.");
         }
 
-        // Changed this to look at JobApplications instead of Assessments
         List<string?> userIds = job.JobApplications
             .Select(a => a.UserId)
             .Distinct()
