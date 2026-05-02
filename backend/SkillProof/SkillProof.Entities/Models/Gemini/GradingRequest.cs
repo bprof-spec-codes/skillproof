@@ -10,5 +10,7 @@ namespace SkillProof.Entities.Models.Gemini
     {
         public string Question { get; set; }
         public string StudentAnswer { get; set; }
+
+        public string AnswerToQuestion { get; set;  }
     }
 }

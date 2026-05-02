@@ -122,7 +122,7 @@ export class JobEdit implements OnInit {
     try {
       this.jobService.updateJob(this.jobId, updateDto as any);
       setTimeout(() => {
-        this.router.navigate(['/profile']);
+        this.router.navigate(['/company']);
       }, 500);
     } catch (err) {
       this.error = 'An error occurred while updating the job.';

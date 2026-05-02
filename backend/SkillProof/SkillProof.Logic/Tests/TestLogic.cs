@@ -269,6 +269,7 @@ public class TestLogic : ITestLogic
         {
             Question = question.QuestionText,
             StudentAnswer = text,
+            AnswerToQuestion = question.FillInTheBlankQuestions?.Answer ?? string.Empty
         };
         double score = geminiService.EvaluateAnswerAsync(request).GetAwaiter().GetResult();
         
@@ -287,6 +288,7 @@ public class TestLogic : ITestLogic
                 .ThenInclude(Assessments => Assessments.TestAttempts)
                     .ThenInclude(TestAttempts => TestAttempts.TestAnswers)
                         .ThenInclude(TestAnswers => TestAnswers.Question)
+                         .ThenInclude(q => q.MultipleChoiceQuestion)
             .FirstOrDefaultAsync(j => j.Id == jobId);
 
         if (job == null)
@@ -301,6 +303,8 @@ public class TestLogic : ITestLogic
 
         var attempt = job.Assessments.SelectMany(a => a.TestAttempts).FirstOrDefault(a => a.UserId == userId);
 
+
+
         if (attempt == null)
         {
             throw new ArgumentException($"There are no test attempt for the assessments attached to this job with this user: {userId}.");
@@ -308,12 +312,14 @@ public class TestLogic : ITestLogic
 
         var reviews = attempt.TestAnswers.Select(testAnswers => new UserTestReviewDto
         {
+            QuestionId = testAnswers.QuestionId,
             TestAnswerId = testAnswers.Id,
             QuestionText = testAnswers.Question.QuestionText,
             UserResponse = testAnswers.FreeTextResponse,
             Score = testAnswers.Score,
             Inspected = testAnswers.Inspected,
-            UserId = userId
+            UserId = userId,
+            QuestionType = testAnswers.Question.Type
         }).ToList();
         return reviews;
     }
@@ -367,8 +373,7 @@ public class TestLogic : ITestLogic
             throw new ArgumentException("Job id is required.");
         }
         var job = await _jobRepository.GetAll()
-            .Include(j => j.Assessments)
-                .ThenInclude(Assessments => Assessments.TestAttempts)
+            .Include(j => j.JobApplications) // <-- Changed this
             .FirstOrDefaultAsync(j => j.Id == jobId);
 
         if (job == null)
@@ -376,9 +381,9 @@ public class TestLogic : ITestLogic
             throw new KeyNotFoundException($"Job '{jobId}' not found.");
         }
 
-        List<string?> userIds = job.Assessments
-            .SelectMany(a => a.TestAttempts)
-            .Select(t => t.UserId)
+        // Changed this to look at JobApplications instead of Assessments
+        List<string?> userIds = job.JobApplications
+            .Select(a => a.UserId)
             .Distinct()
             .ToList();
 

@@ -17,7 +17,8 @@
     <ng-container *ngIf="!isLoading && !errorMessage && !result && assessment && currentQuestion">
       <div class="test-layout">
         <header class="test-header">
-          <button class="title-back-btn" type="button" (click)="goBack()" [disabled]="isFirstQuestion || isSubmitting" aria-label="Previous question">
+          <button class="title-back-btn" type="button" (click)="goBack()" [disabled]="isFirstQuestion || isSubmitting"
+            aria-label="Previous question">
             <span aria-hidden="true">←</span>
           </button>
           <h2 class="test-title">{{ currentQuestion.title || assessment.title }}</h2>
@@ -26,35 +27,24 @@
         <div class="question-shell">
           <div class="question-block">
             <div [ngSwitch]="currentQuestion.type">
-              <app-question-true-false
-                *ngSwitchCase="QuestionType.TrueFalse"
-                [question]="currentQuestion"
+              <app-question-true-false *ngSwitchCase="QuestionType.TrueFalse" [question]="currentQuestion"
                 [currentAnswer]="currentAnswerFor(currentQuestion.id)"
-                (answerChange)="onAnswerChange($event)"
-              ></app-question-true-false>
-              <app-question-multiple-choice
-                *ngSwitchCase="QuestionType.MultipleChoice"
-                [question]="currentQuestion"
+                (answerChange)="onAnswerChange($event)"></app-question-true-false>
+              <app-question-multiple-choice *ngSwitchCase="QuestionType.MultipleChoice" [question]="currentQuestion"
                 [currentAnswer]="currentAnswerFor(currentQuestion.id)"
-                (answerChange)="onAnswerChange($event)"
-              ></app-question-multiple-choice>
-              <app-question-code-completion
-                *ngSwitchCase="QuestionType.CodeCompletion"
-                [question]="currentQuestion"
+                (answerChange)="onAnswerChange($event)"></app-question-multiple-choice>
+              <app-question-code-completion *ngSwitchCase="QuestionType.CodeCompletion" [question]="currentQuestion"
                 [currentAnswer]="currentAnswerFor(currentQuestion.id)"
-                (answerChange)="onAnswerChange($event)"
-              ></app-question-code-completion>
-              <app-question-open-ended
-                *ngSwitchCase="QuestionType.OpenEnded"
-                [question]="currentQuestion"
+                (answerChange)="onAnswerChange($event)"></app-question-code-completion>
+              <app-question-open-ended *ngSwitchCase="QuestionType.OpenEnded" [question]="currentQuestion"
                 [currentAnswer]="currentAnswerFor(currentQuestion.id)"
-                (answerChange)="onAnswerChange($event)"
-              ></app-question-open-ended>
+                (answerChange)="onAnswerChange($event)"></app-question-open-ended>
             </div>
           </div>
 
           <div class="navigation-row">
-            <button class="nav-btn nav-btn-secondary" type="button" (click)="goBack()" [disabled]="isFirstQuestion || isSubmitting">
+            <button class="nav-btn nav-btn-secondary" type="button" (click)="goBack()"
+              [disabled]="isFirstQuestion || isSubmitting">
               <span aria-hidden="true">←</span>
               <span>Back</span>
             </button>
@@ -66,7 +56,8 @@
               <span aria-hidden="true">→</span>
             </button>
 
-            <button *ngIf="isLastQuestion" class="nav-btn nav-btn-primary" type="button" (click)="onSubmit()" [disabled]="isSubmitting">
+            <button *ngIf="isLastQuestion" class="nav-btn nav-btn-primary" type="button" (click)="onSubmit()"
+              [disabled]="isSubmitting">
               <span>{{ isSubmitting ? 'Submitting...' : 'Submit' }}</span>
               <span aria-hidden="true">→</span>
             </button>
@@ -76,34 +67,39 @@
     </ng-container>
 
     <ng-container *ngIf="!isLoading && !errorMessage && result">
-      <div class="result-block">
-        <h2 class="result-title">
-          You got {{ result.score }} / {{ result.maxScore }} points
-          — {{ result.passed ? 'Passed' : 'Not passed' }}
-        </h2>
+      <div class="card">
+        <div class="card-body">
+          <div class="result-block">
+            <h2 class="result-title">
+              You got {{ result.score }} / {{ result.maxScore }} points
+              — {{ result.passed ? 'Passed' : 'Not passed' }}
+            </h2>
 
-        <ul class="result-list">
-          <li *ngFor="let qr of result.questionResults" class="result-item">
-            <div class="result-item-header">
-              <span class="result-icon" [class.correct]="qr.isCorrect" [class.incorrect]="!qr.isCorrect">
-                {{ qr.isCorrect ? '✓' : '✗' }}
-              </span>
-              <span class="result-question-title">{{ qr.questionTitle }}</span>
-              <span class="result-points">{{ qr.pointsAwarded }} / {{ qr.maxPoints }}</span>
-            </div>
+            <ul class="result-list">
+              <li *ngFor="let qr of result.questionResults" class="result-item">
+                <div class="result-item-header">
+                  <span class="result-icon" [class.correct]="qr.isCorrect" [class.incorrect]="!qr.isCorrect">
+                    {{ qr.isCorrect ? '✓' : '✗' }}
+                  </span>
+                  <span class="result-question-title">{{ qr.questionTitle }}</span>
+                  <span class="result-points">{{ qr.pointsAwarded }} / {{ qr.maxPoints }}</span>
+                </div>
 
-            <div *ngIf="qr.userResponse" class="result-user-response">
-              <strong>Your answer:</strong> {{ qr.userResponse }}
-            </div>
+                <div *ngIf="qr.userResponse" class="result-user-response">
+                  <strong>Your answer:</strong> {{ qr.userResponse }}
+                </div>
 
-            <div *ngIf="qr.aiFeedback && qr.aiFeedback !== '-'" class="result-ai-feedback">
-              <strong>Feedback:</strong> {{ qr.aiFeedback }}
-            </div>
-          </li>
-        </ul>
+                <div *ngIf="qr.aiFeedback && qr.aiFeedback !== '-'" class="result-ai-feedback">
+                  <strong>Feedback:</strong> {{ qr.aiFeedback }}
+                </div>
+              </li>
+            </ul>
 
-        <button class="btn btn-outline-secondary" type="button" (click)="backToJob()">Back to Job</button>
+            <button class="btn btn-outline-secondary" type="button" (click)="backToJob()">Back to Job</button>
+          </div>
+        </div>
       </div>
+
     </ng-container>
   </div>
 </section>

@@ -80,8 +80,8 @@
       </div>
       }
 
-      <button type="submit" class="submit-btn" [disabled]="loading">
-        {{ loading ? 'Posting...' : 'Post Advertisement' }}
+      <button type="submit" class="submit-btn" [disabled]="loading" routerLink="/company">
+        {{ loading ? 'Posting...' : 'Post Advertisement'}}
       </button>
     </form>
   </div>

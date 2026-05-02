@@ -79,7 +79,24 @@ export class JobDetail implements OnInit, OnDestroy {
       return;
     }
 
-    this.router.navigate(['/job', this.job.id, 'test']);
+    if (this.job.assessments && this.job.assessments.length > 0) {
+      this.router.navigate(['/job', this.job.id, 'test']);
+    } else {
+      this.jobService.applyForJob(this.job.id).subscribe({
+        next: (response: any) => {
+          this.modalService.open({
+            type: 'success',
+            message: response?.message || 'Application submitted successfully.',
+          });
+        },
+        error: (err) => {
+          this.modalService.open({
+            type: 'error',
+            message: err.error?.message || 'An error occurred while applying.',
+          });
+        }
+      });
+    }
   }
 
   shareJob(): void {

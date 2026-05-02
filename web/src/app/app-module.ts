@@ -26,7 +26,10 @@ import { QuestionCodeCompletion } from './components/question-code-completion/qu
 import { CompanyHome } from './components/company-home/company-home';
 import { QuestionOpenEnded } from './components/question-open-ended/question-open-ended';
 import { Router, RouterModule } from '@angular/router';
-import { CommonModule } from '@angular/common';
+import { AsyncPipe, CommonModule } from '@angular/common';
+import { MyJobs } from './components/my-jobs/my-jobs';
+import { ReviewUser } from './components/review-user/review-user';
+import { ManualFeedback } from './components/manual-feedback/manual-feedback';
 
 @NgModule({
   declarations: [
@@ -51,8 +54,19 @@ import { CommonModule } from '@angular/common';
     QuestionCodeCompletion,
     CompanyHome,
     QuestionOpenEnded,
+    MyJobs,
+    ReviewUser,
+    ManualFeedback,
   ],
-  imports: [BrowserModule, AppRoutingModule, ReactiveFormsModule, FormsModule, RouterModule, CommonModule],
+  imports: [
+    BrowserModule,
+    AppRoutingModule,
+    ReactiveFormsModule,
+    FormsModule,
+    RouterModule,
+    CommonModule,
+    AsyncPipe,
+  ],
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideHttpClient(withInterceptors([errorInterceptor])),

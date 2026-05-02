@@ -1,0 +1,59 @@
+<section class="home wrap border-bottom">
+    <div class="container">
+        <div class="mx-auto hero-wrap">
+            @if(jobs$ | async; as jobs){
+            @if(jobs.length > 0) {
+            <div class="row accordion" id="jobsAccordion">
+                @for(job of jobs; track job.id) {
+                <div class="card border-0 radius mt-4 mb-2">
+                    <div class="card-body p-4 cursor-pointer" data-bs-toggle="collapse"
+                        [attr.data-bs-target]="'#collapse-' + job.id" aria-expanded="false"
+                        [attr.aria-controls]="'collapse-' + job.id" (click)="loadApplicants(job.id)">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h4 class="fw-bold color mb-2">{{job.title}}</h4>
+                                <div class="text-secondary small d-flex flex-column gap-1">
+                                    <span><i class="bi bi-clock text-danger"></i> {{ getTimeAgo(job.createdAt) }}</span>
+                                </div>
+                            </div>
+                            <i class="bi bi-chevron-down pointer text-secondary"></i>
+                        </div>
+                    </div>
+
+                    <div [id]="'collapse-' + job.id" class="collapse" data-bs-parent="#jobsAccordion">
+                        <hr class="divider">
+                        <div class="mb-4">
+                            <h4 class="fw-bold color ms-4 mb-3 text-center">Applicants</h4>
+                            <hr class="divider">
+
+                            @if(job.isLoadingApplicants) {
+                            <div class="spinner-border spinner-border-sm text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            } @else {
+                            @if(job.applicants && job.applicants.length > 0) {
+                            <ul class="list-group list-group-flush border-0">
+                                @for(applicant of job.applicants; track applicant.id) {
+                                <li
+                                    class="list-group-item border-0 bg-transparent d-flex justify-content-between align-items-center px-0">
+                                    <span class="fontsize ms-4 color">{{ applicant.fullName }}</span>
+                                    <span class="me-4 fontsize pointer" [routerLink]="['/reviewUser', applicant.id]"
+                                    [queryParams]="{jobId: job.id}"><img src="/Assets/Arrow.svg" class="icon"></span>
+                                </li>
+                                <hr class="divider">
+                                }
+                            </ul>
+                            } @else {
+                            <p class="text-muted small text-center">No applicants yet for this position.</p>
+                            }
+                            }
+                        </div>
+                    </div>
+                </div>
+                }
+            </div>
+            }
+            }
+        </div>
+    </div>
+</section>

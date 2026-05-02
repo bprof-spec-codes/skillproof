@@ -15,12 +15,20 @@ $primary-color: #003049;
 
 html,
 body,
-main,
-h1 {
-  font-family: $primary;
-  font-weight: $font-weight-semibold;
-  color: $primary-color;
+main {
+  font-family: $primary !important;
+  color: $primary-color !important;
 
+}
+
+h1 {
+  font-weight: $font-weight-semibold;
+  font-family: $primary;
+  color: $primary-color !important;
+}
+
+p {
+  color: $primary-color;
 }
 
 .background {

@@ -14,6 +14,9 @@ import { AssessmentCreate } from './components/assessment-create/assessment-crea
 import { JobDetail } from './components/job-detail/job-detail';
 import { TestTake } from './components/test-take/test-take';
 import { CompanyHome } from './components/company-home/company-home';
+import { MyJobs } from './components/my-jobs/my-jobs';
+import { ReviewUser } from './components/review-user/review-user';
+import { ManualFeedback } from './components/manual-feedback/manual-feedback';
 
 const routes: Routes = [
   { path: '', redirectTo: 'home', pathMatch: 'full' },
@@ -30,8 +33,11 @@ const routes: Routes = [
   { path: 'editJob/:id', component: JobEdit },
   { path: 'job/:id', component: JobDetail },
   { path: 'job/:id/test', component: TestTake },
-  { path: 'assessments/create', component: AssessmentCreate},
-  { path: 'company', component: CompanyHome},
+  { path: 'assessments/create', component: AssessmentCreate },
+  { path: 'company', component: CompanyHome },
+  { path: 'myJobs', component: MyJobs },
+  { path: 'reviewUser/:id', component: ReviewUser },
+  { path: 'manualFeedback/:id', component: ManualFeedback },
   { path: '**', redirectTo: 'home', pathMatch: 'full' },
 ];
 
@@ -39,4 +45,4 @@ const routes: Routes = [
   imports: [RouterModule.forRoot(routes)],
   exports: [RouterModule]
 })
-export class AppRoutingModule {}
+export class AppRoutingModule { }
