@@ -1,10 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { ProfileService } from '../../services/profile-service';
 import { JobService } from '../../services/job-service';
-import { Observable, filter, switchMap, of } from 'rxjs';
-import { ProfileViewDto } from '../../Models/User/profile-view-dto';
+import { Observable, filter, switchMap, of, combineLatest, map } from 'rxjs';
 import { JobViewDto } from '../../Models/Dtos/Job/JobView-dto';
 import { UserTestsDto } from '../../Models/Dtos/User/userTests-dto';
+import { ProfileViewDto } from '../../Models/Dtos/User/profile-view-dto';
 
 @Component({
   selector: 'app-profile-view',
@@ -16,6 +16,8 @@ export class ProfileView implements OnInit {
   profile$!: Observable<ProfileViewDto | null>;
   companyJobs$!: Observable<JobViewDto[]>;
   profileTests$!: Observable<UserTestsDto[] | null>;
+
+  savedJobs$!: Observable<JobViewDto[]>;
 
   constructor(
     private profileService: ProfileService,
@@ -35,6 +37,15 @@ export class ProfileView implements OnInit {
         return this.jobService.getJobsByCompanyId(profile.companyId);
       }),
     );
+
+    this.savedJobs$ = combineLatest([this.jobService.jobs$, this.profile$]).pipe(
+      map(([allJobs, profile]) => {
+        if (!profile || !profile.savedJobIds || profile.savedJobIds.length === 0) {
+          return [];
+        }
+        return allJobs.filter((job) => profile.savedJobIds.includes(job.id));
+      }),
+    );
   }
 
   deleteJob(jobId: string, companyId: string): void {
@@ -45,4 +56,8 @@ export class ProfileView implements OnInit {
     }
   }
 
+  removeSavedJob(jobId: string, event: MouseEvent): void {
+    event.stopPropagation();
+    this.profileService.toggleSavedJob(jobId).subscribe();
+  }
 }

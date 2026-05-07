@@ -1,18 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Tokens;
 using SkillProof.Entities.Dtos.Users;
-using SkillProof.Entities.Helper;
-using SkillProof.Entities.Models;
-using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using SkillProof.Logic.User;
 
 namespace SkillProof.Api.Controllers
@@ -106,6 +95,31 @@ namespace SkillProof.Api.Controllers
             await _userLogic.UpdateSkillsToUser(id, dto);
 
             return NoContent();
+        }
+
+        [HttpPost("toggle-saved-job/{jobId}")]
+        public async Task<IActionResult> ToggleSavedJob(string jobId)
+        {
+            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var updatedProfile = await _userLogic.ToggleSavedJobAsync(currentUserId, jobId);
+            return Ok(updatedProfile);
+        }
+
+        [HttpPost("apply/{jobId}")]
+        public async Task<IActionResult> ApplyToJob(string jobId)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId)) return Unauthorized();
+
+            try
+            {
+                await _userLogic.ApplyToJobAsync(userId, jobId);
+                return Ok();
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
     }
 }

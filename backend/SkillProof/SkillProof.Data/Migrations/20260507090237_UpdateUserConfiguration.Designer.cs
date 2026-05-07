@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SkillProof.Data;
 
@@ -11,9 +12,11 @@ using SkillProof.Data;
 namespace SkillProof.Data.Migrations
 {
     [DbContext(typeof(SkillProofDbContext))]
-    partial class SkillProofDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260507090237_UpdateUserConfiguration")]
+    partial class UpdateUserConfiguration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -470,6 +473,10 @@ namespace SkillProof.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
+                    b.Property<string>("UserId1")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
                     b.HasKey("Id");
 
                     b.HasIndex("JobId");
@@ -479,6 +486,8 @@ namespace SkillProof.Data.Migrations
                         .HasFilter("[TestId] IS NOT NULL");
 
                     b.HasIndex("UserId");
+
+                    b.HasIndex("UserId1");
 
                     b.ToTable("JobApplications");
                 });
@@ -882,10 +891,16 @@ namespace SkillProof.Data.Migrations
                         .HasForeignKey("SkillProof.Entities.Models.JobApplication", "TestId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("SkillProof.Entities.Models.Users", "User")
+                    b.HasOne("SkillProof.Entities.Models.Users", null)
                         .WithMany("JobApplications")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("SkillProof.Entities.Models.Users", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId1")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Job");

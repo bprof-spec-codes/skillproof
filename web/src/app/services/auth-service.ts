@@ -7,7 +7,7 @@ import { LoginDto } from '../Models/Dtos/User/login-dto';
 import { Router } from '@angular/router';
 import { JwtPayload } from '../Models/Helpers/jwt-payload';
 import { ProfileService } from './profile-service';
-import { ProfileViewDto } from '../Models/User/profile-view-dto';
+import { ProfileViewDto } from '../Models/Dtos/User/profile-view-dto';
 
 @Injectable({
   providedIn: 'root',

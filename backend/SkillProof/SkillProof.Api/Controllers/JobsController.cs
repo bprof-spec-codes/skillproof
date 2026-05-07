@@ -63,6 +63,7 @@ public class JobsController : ControllerBase
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdateJob(string id, [FromBody] JobViewDto dto)
     {
+
         var companyId = User.Claims.FirstOrDefault(c => 
             c.Type == "CompanyId" || 
             c.Type.EndsWith("CompanyId", StringComparison.OrdinalIgnoreCase))?.Value;

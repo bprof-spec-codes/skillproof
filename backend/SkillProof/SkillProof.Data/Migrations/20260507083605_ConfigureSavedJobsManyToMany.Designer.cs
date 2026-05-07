@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SkillProof.Data;
 
@@ -11,9 +12,11 @@ using SkillProof.Data;
 namespace SkillProof.Data.Migrations
 {
     [DbContext(typeof(SkillProofDbContext))]
-    partial class SkillProofDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260507083605_ConfigureSavedJobsManyToMany")]
+    partial class ConfigureSavedJobsManyToMany
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -885,7 +888,7 @@ namespace SkillProof.Data.Migrations
                     b.HasOne("SkillProof.Entities.Models.Users", "User")
                         .WithMany("JobApplications")
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Job");

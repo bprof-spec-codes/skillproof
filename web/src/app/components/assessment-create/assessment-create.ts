@@ -39,7 +39,7 @@ interface PlannedQuestion {
 export class AssessmentCreate implements OnInit {
   title = '';
   description = '';
-  difficultyLevel = 0;
+  difficultyLevel = -1;
 
   availableQuestions: QuestionResponseDto[] = [];
   filteredQuestions: QuestionResponseDto[] = [];
@@ -104,16 +104,25 @@ export class AssessmentCreate implements OnInit {
   get filteredTagSuggestions(): string[] {
     const query = this.normalizeTag(this.tagQuery);
     return this.availableTags
-      .filter((tag) => !this.selectedFilterTags.some((selected) => this.normalizeTag(selected) === this.normalizeTag(tag)))
+      .filter(
+        (tag) =>
+          !this.selectedFilterTags.some(
+            (selected) => this.normalizeTag(selected) === this.normalizeTag(tag),
+          ),
+      )
       .filter((tag) => query === '' || this.normalizeTag(tag).includes(query))
       .slice(0, 12);
   }
 
   get tagGroups(): TagGroupSummary[] {
     const groups = new Map<string, { tag: string; questions: QuestionResponseDto[] }>();
-    const normalizedSelectedTags = new Set(this.selectedFilterTags.map((tag) => this.normalizeTag(tag)));
+    const normalizedSelectedTags = new Set(
+      this.selectedFilterTags.map((tag) => this.normalizeTag(tag)),
+    );
     const reservedQuestionIds = new Set(
-      this.resolveRandomRules(false).flatMap((entry) => entry.questions.map((question) => question.id))
+      this.resolveRandomRules(false).flatMap((entry) =>
+        entry.questions.map((question) => question.id),
+      ),
     );
 
     this.targetDifficultyQuestions.forEach((question) => {
@@ -138,7 +147,7 @@ export class AssessmentCreate implements OnInit {
         const selectedIds = new Set(this.selectedQuestions.map((question) => question.id));
         const total = group.questions.length;
         const available = group.questions.filter(
-          (question) => !selectedIds.has(question.id) && !reservedQuestionIds.has(question.id)
+          (question) => !selectedIds.has(question.id) && !reservedQuestionIds.has(question.id),
         ).length;
         const reserved = this.randomTagRules
           .filter((rule) => this.normalizeTag(rule.tag) === key)
@@ -161,7 +170,9 @@ export class AssessmentCreate implements OnInit {
   }
 
   get totalQuestionCount(): number {
-    return this.selectedQuestions.length + this.randomTagRules.reduce((sum, rule) => sum + rule.count, 0);
+    return (
+      this.selectedQuestions.length + this.randomTagRules.reduce((sum, rule) => sum + rule.count, 0)
+    );
   }
 
   get plannedQuestions(): PlannedQuestion[] {
@@ -175,7 +186,7 @@ export class AssessmentCreate implements OnInit {
         question,
         source: 'random' as const,
         randomTag: entry.rule.tag,
-      }))
+      })),
     );
 
     return [...fixedQuestions, ...randomQuestions];
@@ -186,13 +197,18 @@ export class AssessmentCreate implements OnInit {
   }
 
   private get targetDifficultyQuestions(): QuestionResponseDto[] {
+    if (Number(this.difficultyLevel) === -1) {
+      return this.availableQuestions;
+    }
     const targetDifficulty = String(this.difficultyLevel);
-    return this.availableQuestions.filter((question) => String(question.difficulty) === targetDifficulty);
+    return this.availableQuestions.filter(
+      (question) => String(question.difficulty) === targetDifficulty,
+    );
   }
 
   onTargetDifficultyChange(): void {
     this.selectedQuestions = this.selectedQuestions.filter(
-      (question) => String(question.difficulty) === String(this.difficultyLevel)
+      (question) => String(question.difficulty) === String(this.difficultyLevel),
     );
     this.rebuildAvailableTags();
     this.applyFilters();
@@ -264,7 +280,9 @@ export class AssessmentCreate implements OnInit {
 
   addRandomRule(tag: string, requestedCount?: string | number): void {
     const maxCount = this.getRandomGroupMaxCount(tag);
-    const existing = this.randomTagRules.find((rule) => this.normalizeTag(rule.tag) === this.normalizeTag(tag));
+    const existing = this.randomTagRules.find(
+      (rule) => this.normalizeTag(rule.tag) === this.normalizeTag(tag),
+    );
 
     if (maxCount <= 0 && !existing) {
       this.questionPickerError = `There are no more available questions with the "${tag}" tag.`;
@@ -272,7 +290,10 @@ export class AssessmentCreate implements OnInit {
     }
 
     const parsedCount = requestedCount === undefined ? 1 : Math.floor(Number(requestedCount));
-    const targetCount = Math.max(0, Math.min(Number.isFinite(parsedCount) ? parsedCount : 1, maxCount));
+    const targetCount = Math.max(
+      0,
+      Math.min(Number.isFinite(parsedCount) ? parsedCount : 1, maxCount),
+    );
 
     if (existing) {
       this.updateRandomRuleCount(existing.tag, targetCount);
@@ -300,7 +321,9 @@ export class AssessmentCreate implements OnInit {
     }
 
     this.randomTagRules = this.randomTagRules.map((rule) =>
-      this.normalizeTag(rule.tag) === this.normalizeTag(tag) ? { ...rule, count: clampedCount } : rule
+      this.normalizeTag(rule.tag) === this.normalizeTag(tag)
+        ? { ...rule, count: clampedCount }
+        : rule,
     );
     this.clampRandomRules();
     this.refreshRandomPreview();
@@ -309,7 +332,9 @@ export class AssessmentCreate implements OnInit {
 
   removeRandomRule(tag: string): void {
     const normalizedTag = this.normalizeTag(tag);
-    this.randomTagRules = this.randomTagRules.filter((rule) => this.normalizeTag(rule.tag) !== normalizedTag);
+    this.randomTagRules = this.randomTagRules.filter(
+      (rule) => this.normalizeTag(rule.tag) !== normalizedTag,
+    );
     const { [normalizedTag]: _removed, ...nextPreview } = this.randomPreviewQuestionIds;
     this.randomPreviewQuestionIds = nextPreview;
     this.questionPickerError = '';
@@ -318,7 +343,9 @@ export class AssessmentCreate implements OnInit {
 
   removeRandomPreviewQuestion(questionId: string, tag: string): void {
     const normalizedTag = this.normalizeTag(tag);
-    const currentRule = this.randomTagRules.find((rule) => this.normalizeTag(rule.tag) === normalizedTag);
+    const currentRule = this.randomTagRules.find(
+      (rule) => this.normalizeTag(rule.tag) === normalizedTag,
+    );
     if (!currentRule) {
       return;
     }
@@ -331,10 +358,12 @@ export class AssessmentCreate implements OnInit {
 
     this.randomPreviewQuestionIds = {
       ...this.randomPreviewQuestionIds,
-      [normalizedTag]: (this.randomPreviewQuestionIds[normalizedTag] ?? []).filter((id) => id !== questionId),
+      [normalizedTag]: (this.randomPreviewQuestionIds[normalizedTag] ?? []).filter(
+        (id) => id !== questionId,
+      ),
     };
     this.randomTagRules = this.randomTagRules.map((rule) =>
-      this.normalizeTag(rule.tag) === normalizedTag ? { ...rule, count: nextCount } : rule
+      this.normalizeTag(rule.tag) === normalizedTag ? { ...rule, count: nextCount } : rule,
     );
     this.questionPickerError = '';
     this.clampRandomRules();
@@ -382,7 +411,10 @@ export class AssessmentCreate implements OnInit {
     const existing = this.randomTagRules.find((rule) => this.normalizeTag(rule.tag) === key);
     const parsedValue = Math.floor(Number(value));
     const max = this.getRandomGroupMaxCount(tag);
-    const nextValue = Math.max(existing ? 0 : 1, Math.min(Number.isFinite(parsedValue) ? parsedValue : 1, Math.max(max, 1)));
+    const nextValue = Math.max(
+      existing ? 0 : 1,
+      Math.min(Number.isFinite(parsedValue) ? parsedValue : 1, Math.max(max, 1)),
+    );
 
     if (existing) {
       this.updateRandomRuleCount(tag, nextValue);
@@ -401,7 +433,7 @@ export class AssessmentCreate implements OnInit {
 
   getRandomPreviewLabel(questionId: string): string {
     const rule = this.randomTagRules.find((entry) =>
-      (this.randomPreviewQuestionIds[this.normalizeTag(entry.tag)] ?? []).includes(questionId)
+      (this.randomPreviewQuestionIds[this.normalizeTag(entry.tag)] ?? []).includes(questionId),
     );
     return rule ? `From tag: ${rule.tag}` : '';
   }
@@ -429,7 +461,11 @@ export class AssessmentCreate implements OnInit {
       return;
     }
 
-    if (event.key === 'Backspace' && this.tagQuery.trim() === '' && this.selectedFilterTags.length > 0) {
+    if (
+      event.key === 'Backspace' &&
+      this.tagQuery.trim() === '' &&
+      this.selectedFilterTags.length > 0
+    ) {
       this.removeFilterTag(this.selectedFilterTags[this.selectedFilterTags.length - 1]);
       return;
     }
@@ -445,7 +481,9 @@ export class AssessmentCreate implements OnInit {
       return;
     }
 
-    const alreadySelected = this.selectedFilterTags.some((selected) => this.normalizeTag(selected) === normalizedTag);
+    const alreadySelected = this.selectedFilterTags.some(
+      (selected) => this.normalizeTag(selected) === normalizedTag,
+    );
     if (!alreadySelected) {
       this.selectedFilterTags = [...this.selectedFilterTags, tag.trim()];
     }
@@ -457,7 +495,9 @@ export class AssessmentCreate implements OnInit {
 
   removeFilterTag(tag: string): void {
     const normalizedTag = this.normalizeTag(tag);
-    this.selectedFilterTags = this.selectedFilterTags.filter((selected) => this.normalizeTag(selected) !== normalizedTag);
+    this.selectedFilterTags = this.selectedFilterTags.filter(
+      (selected) => this.normalizeTag(selected) !== normalizedTag,
+    );
     this.applyFilters();
   }
 
@@ -475,7 +515,10 @@ export class AssessmentCreate implements OnInit {
   }
 
   getDifficultyLabel(difficulty: DifficultyLevel): string {
-    return this.difficultyOptions.find((option) => option.value === difficulty)?.label ?? String(difficulty);
+    return (
+      this.difficultyOptions.find((option) => option.value === difficulty)?.label ??
+      String(difficulty)
+    );
   }
 
   getQuestionPreview(question: QuestionResponseDto): string {
@@ -522,7 +565,10 @@ export class AssessmentCreate implements OnInit {
 
   previewRandomRule(rule: RandomTagRule): QuestionResponseDto[] {
     const resolved = this.resolveRandomRules(false);
-    return resolved.find((entry) => this.normalizeTag(entry.rule.tag) === this.normalizeTag(rule.tag))?.questions ?? [];
+    return (
+      resolved.find((entry) => this.normalizeTag(entry.rule.tag) === this.normalizeTag(rule.tag))
+        ?.questions ?? []
+    );
   }
 
   private loadActiveQuestions(): void {
@@ -562,7 +608,9 @@ export class AssessmentCreate implements OnInit {
       }
 
       if (normalizedSelectedTags.length > 0) {
-        const questionTagSet = new Set(this.getUniqueTags(question).map((tag) => this.normalizeTag(tag)));
+        const questionTagSet = new Set(
+          this.getUniqueTags(question).map((tag) => this.normalizeTag(tag)),
+        );
         const hasAllTags = normalizedSelectedTags.every((tag) => questionTagSet.has(tag));
         if (!hasAllTags) {
           return false;
@@ -587,7 +635,9 @@ export class AssessmentCreate implements OnInit {
       });
     });
 
-    this.availableTags = Array.from(tagsByNormalizedValue.values()).sort((a, b) => a.localeCompare(b));
+    this.availableTags = Array.from(tagsByNormalizedValue.values()).sort((a, b) =>
+      a.localeCompare(b),
+    );
   }
 
   private resolveQuestionSelection(): string[] | null {
@@ -616,7 +666,9 @@ export class AssessmentCreate implements OnInit {
           return false;
         }
 
-        return this.getUniqueTags(question).some((tag) => this.normalizeTag(tag) === this.normalizeTag(rule.tag));
+        return this.getUniqueTags(question).some(
+          (tag) => this.normalizeTag(tag) === this.normalizeTag(rule.tag),
+        );
       });
 
       const orderedCandidates = randomize ? this.shuffleQuestions(candidates) : candidates;
@@ -632,7 +684,9 @@ export class AssessmentCreate implements OnInit {
     const nextRules: RandomTagRule[] = [];
 
     this.randomTagRules.forEach((rule) => {
-      const candidates = this.getQuestionsByTag(rule.tag).filter((question) => !usedIds.has(question.id));
+      const candidates = this.getQuestionsByTag(rule.tag).filter(
+        (question) => !usedIds.has(question.id),
+      );
       const count = Math.min(rule.count, candidates.length);
       if (count <= 0) {
         return;
@@ -652,12 +706,16 @@ export class AssessmentCreate implements OnInit {
     this.randomTagRules.forEach((rule) => {
       const key = this.normalizeTag(rule.tag);
       const existingIds = this.randomPreviewQuestionIds[key] ?? [];
-      const candidates = this.getQuestionsByTag(rule.tag).filter((question) => !usedIds.has(question.id));
+      const candidates = this.getQuestionsByTag(rule.tag).filter(
+        (question) => !usedIds.has(question.id),
+      );
       const candidateIds = new Set(candidates.map((question) => question.id));
       const keptIds = existingIds.filter((id) => candidateIds.has(id)).slice(0, rule.count);
       const keptIdSet = new Set(keptIds);
       const missingCount = rule.count - keptIds.length;
-      const fillIds = this.shuffleQuestions(candidates.filter((question) => !keptIdSet.has(question.id)))
+      const fillIds = this.shuffleQuestions(
+        candidates.filter((question) => !keptIdSet.has(question.id)),
+      )
         .slice(0, missingCount)
         .map((question) => question.id);
 
@@ -705,12 +763,16 @@ export class AssessmentCreate implements OnInit {
   private getQuestionsByTag(tag: string): QuestionResponseDto[] {
     const normalizedTag = this.normalizeTag(tag);
     return this.targetDifficultyQuestions.filter((question) =>
-      this.getUniqueTags(question).some((questionTag) => this.normalizeTag(questionTag) === normalizedTag)
+      this.getUniqueTags(question).some(
+        (questionTag) => this.normalizeTag(questionTag) === normalizedTag,
+      ),
     );
   }
 
   private getUniqueTags(question: QuestionResponseDto): string[] {
-    return Array.from(new Set((question.tags ?? []).map((tag) => tag.trim()).filter((tag) => tag.length > 0)));
+    return Array.from(
+      new Set((question.tags ?? []).map((tag) => tag.trim()).filter((tag) => tag.length > 0)),
+    );
   }
 
   private normalizeTag(value: string): string {

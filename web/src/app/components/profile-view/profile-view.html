@@ -107,6 +107,51 @@
           }
         }
       </div>
+    } @else {
+      <div class="card shadow-sm p-4 mx-auto" style="max-width: 600px;">
+        <h4 class="mb-4 text-center"><i class="bi bi-bookmark-heart text-primary me-2"></i>Saved Jobs</h4>
+
+        @if (savedJobs$ | async; as savedJobs) {
+          @if (savedJobs.length > 0) {
+            <div class="row g-3">
+              @for (job of savedJobs; track job.id) {
+                <div class="col-12">
+                  <div class="card border-light bg-light" style="cursor: pointer;" [routerLink]="['/job', job.id]">
+                    <div class="card-body">
+                      <div class="d-flex justify-content-between align-items-start mb-2">
+                        <div>
+                          <h5 class="card-title mb-1 text-primary">{{ job.title }}</h5>
+                          <h6 class="card-subtitle text-muted small">
+                            <i class="bi bi-geo-alt-fill me-1"></i>{{ job.location || 'Unknown' }}
+                          </h6>
+                        </div>
+                        <div>
+                          <button class="btn btn-sm btn-outline-danger" (click)="removeSavedJob(job.id, $event)" title="Remove from saved">
+                            <i class="bi bi-bookmark-x"></i>
+                          </button>
+                        </div>
+                      </div>
+                      
+                      <div class="d-flex flex-wrap gap-1 mt-3">
+                        @for (tag of job.tags; track tag) {
+                          <span class="badge bg-secondary bg-opacity-25 text-dark" style="font-size: 0.75rem;">
+                            {{ tag }}
+                          </span>
+                        }
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              }
+            </div>
+          } @else {
+            <div class="text-center text-muted py-3">
+              <p class="mb-0">You have no saved jobs. Browse the job board and bookmark some!</p>
+            </div>
+          }
+        }
+      </div>
     }
+
   }
 </div>

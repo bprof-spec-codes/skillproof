@@ -1,11 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using SkillProof.Entities.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SkillProof.Entities.Configurations
 {
@@ -18,6 +13,9 @@ namespace SkillProof.Entities.Configurations
             builder.Property(u => u.Email).IsRequired().HasMaxLength(50);
             builder.Property(u => u.Headline).HasMaxLength(100);
             builder.Property(u => u.Bio).HasMaxLength(500);
+            builder.HasMany(u => u.SavedJobs)
+                   .WithMany()
+                   .UsingEntity(j => j.ToTable("UserSavedJobs"));
         }
     }
 }

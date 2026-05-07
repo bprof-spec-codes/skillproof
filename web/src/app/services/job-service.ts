@@ -13,7 +13,7 @@ export class JobService {
   apiUrl = `${environment.apiUrl}/Jobs`;
   jobs = new BehaviorSubject<JobViewDto[]>([]);
   jobs$ = this.jobs.asObservable();
-  private _currentCompanyJobs$ = new BehaviorSubject<JobViewDto[] | null> (null);
+  private _currentCompanyJobs$ = new BehaviorSubject<JobViewDto[] | null>(null);
   public currentCompanyJobs$ = this._currentCompanyJobs$.asObservable();
 
   constructor(private http: HttpClient) {
@@ -139,8 +139,7 @@ export class JobService {
         if (Array.isArray(parsed)) {
           return parsed.map((t) => String(t).trim()).filter((t) => t.length > 0);
         }
-      } catch {
-      }
+      } catch {}
     }
 
     return trimmed
@@ -150,28 +149,35 @@ export class JobService {
   }
 
   loadCompanyJobs(userId: string): void {
-    this.http.get<Job[]>(`${environment.apiUrls.getJobsOfCompany}/${userId}`).pipe(
-      map((jobs) => jobs.map((job) => this.normalizeJob(job))),
-    )
-    .subscribe({
-      next: (jobs) => {
-        console.log("Jobs loaded in successfully", jobs);
-        this._currentCompanyJobs$.next(jobs);
-      },
-      error: (err) => {
-        console.error(err);
-        this._currentCompanyJobs$.next(null);
-      }
-    });
-   }
+    this.http
+      .get<Job[]>(`${environment.apiUrls.getJobsOfCompany}/${userId}`)
+      .pipe(map((jobs) => jobs.map((job) => this.normalizeJob(job))))
+      .subscribe({
+        next: (jobs) => {
+          console.log('Jobs loaded in successfully', jobs);
+          this._currentCompanyJobs$.next(jobs);
+        },
+        error: (err) => {
+          console.error(err);
+          this._currentCompanyJobs$.next(null);
+        },
+      });
+  }
 
   private normalizeJob(job: Job): JobViewDto {
-    const employmentType = job.employmentType ?? job.EmploymentType ?? null;
+    const employmentType = job.employmentType ?? job.employmentType ?? null;
 
     return {
-      ...job,
-      employmentType,
-      EmploymentType: employmentType,
+      id: job.id,
+      companyId: job.companyId,
+      title: job.title,
+      description: job.description,
+      shortDescription: job.shortDescription,
+      location: job.location,
+      salary: job.salary,
+      createdAt: job.createdAt,
+      employmentType: job.employmentType ?? null,
+      assessmentIds: job.assessmentIds || job.assessments?.map((a: any) => a.id) || [],
       tags: this.normalizeTags(job.tags),
     } as JobViewDto;
   }

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { JobService } from '../services/job-service';
 import { JobViewDto } from '../Models/Dtos/Job/JobView-dto';
 import levenshtein from 'fast-levenshtein';
@@ -13,7 +13,7 @@ import { DifficultyLevel } from '../Models/Enums/DifficultyLevel';
   templateUrl: './home-page.html',
   styleUrl: './home-page.scss',
 })
-export class HomePage implements OnInit {
+export class HomePage implements OnInit, OnDestroy {
   freeTextControl = new FormControl('');
   locationControl = new FormControl('');
 
@@ -21,22 +21,23 @@ export class HomePage implements OnInit {
 
   filteredJobs = new BehaviorSubject<JobViewDto[]>([]);
   filteredJobs$: Observable<JobViewDto[]> = this.filteredJobs.asObservable();
-  private destroy$ = new Subject<void>()
+  private destroy$ = new Subject<void>();
   filterType = '';
-  filterExperience = ''
-  filterTags = ''
-  sort = ''
+  filterExperience = '';
+  filterTags = '';
+  sort = '';
+
   readonly jobTypeOptions = [
-      { label: 'FullTime', value: 0 },
-      { label: 'Internship', value: 1 },
-      { label: 'PartTime', value: 2 },
-      { label: 'Temporary', value: 3 },
+    { label: 'FullTime', value: 0 },
+    { label: 'Internship', value: 1 },
+    { label: 'PartTime', value: 2 },
+    { label: 'Temporary', value: 3 },
   ];
 
   readonly jobExperience = [
-      { label: 'Senior', value: DifficultyLevel.Senior },
-      { label: 'Medior', value: DifficultyLevel.Medior },
-      { label: 'Junior', value: DifficultyLevel.Junior },
+    { label: 'Senior', value: DifficultyLevel.Senior },
+    { label: 'Medior', value: DifficultyLevel.Medior },
+    { label: 'Junior', value: DifficultyLevel.Junior },
   ];
 
   constructor(public jobService: JobService) {}
@@ -45,31 +46,69 @@ export class HomePage implements OnInit {
     this.isLoggedIn = !!localStorage.getItem('skillProof_token');
 
     this.jobService.jobs$.subscribe((allJobs) => {
-      if (!this.freeTextControl.value && !this.locationControl.value && !this.filterExperience && !this.filterTags && !this.filterType && !this.sort) {
-        this.filteredJobs.next(allJobs);
+      const parsedJobs = this.parseJobsTags(allJobs);
+
+      if (
+        !this.freeTextControl.value &&
+        !this.locationControl.value &&
+        !this.filterExperience &&
+        !this.filterTags &&
+        !this.filterType &&
+        !this.sort
+      ) {
+        this.filteredJobs.next(parsedJobs);
       }
     });
 
-    this.freeTextControl.valueChanges.pipe(
-      takeUntil(this.destroy$),
-      debounceTime(200)).subscribe(() => {
-        this.search()
+    this.freeTextControl.valueChanges
+      .pipe(takeUntil(this.destroy$), debounceTime(200))
+      .subscribe(() => {
+        this.search();
+      });
+
+    this.locationControl.valueChanges
+      .pipe(takeUntil(this.destroy$), debounceTime(200))
+      .subscribe(() => {
+        this.search();
+      });
+  }
+
+  // --- EZ A METÓDUS HIÁNYZOTT: Átalakítja a vesszővel elválasztott stringet tömbbé ---
+  private parseJobsTags(jobs: JobViewDto[]): JobViewDto[] {
+    return jobs.map((job) => {
+      const parsedJob = { ...job };
+      if (typeof parsedJob.tags === 'string') {
+        const tagString = parsedJob.tags as unknown as string;
+        parsedJob.tags = tagString
+          .split(',')
+          .map((t) => t.trim())
+          .filter((t) => t !== '') as any;
       }
-    )
-    this.locationControl.valueChanges.pipe(
-      takeUntil(this.destroy$),
-      debounceTime(200)).subscribe(() => {
-        this.search()
+
+      if (!Array.isArray(parsedJob.tags)) {
+        parsedJob.tags = [];
       }
-    )
+      return parsedJob;
+    });
   }
 
   search() {
     this.jobService.jobs$.pipe(take(1)).subscribe((allJobs) => {
+      // 2. Keresés előtt is átalakítjuk a listát
+      const parsedJobs = this.parseJobsTags(allJobs);
+
       const fText = this.freeTextControl.value?.toLowerCase().trim() || '';
       const lText = this.locationControl.value?.toLowerCase().trim() || '';
-      if (!fText && !lText && !this.filterExperience && !this.filterTags && !this.filterType && !this.sort) {
-        this.filteredJobs.next(allJobs);
+
+      if (
+        !fText &&
+        !lText &&
+        !this.filterExperience &&
+        !this.filterTags &&
+        !this.filterType &&
+        !this.sort
+      ) {
+        this.filteredJobs.next(parsedJobs);
         return;
       }
 
@@ -80,7 +119,8 @@ export class HomePage implements OnInit {
       else if (fLength >= 10 && fLength < 16) threshold = 2;
       else if (fLength >= 16) threshold = 3;
 
-      let results = allJobs
+      // 3. Az eredeti allJobs helyett a parsedJobs-t használjuk
+      let results = parsedJobs
         .map((job) => {
           let score = 0;
           let tagScore = 0;
@@ -100,7 +140,7 @@ export class HomePage implements OnInit {
           }
 
           if (fText) {
-            titles.forEach(title => {
+            titles.forEach((title) => {
               const dist = levenshtein.get(fText, title.toLowerCase());
               if (dist <= 2) {
                 titleScore += 3;
@@ -108,7 +148,7 @@ export class HomePage implements OnInit {
               }
             });
 
-            job.tags?.forEach(tag => {
+            job.tags?.forEach((tag) => {
               const dist = levenshtein.get(fText, tag.toLowerCase());
               if (dist === 0) {
                 tagScore += 1;
@@ -117,26 +157,37 @@ export class HomePage implements OnInit {
           }
 
           if (this.filterTags.length > 0) {
-            job.tags?.forEach(tag => {
-              this.filterTags.trim().split(',').forEach(fTag => {
-                if (tag.toLowerCase() === fTag.toLowerCase()) {
-                  tagScore += 3;
-                }
-              });
+            job.tags?.forEach((tag) => {
+              this.filterTags
+                .trim()
+                .split(',')
+                .forEach((fTag) => {
+                  if (tag.toLowerCase() === fTag.toLowerCase()) {
+                    tagScore += 3;
+                  }
+                });
             });
           }
 
           if (this.filterType !== '') {
             const selectedType = Number(this.filterType);
-            const convertedType = EmploymentType[selectedType]
+            const convertedType = EmploymentType[selectedType];
             if (job.employmentType?.toString() == convertedType) {
               employmentTypeScore += 3;
             }
           }
-          score = employmentTypeScore + titleScore + tagScore
-          return { job, score, titleMatched, locationMatched, employmentTypeScore, titleScore, tagScore };
+          score = employmentTypeScore + titleScore + tagScore;
+          return {
+            job,
+            score,
+            titleMatched,
+            locationMatched,
+            employmentTypeScore,
+            titleScore,
+            tagScore,
+          };
         })
-        .filter(item => {
+        .filter((item) => {
           if (!fText && !lText) {
             return item.score > 0;
           }
@@ -163,7 +214,6 @@ export class HomePage implements OnInit {
               return b.employmentTypeScore - a.employmentTypeScore;
 
             case 'date':
-              console.log(new Date(b.job.createdAt).getTime())
               return new Date(b.job.createdAt).getTime() - new Date(a.job.createdAt).getTime();
 
             default:
@@ -172,16 +222,16 @@ export class HomePage implements OnInit {
         })
         .map((item) => item.job);
 
-        if(results.length === 0)
-        {
-          results = allJobs.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-        }
+      if (results.length === 0) {
+        // 4. Fallback esetén is a parsedJobs-ból dolgozunk
+        results = parsedJobs.sort(
+          (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+        );
+      }
 
       this.filteredJobs.next(results);
     });
   }
-  
-  
 
   clearFilters(): void {
     this.filterType = '';
@@ -192,14 +242,14 @@ export class HomePage implements OnInit {
     this.locationControl.setValue('');
     this.search();
   }
+
   applyFilters(): void {
-    this.search()
+    this.search();
   }
-  // Ezt loptam :)
+
   getTimeAgo(dateStr: string): string {
-    const formattedDateStr = dateStr.includes('Z') || dateStr.includes('+') 
-                             ? dateStr 
-                             : `${dateStr.replace(' ', 'T')}Z`;
+    const formattedDateStr =
+      dateStr.includes('Z') || dateStr.includes('+') ? dateStr : `${dateStr.replace(' ', 'T')}Z`;
     const date = new Date(formattedDateStr);
     const time = date.getTime();
 
@@ -229,9 +279,8 @@ export class HomePage implements OnInit {
     return `${years} year${years === 1 ? '' : 's'} ago`;
   }
 
-
   ngOnDestroy() {
-    this.destroy$.next()
-    this.destroy$.complete()
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }

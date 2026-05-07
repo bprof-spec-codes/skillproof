@@ -1,10 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using SkillProof.Entities.Enums;
 using SkillProof.Entities.Models;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -17,6 +13,7 @@ namespace SkillProof.Data
         public DifficultyLevel Difficulty { get; set; }
         public string Title { get; set; }
         public string QuestionText { get; set; }
+        public List<string> Tags { get; set; }
         public TrueFalseSeedDto? TrueFalsePayload { get; set; }
         public MultipleChoiceSeedDto? MultipleChoicePayload { get; set; }
     }
@@ -40,25 +37,18 @@ namespace SkillProof.Data
         {
             context.Database.EnsureCreated();
 
-            if (context.Set<Questions>().Any() || context.Set<Assessments>().Any())
-            {
-                return;
-            }
-
             var existingUser = context.Set<Users>().FirstOrDefault();
             var adminUserId = existingUser != null ? existingUser.Id : Guid.NewGuid().ToString();
 
-            // Debugging tipp: kiírathatod az elérési utat a konzolra, ha továbbra sem találja
             var seedFilePath = Path.Combine(AppContext.BaseDirectory, "seed-questions.json");
 
             if (!File.Exists(seedFilePath))
             {
-                // Ha nem találja a bin-ben, megpróbáljuk a gyökérben (fejlesztői környezet)
                 seedFilePath = Path.Combine(Directory.GetCurrentDirectory(), "seed-questions.json");
 
                 if (!File.Exists(seedFilePath))
                 {
-                    throw new FileNotFoundException($"The seed JSON file was not found. Looked in: {seedFilePath}");
+                    throw new FileNotFoundException($"The seed JSON file was not found. Searched path: {seedFilePath}");
                 }
             }
 
@@ -70,7 +60,7 @@ namespace SkillProof.Data
 
             if (seedQuestions == null || !seedQuestions.Any())
             {
-                return;
+                throw new InvalidDataException("The seed JSON file was parsed but contains no valid questions.");
             }
 
             var generatedQuestions = new List<Questions>();
@@ -86,6 +76,7 @@ namespace SkillProof.Data
                     Difficulty = sq.Difficulty,
                     Title = sq.Title,
                     QuestionText = sq.QuestionText,
+                    Tags = sq.Tags ?? new List<string>(),
                     CreatedBy = adminUserId,
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow,

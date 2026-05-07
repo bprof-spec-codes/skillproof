@@ -24,6 +24,7 @@ namespace SkillProof.Entities.Models
 
         [Required]
         public string Location { get; set; }
+        public int Salary { get; set; }
 
         public string Tags { get; set; } // Json array of strings
 

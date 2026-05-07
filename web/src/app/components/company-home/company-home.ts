@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Observable, filter, switchMap, of } from 'rxjs';
 import { JobViewDto } from '../../Models/Dtos/Job/JobView-dto';
 import { JobService } from '../../services/job-service';
-import { ProfileViewDto } from '../../Models/User/profile-view-dto';
+import { ProfileViewDto } from '../../Models/Dtos/User/profile-view-dto';
 import { ProfileService } from '../../services/profile-service';
 
 @Component({
@@ -18,26 +18,26 @@ export class CompanyHome implements OnInit {
 
   constructor(
     private jobService: JobService,
-    private profileService: ProfileService
-  ) { }
+    private profileService: ProfileService,
+  ) {}
 
   ngOnInit(): void {
-     this.profile$ = this.profileService.currentProfile$;
+    this.profile$ = this.profileService.currentProfile$;
 
-     this.companyJobs$ = this.profile$.pipe(
-           filter((profile): profile is ProfileViewDto => profile !== null),
-           switchMap((profile) => {
-             if (!profile.companyId) {
-               return of([]);
-             }
-             return this.jobService.getJobsByCompanyId(profile.companyId);
-           }),
-         );
+    this.companyJobs$ = this.profile$.pipe(
+      filter((profile): profile is ProfileViewDto => profile !== null),
+      switchMap((profile) => {
+        if (!profile.companyId) {
+          return of([]);
+        }
+        return this.jobService.getJobsByCompanyId(profile.companyId);
+      }),
+    );
   }
 
   getTimeAgo(dateInput: string | Date): string {
     if (!dateInput) return '';
-    
+
     const pastDate = new Date(dateInput);
     const now = new Date();
     const seconds = Math.floor((now.getTime() - pastDate.getTime()) / 1000);
@@ -73,5 +73,4 @@ export class CompanyHome implements OnInit {
   selectJob(job: JobViewDto): void {
     this.selectedJob = job;
   }
-
 }
