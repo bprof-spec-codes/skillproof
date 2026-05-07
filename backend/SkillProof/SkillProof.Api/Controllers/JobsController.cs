@@ -102,10 +102,31 @@ public class JobsController : ControllerBase
         return Ok(candidateTest);
     }
 
-    [HttpGet("jobsOfCompany/{id}")]
-    public async Task<IActionResult> GetJobsByCompanyId(string id)
+    [HttpPost("{id}/apply")]
+    public async Task<IActionResult> ApplyForJob(string id)
     {
-        var jobs = await _jobLogic.GetJobsOfCompanyAsync(id);
-        return Ok(jobs);
+        var userId = User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(userId))
+        {
+            return Unauthorized(new { message = "You must be logged in to apply." });
+        }
+
+        try
+        {
+            var applicationId = await _jobLogic.ApplyForJobAsync(id, userId);
+            return Ok(new { ApplicationId = applicationId, message = "Application submitted successfully." });
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new { message = ex.Message });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Conflict(new { message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = "An error occurred while submitting the application.", details = ex.Message });
+        }
     }
 }

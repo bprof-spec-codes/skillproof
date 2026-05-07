@@ -472,5 +472,37 @@ public class JobLogic : IJobLogic
             .ToListAsync();
     }
 
-    
+    public async Task<string> ApplyForJobAsync(string jobId, string userId)
+    {
+        var jobExists = await _jobRepository.GetAll().AnyAsync(j => j.Id == jobId);
+        if (!jobExists)
+        {
+            throw new KeyNotFoundException("The job was not found.");
+        }
+
+        var existingApplication = await _ctx.JobApplications
+            .FirstOrDefaultAsync(ja => ja.JobId == jobId && ja.UserId == userId);
+
+        if (existingApplication != null)
+        {
+            throw new InvalidOperationException("You have already applied for this job.");
+        }
+
+        var jobApplication = new JobApplication
+        {
+            Id = Guid.NewGuid().ToString(),
+            JobId = jobId,
+            UserId = userId,
+            TestId = null, 
+            Status = JobApplicationStatus.Submitted,
+            AppliedAt = DateTime.UtcNow
+        };
+
+        _ctx.JobApplications.Add(jobApplication);
+        await _ctx.SaveChangesAsync();
+
+        return jobApplication.Id;
+    }
+
+
 }
