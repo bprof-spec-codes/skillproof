@@ -35,10 +35,44 @@ namespace SkillProof.Data
     {
         public static void Seed(DbContext context)
         {
-            context.Database.EnsureCreated();
+            var existingSeed = context.Set<Assessments>()
+                .Include(a => a.Questions)
+                .FirstOrDefault(a => a.Title == "Full-Stack Developer Starter Kit");
+
+            if (existingSeed != null)
+            {
+                if (existingSeed.Questions != null && existingSeed.Questions.Any())
+                {
+                    return;
+                }
+
+                context.Set<Assessments>().Remove(existingSeed);
+                context.SaveChanges();
+            }
 
             var existingUser = context.Set<Users>().FirstOrDefault();
-            var adminUserId = existingUser != null ? existingUser.Id : Guid.NewGuid().ToString();
+            string adminUserId;
+
+            if (existingUser != null)
+            {
+                adminUserId = existingUser.Id;
+            }
+            else
+            {
+                var newUser = new Users
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    UserName = "systemadmin",
+                    Email = "admin@system.local",
+                    NormalizedUserName = "SYSTEMADMIN",
+                    NormalizedEmail = "ADMIN@SYSTEM.LOCAL",
+                    EmailConfirmed = true,
+                    SecurityStamp = Guid.NewGuid().ToString()
+                };
+
+                context.Set<Users>().Add(newUser);
+                adminUserId = newUser.Id;
+            }
 
             var seedFilePath = Path.Combine(AppContext.BaseDirectory, "seed-questions.json");
 

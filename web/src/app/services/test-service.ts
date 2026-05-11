@@ -6,6 +6,7 @@ import { CandidateAssessmentDto } from '../Models/Dtos/Test/candidate-assessment
 import { TestResultDto } from '../Models/Dtos/Test/test-result-dto';
 import { TestSubmitDto } from '../Models/Dtos/Test/test-submit-dto';
 import { normalizeCandidateAssessment } from './open-ended-compat';
+import { UserTestsDto } from '../Models/Dtos/User/userTests-dto';
 
 @Injectable({
   providedIn: 'root',
@@ -29,5 +30,20 @@ export class TestService {
       : undefined;
 
     return this.http.post<TestResultDto>(`${this.testsUrl}/submit`, dto, { headers });
+  }
+
+  getUserTestQuestions(userId: string, jobId: string): Observable<UserTestsDto[]> {
+    return this.http.get<UserTestsDto[]>(`${this.testsUrl}/GetUserTestQuestions`, {
+      params: {userId, jobId}
+    });
+  }
+
+  manualFeedback(feedback: string, score: number, testAnswerId: string) {
+    const body = JSON.stringify(feedback || ""); 
+    
+    return this.http.put(`${this.testsUrl}/ManualFeedbackAsync`, body, {
+      headers: { 'Content-Type': 'application/json' },
+      params: { score, testAnswerId }
+    });
   }
 }

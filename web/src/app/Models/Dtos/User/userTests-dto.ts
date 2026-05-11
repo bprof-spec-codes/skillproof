@@ -1,6 +1,12 @@
-import { DifficultyLevel } from "../../Enums/DifficultyLevel"
+import { QuestionType } from "../../Enums/QuestionType";
 
 export interface UserTestsDto {
-    difficultyLevel: DifficultyLevel;
-    passed: boolean;
+    questionId: string;
+    testAnswerId: string;
+    score: number;
+    questionText: string;
+    userResponse: string;
+    isInspected: boolean;
+    userId: string;
+    questionType: QuestionType;
 }

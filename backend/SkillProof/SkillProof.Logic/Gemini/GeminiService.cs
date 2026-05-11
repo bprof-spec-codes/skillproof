@@ -24,6 +24,11 @@ namespace SkillProof.Logic.Gemini
         public GeminiService(IConfiguration config)
         {
             string apiKey = config["Gemini:ApiKey"];
+            if (!string.IsNullOrEmpty(apiKey))
+            {
+                apiKey = new string(apiKey.Where(c => c < 128 && !char.IsWhiteSpace(c)).ToArray());
+            }
+
             _client = new Client(apiKey: apiKey);
         }
 
@@ -35,16 +40,17 @@ namespace SkillProof.Logic.Gemini
             {
                 var prompt = $@"
               You are an expert strict exam evaluator. 
-              Evaluate the user's answer to the following question. 
+              Evaluate the user's answer to the following question and if there is an answer provided then based on what the inputted Answer to the question is. 
               Score the answer as 0 (completely wrong), 0.5 (partially correct), or 1 (perfect).
               Respond ONLY with the number (0, 0.5, or 1). No explanation, no extra text.
 
               Question: {request.Question}
+              Answer to the question: {request.AnswerToQuestion}
               Student Answer: {request.StudentAnswer}";
 
                 var config = new GenerateContentConfig
                 {
-                    ResponseMimeType = "application/json"
+                    ResponseMimeType = "text/plain"
                 };
 
                 var response = await _client.Models.GenerateContentAsync(

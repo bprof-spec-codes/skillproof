@@ -11,6 +11,7 @@ using SkillProof.Entities.Helper;
 using SkillProof.Entities.Models;
 using SkillProof.Logic.Assesments;
 using SkillProof.Logic.Assessments;
+using SkillProof.Logic.Gemini;
 using SkillProof.Logic.Helper;
 using SkillProof.Logic.Jobs;
 using SkillProof.Logic.Questions;
@@ -71,6 +72,7 @@ namespace SkillProof.Api
             });
             builder.Services.AddTransient(typeof(Repository<>));
             builder.Services.AddScoped<IMarkdownService, MarkdownService>();
+            builder.Services.AddScoped<IGeminiService, GeminiService>();
 
             builder.Services.AddCors(option =>
             {

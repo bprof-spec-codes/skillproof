@@ -85,7 +85,7 @@ export class JobEdit implements OnInit {
           this.description = job.description;
           this.shortDescription = job.shortDescription;
 
-          this.selectedAssessments = job.assessments || [];
+          this.selectedAssessments = job.assessments || job.Assessments || [];
 
           this.cdr.detectChanges();
         },
@@ -155,15 +155,18 @@ export class JobEdit implements OnInit {
       assessmentIds: this.selectedAssessments.map((a) => a.id),
     };
 
-    try {
-      this.jobService.updateJob(this.jobId, updateDto as any);
-      setTimeout(() => {
-        this.router.navigate(['/profile']);
-      }, 500);
-    } catch (err) {
-      this.error = 'An error occurred while updating the job.';
-      this.loading = false;
-    }
+    this.jobService.updateJob(this.jobId, updateDto as any).subscribe({
+      next: () => {
+        setTimeout(() => {
+          this.router.navigate(['/company']);
+        }, 500);
+      },
+      error: () => {
+        this.error = 'An error occurred while updating the job.';
+        this.loading = false;
+        this.cdr.detectChanges();
+      },
+    });
   }
 
   goHome() {
