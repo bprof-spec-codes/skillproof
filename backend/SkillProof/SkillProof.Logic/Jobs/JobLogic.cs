@@ -147,6 +147,7 @@ public class JobLogic : IJobLogic
             Tags = job.Tags,
             EmploymentType = job.EmploymentType,
             CreatedAt = job.CreatedAt,
+            Salary = job.Salary,
             Id = job.Id,
             AssessmentIds = job.Assessments.Select(a => a.Id).ToList(),
             Assessments = job.Assessments.Select(a => new AssessmentViewDto
@@ -218,6 +219,12 @@ public class JobLogic : IJobLogic
 
     public async Task<JobViewDto> UpdateJobAsync(string id, JobViewDto model, string companyId)
     {
+
+        if (model == null)
+        {
+            throw new ArgumentNullException(nameof(model), "Model cannot be null.");
+        }
+
         var job = await _jobRepository.GetAll()
             .Include(j => j.Assessments)
             .FirstOrDefaultAsync(j => j.Id == id);
@@ -238,6 +245,7 @@ public class JobLogic : IJobLogic
         job.Location = model.Location;
         job.Tags = model.Tags;
         job.EmploymentType = model.EmploymentType;
+        job.Salary = model.Salary;
 
         job.Assessments.Clear();
 
@@ -257,6 +265,7 @@ public class JobLogic : IJobLogic
 
         return new JobViewDto
         {
+            Id = job.Id,
             CompanyId = job.CompanyId,
             Title = job.Title,
             Description = job.Description,
@@ -264,9 +273,15 @@ public class JobLogic : IJobLogic
             Location = job.Location,
             Tags = job.Tags,
             EmploymentType = job.EmploymentType,
+            Salary = job.Salary,
             CreatedAt = job.CreatedAt,
-            Id = job.Id,
-            AssessmentIds = job.Assessments.Select(a => a.Id).ToList()
+            AssessmentIds = job.Assessments.Select(a => a.Id).ToList(),
+            Assessments = job.Assessments.Select(a => new AssessmentViewDto
+            {
+                Id = a.Id,
+                Title = a.Title,
+                DifficultyLevel = a.DifficultyLevel
+            }).ToList()
         };
     }
 
@@ -404,7 +419,11 @@ public class JobLogic : IJobLogic
             return null;
         }
 
-        var firstAssessment = job.Assessments.First();
+        var firstAssessment = job.Assessments.FirstOrDefault();
+        if (firstAssessment == null)
+        {
+            return null;
+        }
         var allQuestions = job.Assessments.SelectMany(a => a.Questions).ToList();
 
         if (allQuestions.Count == 0)
@@ -456,18 +475,26 @@ public class JobLogic : IJobLogic
         }
 
         return await _jobRepository.GetAll()
+            .Include(j => j.Assessments)
             .Where(j => j.CompanyId == user.CompanyId)
             .Select(j => new JobViewDto
             {
+                Id = j.Id,
                 CompanyId = j.CompanyId,
                 Title = j.Title,
-                Description = j.Description,
                 ShortDescription = j.ShortDescription,
                 Location = j.Location,
                 Tags = j.Tags,
                 EmploymentType = j.EmploymentType,
+                Salary = j.Salary,
                 CreatedAt = j.CreatedAt,
-                Id = j.Id
+                AssessmentIds = j.Assessments.Select(a => a.Id).ToList(),
+                Assessments = j.Assessments.Select(a => new AssessmentViewDto
+                {
+                    Id = a.Id,
+                    Title = a.Title,
+                    DifficultyLevel = a.DifficultyLevel
+                }).ToList()
             })
             .ToListAsync();
     }
@@ -493,7 +520,7 @@ public class JobLogic : IJobLogic
             Id = Guid.NewGuid().ToString(),
             JobId = jobId,
             UserId = userId,
-            TestId = null, 
+            TestId = null,
             Status = JobApplicationStatus.Submitted,
             AppliedAt = DateTime.UtcNow
         };
@@ -503,6 +530,4 @@ public class JobLogic : IJobLogic
 
         return jobApplication.Id;
     }
-
-
 }

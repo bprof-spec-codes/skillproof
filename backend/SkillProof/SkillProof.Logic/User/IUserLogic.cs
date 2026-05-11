@@ -16,4 +16,6 @@ public interface IUserLogic
     Task RevokeRoleAsync(string userId);
     Task<IEnumerable<UserTestsDto>> GetUserTestsAsync(string userId);
     Task UpdateSkillsToUser(string id, UpdateSkillToUser dto);
+    Task<ViewUser> ToggleSavedJobAsync(string userId, string jobId);
+    Task ApplyToJobAsync(string userId, string jobId);
 }

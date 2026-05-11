@@ -4,7 +4,7 @@ import { JobViewDto } from '../../Models/Dtos/Job/JobView-dto';
 import { AsyncPipe } from '@angular/common';
 import { Observable, filter, switchMap, of, forkJoin, catchError, tap } from 'rxjs';
 import { ProfileService } from '../../services/profile-service';
-import { ProfileViewDto } from '../../Models/User/profile-view-dto';
+import { ProfileViewDto } from '../../Models/Dtos/User/profile-view-dto';
 
 interface JobCardVm extends JobViewDto {
   applicants?: ProfileViewDto[];
@@ -24,8 +24,8 @@ export class MyJobs implements OnInit {
 
   constructor(
     private jobService: JobService,
-    private profileService: ProfileService
-  ) { }
+    private profileService: ProfileService,
+  ) {}
 
   ngOnInit(): void {
     this.jobs$ = this.profileService.currentProfile$.pipe(
@@ -36,44 +36,45 @@ export class MyJobs implements OnInit {
         }
         return this.jobService.getJobsByCompanyId(profile.companyId);
       }),
-      tap(jobs => {
+      tap((jobs) => {
         this.jobsData = jobs;
-        this.jobsData.forEach(job => this.loadApplicants(job.id));
-      })
+        this.jobsData.forEach((job) => this.loadApplicants(job.id));
+      }),
     );
   }
 
   loadApplicants(jobId: string) {
-    const job = this.jobsData.find(j => j.id === jobId);
+    const job = this.jobsData.find((j) => j.id === jobId);
 
     if (job && !job.hasLoadedApplicants && !job.isLoadingApplicants) {
       job.isLoadingApplicants = true;
 
-      this.jobService.getTestUsers(jobId).pipe(
-        switchMap((userIds: string[]) => {
-          if (!userIds || userIds.length === 0) {
-            return of([]);
-          }
+      this.jobService
+        .getTestUsers(jobId)
+        .pipe(
+          switchMap((userIds: string[]) => {
+            if (!userIds || userIds.length === 0) {
+              return of([]);
+            }
 
-          const profileRequests = userIds.map(userId =>
-            this.profileService.getProfile(userId).pipe(
-              catchError(() => of(null))
-            )
-          );
-          return forkJoin(profileRequests);
-        })
-      ).subscribe({
-        next: (profiles) => {
-          job.applicants = profiles.filter((p): p is ProfileViewDto => p !== null);
-          job.isLoadingApplicants = false;
-          job.hasLoadedApplicants = true;
-        },
-        error: () => {
-          job.applicants = [];
-          job.isLoadingApplicants = false;
-          job.hasLoadedApplicants = true;
-        }
-      });
+            const profileRequests = userIds.map((userId) =>
+              this.profileService.getProfile(userId).pipe(catchError(() => of(null))),
+            );
+            return forkJoin(profileRequests);
+          }),
+        )
+        .subscribe({
+          next: (profiles) => {
+            job.applicants = profiles.filter((p): p is ProfileViewDto => p !== null);
+            job.isLoadingApplicants = false;
+            job.hasLoadedApplicants = true;
+          },
+          error: () => {
+            job.applicants = [];
+            job.isLoadingApplicants = false;
+            job.hasLoadedApplicants = true;
+          },
+        });
     }
   }
 

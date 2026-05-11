@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SkillProof.Data;
 
@@ -11,9 +12,11 @@ using SkillProof.Data;
 namespace SkillProof.Data.Migrations
 {
     [DbContext(typeof(SkillProofDbContext))]
-    partial class SkillProofDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260507065234_AddSalaryToJob")]
+    partial class AddSalaryToJob
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -80,21 +83,6 @@ namespace SkillProof.Data.Migrations
                     b.HasIndex("QuestionsId");
 
                     b.ToTable("JobQuestions");
-                });
-
-            modelBuilder.Entity("JobUsers", b =>
-                {
-                    b.Property<string>("SavedJobsId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("UsersId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("SavedJobsId", "UsersId");
-
-                    b.HasIndex("UsersId");
-
-                    b.ToTable("UserSavedJobs", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -567,21 +555,12 @@ namespace SkillProof.Data.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
-                    b.Property<bool>("Inspected")
-                        .HasColumnType("bit");
-
                     b.Property<bool>("IsCorrect")
                         .HasColumnType("bit");
-
-                    b.Property<string>("ManualFeedback")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("QuestionId")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
-
-                    b.Property<double>("Score")
-                        .HasColumnType("float");
 
                     b.Property<string>("TestId")
                         .IsRequired()
@@ -610,8 +589,8 @@ namespace SkillProof.Data.Migrations
                     b.Property<bool>("Passed")
                         .HasColumnType("bit");
 
-                    b.Property<double>("Score")
-                        .HasColumnType("float");
+                    b.Property<int>("Score")
+                        .HasColumnType("int");
 
                     b.Property<string>("UserId")
                         .HasColumnType("nvarchar(450)");
@@ -779,21 +758,6 @@ namespace SkillProof.Data.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("JobUsers", b =>
-                {
-                    b.HasOne("SkillProof.Entities.Models.Job", null)
-                        .WithMany()
-                        .HasForeignKey("SavedJobsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("SkillProof.Entities.Models.Users", null)
-                        .WithMany()
-                        .HasForeignKey("UsersId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -894,7 +858,7 @@ namespace SkillProof.Data.Migrations
                     b.HasOne("SkillProof.Entities.Models.Users", "User")
                         .WithMany("JobApplications")
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Job");

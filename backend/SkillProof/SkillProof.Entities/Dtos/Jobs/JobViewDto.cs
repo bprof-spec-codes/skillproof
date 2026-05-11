@@ -21,6 +21,7 @@ namespace SkillProof.Entities.Dtos.Jobs
         public string ShortDescription { get; set; }
 
         public string Location { get; set; }
+        public int Salary { get; set; }
 
         public string Tags { get; set; } // Json array of string
 

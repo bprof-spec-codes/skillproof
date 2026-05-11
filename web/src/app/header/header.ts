@@ -1,9 +1,9 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { AuthService } from '../services/auth-service';
-import { ProfileViewDto } from '../Models/User/profile-view-dto';
 import { ProfileService } from '../services/profile-service';
 import { Observable, Subscription } from 'rxjs';
 import { DashboardRoutingService } from '../services/dashboardRouting';
+import { ProfileViewDto } from '../Models/Dtos/User/profile-view-dto';
 
 @Component({
   selector: 'app-header',
@@ -15,7 +15,7 @@ export class Header implements OnInit {
   constructor(
     public authService: AuthService,
     private profileService: ProfileService,
-    private dashRouteService: DashboardRoutingService
+    private dashRouteService: DashboardRoutingService,
   ) {}
 
   profile$!: Observable<ProfileViewDto | null>;
@@ -32,7 +32,7 @@ export class Header implements OnInit {
     this.isEmployer = this.authService.getRoles().some((r) => r === 'Employer');
   }
 
-  goHome(){
+  goHome() {
     this.dashRouteService.routeToDashboard();
   }
 }

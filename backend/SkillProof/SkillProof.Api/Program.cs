@@ -210,16 +210,16 @@ namespace SkillProof.Api
             using (var scope = app.Services.CreateScope())
             {
                 var services = scope.ServiceProvider;
-                try
-                {
+                //try
+                //{
                     var context = services.GetRequiredService<SkillProofDbContext>();
                     context.Database.Migrate();
                     DbInitializer.Seed(context);
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Database seeding failed: {ex.Message}");
-                }
+                //}
+                //catch (Exception ex)
+                //{
+                //    Console.WriteLine($"Database seeding failed: {ex.Message}");
+                //}
             }
 
             app.Run();

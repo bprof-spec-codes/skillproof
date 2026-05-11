@@ -11,5 +11,7 @@
         public string? CompanyId { get; set; }
 
         public List<string>? Skills { get; set; }
+        public List<string> SavedJobIds { get; set; } = new List<string>();
+        public List<string> AppliedJobIds { get; set; } = new List<string>();
     }
 }

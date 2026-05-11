@@ -7,6 +7,7 @@ using Microsoft.IdentityModel.Tokens;
 using SkillProof.Data.Repositorys;
 using SkillProof.Entities.Dtos.Tests;
 using SkillProof.Entities.Dtos.Users;
+using SkillProof.Entities.Enums;
 using SkillProof.Entities.Helper;
 using SkillProof.Entities.Models;
 using System.IdentityModel.Tokens.Jwt;
@@ -22,6 +23,8 @@ namespace SkillProof.Logic.User
         private readonly UserManager<Users> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly IRepository<Entities.Models.Companies> _companyRepository;
+        private readonly IRepository<Job> _jobRepository;
+        private readonly IRepository<JobApplication> _applicationRepository;
         private readonly IWebHostEnvironment _env;
         private readonly JwtSettings _jwtSettings;
 
@@ -29,12 +32,16 @@ namespace SkillProof.Logic.User
             UserManager<Users> userManager,
             RoleManager<IdentityRole> roleManager,
             IRepository<Entities.Models.Companies> companyRepository,
+            IRepository<Job> jobRepository,
+            IRepository<JobApplication> applicationRepository,
             IWebHostEnvironment env,
             IOptions<JwtSettings> jwtSettings)
         {
             _userManager = userManager;
             _roleManager = roleManager;
             _companyRepository = companyRepository;
+            _jobRepository = jobRepository;
+            _applicationRepository = applicationRepository;
             _env = env;
             _jwtSettings = jwtSettings.Value;
         }
@@ -156,7 +163,11 @@ namespace SkillProof.Logic.User
 
         public async Task<ViewUser> GetUserByIdAsync(string id)
         {
-            var user = await _userManager.FindByIdAsync(id);
+            var user = await _userManager.Users
+          .Include(u => u.SavedJobs)
+          .Include(u => u.JobApplications)
+          .FirstOrDefaultAsync(u => u.Id == id);
+
             if (user == null)
             {
                 throw new KeyNotFoundException("User not found.");
@@ -171,6 +182,10 @@ namespace SkillProof.Logic.User
                 Bio = user.Bio,
                 Headline = user.Headline,
                 CompanyId = user.CompanyId,
+                SavedJobIds = user.SavedJobs?.Select(j => j.Id).ToList() ?? new List<string>(),
+
+                AppliedJobIds = user.JobApplications?.Select(ja => ja.JobId).ToList() ?? new List<string>(),
+
                 Skills = user.Skills?
                         .Split(',', StringSplitOptions.RemoveEmptyEntries)
                         .Select(s => s.Trim())
@@ -199,6 +214,49 @@ namespace SkillProof.Logic.User
 
             await _userManager.SetEmailAsync(currentUser, dto.Email);
             await _userManager.UpdateAsync(currentUser);
+        }
+
+        public async Task<ViewUser> ToggleSavedJobAsync(string userId, string jobId)
+        {
+            var user = await _userManager.Users
+                .Include(u => u.SavedJobs)
+                .FirstOrDefaultAsync(u => u.Id == userId);
+
+            if (user == null)
+            {
+                throw new KeyNotFoundException($"User not found. Provided ID: '{userId}'");
+            }
+
+            var job = await _jobRepository.GetOne(jobId);
+
+            if (job == null)
+            {
+                throw new KeyNotFoundException("Job not found.");
+            }
+
+            var existingJob = user.SavedJobs.FirstOrDefault(j => j.Id == jobId);
+
+            if (existingJob != null)
+            {
+                user.SavedJobs.Remove(existingJob);
+            }
+            else
+            {
+                user.SavedJobs.Add(job);
+            }
+
+            await _userManager.UpdateAsync(user);
+
+            return new ViewUser
+            {
+                Id = user.Id,
+                FullName = user.FirstName + " " + user.LastName,
+                Email = user.Email,
+                Headline = user.Headline,
+                Bio = user.Bio,
+                CompanyId = user.CompanyId,
+                SavedJobIds = user.SavedJobs.Select(j => j.Id).ToList()
+            };
         }
 
         public async Task DeleteUserAsync(string id)
@@ -351,6 +409,30 @@ namespace SkillProof.Logic.User
 
             if (!result.Succeeded)
                 throw new Exception(string.Join(", ", result.Errors.Select(e => e.Description)));
+        }
+
+        public async Task ApplyToJobAsync(string userId, string jobId)
+        {
+            var allApplications = _applicationRepository.GetAll();
+            var alreadyApplied = await allApplications
+                .AnyAsync(ja => ja.JobId == jobId && ja.UserId == userId);
+
+            if (alreadyApplied)
+            {
+                throw new InvalidOperationException("You have already applied for this job.");
+            }
+
+            var application = new JobApplication
+            {
+                Id = Guid.NewGuid().ToString(),
+                UserId = userId,
+                JobId = jobId,
+                AppliedAt = DateTime.UtcNow,
+                Status = JobApplicationStatus.Submitted,
+                TestId = null
+            };
+
+            await _applicationRepository.Create(application);
         }
     }
 }

@@ -89,13 +89,13 @@ export class JobService {
           const jobsArray = this.jobs.value.filter((j) => j.id !== id);
           this.jobs.next(jobsArray);
         },
-        error: (err) => {
-          console.error('Delete failed.', err);
+        error: () => {
+          throw new Error('Delete failed.');
         },
       });
   }
 
-  updateJob(id: string, dto: JobCreateDto): void {
+  updateJob(id: string, dto: JobCreateDto): Observable<JobViewDto> {
     const payload = {
       ...dto,
       tags: JSON.stringify(dto.tags),
@@ -104,19 +104,16 @@ export class JobService {
     const token = localStorage.getItem('skillProof_token');
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
 
-    this.http.put<JobViewDto>(`${this.apiUrl}/${id}`, payload, { headers }).subscribe({
-      next: (updatedJob) => {
+    return this.http.put<JobViewDto>(`${this.apiUrl}/${id}`, payload, { headers }).pipe(
+      tap((updatedJob) => {
         const jobsArray = this.jobs.value;
         const index = jobsArray.findIndex((j) => j.id === updatedJob.id);
         if (index !== -1) {
           jobsArray[index] = updatedJob;
           this.jobs.next([...jobsArray]);
         }
-      },
-      error: (err) => {
-        console.error('Update failed.', err);
-      },
-    });
+      }),
+    );
   }
 
   private normalizeTags(tags: unknown): string[] {
@@ -139,8 +136,7 @@ export class JobService {
         if (Array.isArray(parsed)) {
           return parsed.map((t) => String(t).trim()).filter((t) => t.length > 0);
         }
-      } catch {
-      }
+      } catch {}
     }
 
     return trimmed
@@ -151,38 +147,44 @@ export class JobService {
 
   getTestUsers(jobId: string): Observable<string[]> {
     return this.http.get<string[]>(`${environment.apiUrl}/Tests/GetTestUsers`, {
-      params: { jobId: jobId }
+      params: { jobId: jobId },
     });
   }
-  
+
   applyForJob(jobId: string) {
     const token = localStorage.getItem('skillProof_token');
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
 
     return this.http.post(`${this.apiUrl}/${jobId}/apply`, {}, { headers });
+  }
+
   loadCompanyJobs(userId: string): void {
-    this.http.get<Job[]>(`${environment.apiUrls.getJobsOfCompany}/${userId}`).pipe(
-      map((jobs) => jobs.map((job) => this.normalizeJob(job))),
-    )
-    .subscribe({
-      next: (jobs) => {
-        console.log("Jobs loaded in successfully", jobs);
-        this._currentCompanyJobs$.next(jobs);
-      },
-      error: (err) => {
-        console.error(err);
-        this._currentCompanyJobs$.next(null);
-      }
-    });
-   }
+    this.http
+      .get<Job[]>(`${environment.apiUrls.getJobsOfCompany}/${userId}`)
+      .pipe(map((jobs) => jobs.map((job) => this.normalizeJob(job))))
+      .subscribe({
+        next: (jobs) => {
+          this._currentCompanyJobs$.next(jobs);
+        },
+        error: () => {
+          this._currentCompanyJobs$.next(null);
+        },
+      });
+  }
 
-  private normalizeJob(job: Job): JobViewDto {
-    const employmentType = job.employmentType ?? job.EmploymentType ?? null;
-
+  private normalizeJob(job: any): JobViewDto {
     return {
-      ...job,
-      employmentType,
-      EmploymentType: employmentType,
+      id: job.id,
+      companyId: job.companyId,
+      title: job.title,
+      description: job.description,
+      shortDescription: job.shortDescription,
+      location: job.location,
+      salary: job.salary,
+      createdAt: job.createdAt,
+      employmentType: job.employmentType ?? null,
+      assessmentIds: job.assessmentIds || job.assessments?.map((a: any) => a.id) || [],
+      assessments: job.assessments || [],
       tags: this.normalizeTags(job.tags),
     } as JobViewDto;
   }

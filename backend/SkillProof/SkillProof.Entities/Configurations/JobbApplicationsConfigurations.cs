@@ -14,14 +14,17 @@ namespace SkillProof.Entities.Configurations
         public void Configure(EntityTypeBuilder<JobApplication> builder)
         {
             builder.HasKey(ja => ja.Id);
+
             builder.HasOne(ja => ja.Job)
                 .WithMany(j => j.JobApplications)
                 .HasForeignKey(ja => ja.JobId)
                 .OnDelete(DeleteBehavior.Cascade);
+
             builder.HasOne(ja => ja.User)
-                .WithMany(ja => ja.JobApplications)
+                .WithMany(u => u.JobApplications)
                 .HasForeignKey(ja => ja.UserId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.NoAction);
+
             builder.HasOne(ja => ja.Test)
                .WithOne(t => t.JobApplication)
                .HasForeignKey<JobApplication>(ja => ja.TestId)
