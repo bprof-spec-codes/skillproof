@@ -530,4 +530,28 @@ public class JobLogic : IJobLogic
 
         return jobApplication.Id;
     }
+
+    public async Task AcceptCandidateAsync(string userId, string jobId)
+    {
+        var jobApplication = await _ctx.JobApplications
+            .FirstOrDefaultAsync(ja => ja.UserId == userId && ja.JobId == jobId);
+        if (jobApplication == null)
+        {
+            throw new KeyNotFoundException("The job application was not found.");
+        }
+        jobApplication.Status = JobApplicationStatus.Accepted;
+        await _ctx.SaveChangesAsync();
+    }
+
+    public async Task RejectCandidateAsync(string userId, string jobId)
+    {
+        var jobApplication = await _ctx.JobApplications
+            .FirstOrDefaultAsync(ja => ja.UserId == userId && ja.JobId == jobId);
+        if (jobApplication == null)
+        {
+            throw new KeyNotFoundException("The job application was not found.");
+        }
+        jobApplication.Status = JobApplicationStatus.Rejected;
+        await _ctx.SaveChangesAsync();
+    }
 }

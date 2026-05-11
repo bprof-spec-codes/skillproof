@@ -172,6 +172,18 @@ export class JobService {
       });
   }
 
+  acceptCandidate(testAnwserId: string){
+    const token = localStorage.getItem('skillProof_token');
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    return this.http.put(`${this.apiUrl}/${testAnwserId}/accept`, {}, { headers });
+  }
+
+  rejectCandidate(testAnwserId: string){
+    const token = localStorage.getItem('skillProof_token');
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    return this.http.put(`${this.apiUrl}/${testAnwserId}/reject`, {}, { headers });
+  }
+
   private normalizeJob(job: any): JobViewDto {
     return {
       id: job.id,

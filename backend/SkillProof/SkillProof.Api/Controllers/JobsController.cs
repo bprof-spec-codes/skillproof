@@ -130,4 +130,36 @@ public class JobsController : ControllerBase
             return StatusCode(500, new { message = "An error occurred while submitting the application.", details = ex.Message });
         }
     }
+
+    [HttpPut("{id}/accept")]
+    public async Task<IActionResult> AcceptCandidate(string userId, string id)
+    {
+        var companyId = User.Claims.FirstOrDefault(c =>
+            c.Type == "CompanyId" ||
+            c.Type.EndsWith("CompanyId", StringComparison.OrdinalIgnoreCase))?.Value;
+
+        if (string.IsNullOrEmpty(companyId))
+        {
+            return BadRequest(new { message = "Company ID is missing from the authentication token." });
+        }
+
+        await _jobLogic.AcceptCandidateAsync(userId, id);
+        return Ok();
+    }
+
+    [HttpPut("{id}/reject")]
+    public async Task<IActionResult> RejectCandidate(string userId, string id)
+    {
+        var companyId = User.Claims.FirstOrDefault(c =>
+            c.Type == "CompanyId" ||
+            c.Type.EndsWith("CompanyId", StringComparison.OrdinalIgnoreCase))?.Value;
+
+        if (string.IsNullOrEmpty(companyId))
+        {
+            return BadRequest(new { message = "Company ID is missing from the authentication token." });
+        }
+
+        await _jobLogic.RejectCandidateAsync(userId, id);
+        return Ok();
+    }
 }

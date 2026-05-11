@@ -33,6 +33,9 @@ export class CompanyHome implements OnInit {
         return this.jobService.getJobsByCompanyId(profile.companyId);
       }),
     );
+    if(!this.selectedJob) {
+      this.companyJobs$.subscribe(jobs => { this.selectedJob = jobs[0] ?? null})
+    }
   }
 
   getTimeAgo(dateInput: string | Date): string {

@@ -73,28 +73,37 @@ export class HomePage implements OnInit, OnDestroy {
       });
   }
 
-  // --- EZ A METÓDUS HIÁNYZOTT: Átalakítja a vesszővel elválasztott stringet tömbbé ---
   private parseJobsTags(jobs: JobViewDto[]): JobViewDto[] {
     return jobs.map((job) => {
       const parsedJob = { ...job };
       if (typeof parsedJob.tags === 'string') {
         const tagString = parsedJob.tags as unknown as string;
         parsedJob.tags = tagString
-          .split(',')
-          .map((t) => t.trim())
-          .filter((t) => t !== '') as any;
+        .split(',')
+        .map((t) => t
+          .trim()
+          .replace(/[\[\]"']/g, '')
+        )
+        .filter((t) => t !== '')
       }
-
+      if (Array.isArray(parsedJob.tags)) {
+        parsedJob.tags = parsedJob.tags
+        .map((t) =>
+          typeof t === 'string' ? 
+            t.replace(/[\[\]"']/g, '').trim()
+            : t
+          )
+      }
       if (!Array.isArray(parsedJob.tags)) {
         parsedJob.tags = [];
       }
-      return parsedJob;
-    });
+      console.log(parsedJob.tags)
+      return parsedJob
+    })
   }
 
   search() {
     this.jobService.jobs$.pipe(take(1)).subscribe((allJobs) => {
-      // 2. Keresés előtt is átalakítjuk a listát
       const parsedJobs = this.parseJobsTags(allJobs);
 
       const fText = this.freeTextControl.value?.toLowerCase().trim() || '';
@@ -119,7 +128,6 @@ export class HomePage implements OnInit, OnDestroy {
       else if (fLength >= 10 && fLength < 16) threshold = 2;
       else if (fLength >= 16) threshold = 3;
 
-      // 3. Az eredeti allJobs helyett a parsedJobs-t használjuk
       let results = parsedJobs
         .map((job) => {
           let score = 0;
@@ -223,7 +231,6 @@ export class HomePage implements OnInit, OnDestroy {
         .map((item) => item.job);
 
       if (results.length === 0) {
-        // 4. Fallback esetén is a parsedJobs-ból dolgozunk
         results = parsedJobs.sort(
           (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
         );

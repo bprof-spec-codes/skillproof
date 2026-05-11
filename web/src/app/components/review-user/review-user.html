@@ -5,30 +5,35 @@
 
         <div class="card border-0 radius">
           <div class="card-body p-4">
-            <h4 class="fw-bold color mb-4">{{profileData?.fullName}}'s Answers</h4>
-            @for (test of testQuestionsData; track $index) {
-            <div class="card shadow-sm border-question radius mb-4"
-              [ngClass]="{ 'background-color': test.score === 0, 'background-color2': test.score === 0.5 }">
-              <div class="card-body">
-                <div class="row align-items-center">
-                  <div class="col">
-                    <h6 class="fw-bold color">{{$index +1}}. {{test.questionText}}</h6>
-                    <p class="mb-0"><span class="underline">Answer:</span> {{test.userResponse}}</p>
-                  </div>
-                  <div class="col-auto d-flex align-items-center justify-content-center"
-                    style="min-width:90px;">
-                    <p class="mb-0 color"><b>{{test.score}} point</b></p>
-                  </div>
-                  <div class="col-auto d-flex align-items-center justify-content-end gap-2" style="min-width:90px;">
-                    @if (test.questionType === QuestionType.CodeCompletion || test.questionType ===
-                    QuestionType.OpenEnded){
-                    <button class="btn review" (click)="goToManualFeedback(test)">Review</button>
-                    }
-                  </div>
+            @if(testQuestionsData !== null ? testQuestionsData.length > 0 : false)
+            {
+              <h4 class="fw-bold color mb-4">{{profileData?.fullName}}'s Answers</h4>
+              @for (test of testQuestionsData; track $index) {
+              <div class="card shadow-sm border-question radius mb-4"
+                [ngClass]="{ 'background-color': test.score === 0, 'background-color2': test.score === 0.5 }">
+                <div class="card-body">
+                  <div class="row align-items-center">
+                    <div class="col">
+                      <h6 class="fw-bold color">{{$index +1}}. {{test.questionText}}</h6>
+                      <p class="mb-0"><span class="underline">Answer:</span> {{test.userResponse}}</p>
+                    </div>
+                    <div class="col-auto d-flex align-items-center justify-content-center"
+                      style="min-width:90px;">
+                      <p class="mb-0 color"><b>{{test.score}} point</b></p>
+                    </div>
+                    <div class="col-auto d-flex align-items-center justify-content-end gap-2" style="min-width:90px;">
+                      @if (test.questionType === QuestionType.CodeCompletion || test.questionType ===
+                      QuestionType.OpenEnded){
+                      <button class="btn review" (click)="goToManualFeedback(test)">Review</button>
+                      }
+                    </div>
 
+                  </div>
                 </div>
               </div>
-            </div>
+              }
+            } @else{
+              <h4 class="fw-bold color mb-4 text-center">This job didn't have an assessment when the candidate applied, so no test results are available.</h4>
             }
 
           </div>

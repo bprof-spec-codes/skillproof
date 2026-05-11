@@ -298,7 +298,7 @@ public class TestLogic : ITestLogic
 
         if (job.Assessments.Count == 0)
         {
-            throw new ArgumentException("This job has no assessment attached.");
+            return new List<UserTestReviewDto>();
         }
 
         var attempt = job.Assessments.SelectMany(a => a.TestAttempts).FirstOrDefault(a => a.UserId == userId);
@@ -307,7 +307,7 @@ public class TestLogic : ITestLogic
 
         if (attempt == null)
         {
-            throw new ArgumentException($"There are no test attempt for the assessments attached to this job with this user: {userId}.");
+            return new List<UserTestReviewDto>();
         }
 
         var reviews = attempt.TestAnswers.Select(testAnswers => new UserTestReviewDto
