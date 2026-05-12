@@ -97,7 +97,7 @@ export class HomePage implements OnInit, OnDestroy {
       if (!Array.isArray(parsedJob.tags)) {
         parsedJob.tags = [];
       }
-      console.log(parsedJob.tags)
+
       return parsedJob
     })
   }

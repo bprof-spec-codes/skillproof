@@ -8,4 +8,5 @@ export interface ProfileViewDto {
   companyId?: string;
   savedJobIds: string[];
   skills: string[] | null;
+  appliedJobIds: string[];
 }
