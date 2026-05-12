@@ -26,4 +26,8 @@ public interface IJobLogic
     Task AcceptCandidateAsync(string userId, string jobId);
 
     Task RejectCandidateAsync(string userId, string jobId);
+
+    Task<IEnumerable<JobNotificationDto>> GetNotificationsAsync(string userId);
+
+    Task MarkNotificationAsReadAsync(string applicationId, string userId);
 }

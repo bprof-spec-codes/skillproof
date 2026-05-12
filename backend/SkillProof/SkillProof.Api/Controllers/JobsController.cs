@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SkillProof.Entities.Dtos.Assesment;
 using SkillProof.Entities.Dtos.Job;
@@ -5,6 +6,7 @@ using SkillProof.Entities.Dtos.Jobs;
 using SkillProof.Entities.Dtos.Questions;
 using SkillProof.Entities.Models;
 using SkillProof.Logic.Jobs;
+using System.Security.Claims;
 
 namespace SkillProof.Api.Controllers;
 [Route("api/[controller]")]
@@ -132,7 +134,7 @@ public class JobsController : ControllerBase
     }
 
     [HttpPut("{id}/accept")]
-    public async Task<IActionResult> AcceptCandidate(string userId, string id)
+    public async Task<IActionResult> AcceptCandidate([FromQuery] string userId, string id)
     {
         var companyId = User.Claims.FirstOrDefault(c =>
             c.Type == "CompanyId" ||
@@ -148,7 +150,7 @@ public class JobsController : ControllerBase
     }
 
     [HttpPut("{id}/reject")]
-    public async Task<IActionResult> RejectCandidate(string userId, string id)
+    public async Task<IActionResult> RejectCandidate([FromQuery] string userId, string id)
     {
         var companyId = User.Claims.FirstOrDefault(c =>
             c.Type == "CompanyId" ||
@@ -162,4 +164,41 @@ public class JobsController : ControllerBase
         await _jobLogic.RejectCandidateAsync(userId, id);
         return Ok();
     }
+
+    [HttpGet("notifications")]
+    [Authorize]
+    public async Task<IActionResult> GetNotifications()
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(userId))
+        {
+            return Unauthorized();
+        }
+
+        var notifications = await _jobLogic.GetNotificationsAsync(userId);
+        return Ok(notifications);
+    }
+
+    [HttpPut("notifications/{id}/read")]
+    [Authorize]
+    public async Task<IActionResult> MarkAsRead(string id)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(userId))
+        {
+            return Unauthorized();
+        }
+
+        try
+        {
+            await _jobLogic.MarkNotificationAsReadAsync(id, userId);
+            return Ok();
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new { message = ex.Message });
+        }
+    }
+
+
 }
