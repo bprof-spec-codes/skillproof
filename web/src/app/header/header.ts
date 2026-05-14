@@ -35,6 +35,7 @@ export class Header implements OnInit, OnDestroy {
     this.isLoggedIn = this.authService.isLoggedIn();
     this.isAdmin = this.authService.getRoles().some((r) => r === 'Admin');
     this.isEmployer = this.authService.getRoles().some((r) => r === 'Employer');
+    if(this.isLoggedIn)
     this.pollingSubscription = timer(0, 10000).pipe(
       switchMap(() => this.jobService.getNotifications())
     ).subscribe({

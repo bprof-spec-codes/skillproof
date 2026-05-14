@@ -6,6 +6,7 @@ import { BehaviorSubject, debounceTime, Observable, Subject, take, takeUntil } f
 import { FormControl } from '@angular/forms';
 import { EmploymentType } from '../Models/Enums/EmploymentType';
 import { DifficultyLevel } from '../Models/Enums/DifficultyLevel';
+import { AuthService } from '../services/auth-service';
 
 @Component({
   selector: 'app-home-page',
@@ -40,10 +41,10 @@ export class HomePage implements OnInit, OnDestroy {
     { label: 'Junior', value: DifficultyLevel.Junior },
   ];
 
-  constructor(public jobService: JobService) {}
+  constructor(public jobService: JobService, private authService: AuthService) {}
 
   ngOnInit() {
-    this.isLoggedIn = !!localStorage.getItem('skillProof_token');
+    this.isLoggedIn = this.authService.isLoggedIn()
 
     this.jobService.jobs$.subscribe((allJobs) => {
       const parsedJobs = this.parseJobsTags(allJobs);
