@@ -6,6 +6,7 @@ import { environment } from '../../environments/environment.development';
 import { JobCreateDto } from '../Models/Dtos/Job/JobCreate-dto';
 import { Job } from '../Models/Dtos/Job/job';
 import { JobNotificationDto } from '../Models/Dtos/Job/jobNotificationDto';
+import { JobApplicationStatusDto } from '../Models/Dtos/Job/job-application-status-dto';
 
 @Injectable({
   providedIn: 'root',
@@ -146,8 +147,8 @@ export class JobService {
       .filter((t) => t.length > 0);
   }
 
-  getTestUsers(jobId: string): Observable<string[]> {
-    return this.http.get<string[]>(`${environment.apiUrl}/Tests/GetTestUsers`, {
+  getTestUsers(jobId: string): Observable<JobApplicationStatusDto[]> {
+    return this.http.get<JobApplicationStatusDto[]>(`${environment.apiUrl}/Tests/GetTestUsers`, {
       params: { jobId: jobId },
     });
   }

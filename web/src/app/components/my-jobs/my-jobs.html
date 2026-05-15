@@ -32,17 +32,43 @@
                             </div>
                             } @else {
                             @if(job.applicants && job.applicants.length > 0) {
-                            <ul class="list-group list-group-flush border-0">
+                                <ul class="list-group list-group-flush border-0">
+                    
                                 @for(applicant of job.applicants; track applicant.id) {
-                                <li
-                                    class="list-group-item border-0 bg-transparent d-flex justify-content-between align-items-center px-0">
-                                    <span class="fontsize ms-4 color">{{ applicant.fullName }}</span>
-                                    <span class="me-4 fontsize pointer" [routerLink]="['/reviewUser', applicant.id]"
-                                    [queryParams]="{jobId: job.id}"><img src="/Assets/Arrow.svg" class="icon"></span>
-                                </li>
-                                <hr class="divider">
+                                    <li class="list-group-item applicant-item border-0 px-0 py-3">
+                                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                                            <div class="d-flex flex-column">
+                                                <span class="fw-semibold customfonts color">
+                                                    {{ applicant.fullName }}
+                                                </span>
+                                                
+                                            </div>
+                                            <div class="d-flex align-items-center gap-3">
+                                                <span
+                                                    class="badge mt-2 status-badge"
+                                                    [ngClass]="{
+                                                        'bg-primary': getJobApplicationStatusLabel(applicant.jobApplicationStatus) === 'Submitted',
+                                                        'bg-warning text-dark': getJobApplicationStatusLabel(applicant.jobApplicationStatus) === 'UnderReview',
+                                                        'bg-info text-dark': getJobApplicationStatusLabel(applicant.jobApplicationStatus) === 'TestAssigned',
+                                                        'bg-secondary': getJobApplicationStatusLabel(applicant.jobApplicationStatus) === 'TestCompleted',
+                                                        'bg-success': getJobApplicationStatusLabel(applicant.jobApplicationStatus) === 'Accepted',
+                                                        'bg-danger': getJobApplicationStatusLabel(applicant.jobApplicationStatus) === 'Rejected',
+                                                        'bg-dark': getJobApplicationStatusLabel(applicant.jobApplicationStatus) === 'Withdrawn'
+                                                    }">
+                                                    {{ getJobApplicationStatusLabel(applicant.jobApplicationStatus) }}
+                                                </span>
+                                                <a
+                                                    class="review-btn"
+                                                    [routerLink]="['/reviewUser', applicant.id]"
+                                                    [queryParams]="{ jobId: job.id }">
+                                                    <img src="/Assets/Arrow.svg" class="icon">
+                                                </a>
+                                            </div>
+                                                
+                                        </div>
+                                    </li>
                                 }
-                            </ul>
+                                </ul>
                             } @else {
                             <p class="text-muted small text-center">No applicants yet for this position.</p>
                             }

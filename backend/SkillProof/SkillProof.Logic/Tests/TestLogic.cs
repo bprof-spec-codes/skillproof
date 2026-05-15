@@ -284,11 +284,11 @@ public class TestLogic : ITestLogic
             throw new ArgumentException("Job id is required.");
         }
         var job = await _jobRepository.GetAll()
+            .Include(j => j.JobApplications)
             .Include(j => j.Assessments)
                 .ThenInclude(Assessments => Assessments.TestAttempts)
                     .ThenInclude(TestAttempts => TestAttempts.TestAnswers)
                         .ThenInclude(TestAnswers => TestAnswers.Question)
-                         .ThenInclude(q => q.MultipleChoiceQuestion)
             .FirstOrDefaultAsync(j => j.Id == jobId);
 
         if (job == null)
@@ -309,7 +309,13 @@ public class TestLogic : ITestLogic
         {
             return new List<UserTestReviewDto>();
         }
-
+        var jobApplication = job.JobApplications.FirstOrDefault(ja => ja.UserId == userId);
+        if (jobApplication != null && jobApplication.Status != JobApplicationStatus.Accepted && jobApplication.Status != JobApplicationStatus.Rejected)
+        {
+            jobApplication.Status = JobApplicationStatus.UnderReview;
+            _ctx.JobApplications.Update(jobApplication);
+            await _ctx.SaveChangesAsync();
+        }
         var reviews = attempt.TestAnswers.Select(testAnswers => new UserTestReviewDto
         {
             QuestionId = testAnswers.QuestionId,
@@ -361,12 +367,12 @@ public class TestLogic : ITestLogic
             Score = testAnwser.Score,
             Inspected = testAnwser.Inspected
         };
-
+        _ctx.TestAnswers.Update(testAnwser);
         await _ctx.SaveChangesAsync();
         return result;
     }
 
-    public async Task<List<string?>> GetTestUsersAsync(string jobId)
+    public async Task<List<JobApplicationStatusDto>> GetTestUsersAsync(string jobId)
     {
         if (jobId == null || string.IsNullOrWhiteSpace(jobId))
         {
@@ -381,11 +387,16 @@ public class TestLogic : ITestLogic
             throw new KeyNotFoundException($"Job '{jobId}' not found.");
         }
 
-        List<string?> userIds = job.JobApplications
-            .Select(a => a.UserId)
+        List<JobApplicationStatusDto> JobApplicationStatusDto = job.JobApplications
+            .Select(a => new JobApplicationStatusDto
+            {
+                UserId = a.UserId,
+                jobApplicationStatus = a.Status
+            })
             .Distinct()
             .ToList();
 
-        return userIds;
+        return JobApplicationStatusDto;
     }
+
 }

@@ -38,39 +38,36 @@ export class CompanyHome implements OnInit {
     }
   }
 
-  getTimeAgo(dateInput: string | Date): string {
-    if (!dateInput) return '';
+  getTimeAgo(dateStr: string): string {
+    const formattedDateStr =
+      dateStr.includes('Z') || dateStr.includes('+') ? dateStr : `${dateStr.replace(' ', 'T')}Z`;
+    const date = new Date(formattedDateStr);
+    const time = date.getTime();
 
-    const pastDate = new Date(dateInput);
-    const now = new Date();
-    const seconds = Math.floor((now.getTime() - pastDate.getTime()) / 1000);
-
-    if (seconds < 60) {
-      return 'just now';
+    if (!dateStr || Number.isNaN(time)) {
+      return 'Unknown';
     }
 
-    const minutes = Math.floor(seconds / 60);
-    if (minutes < 60) {
-      return ` ${minutes} minute${minutes > 1 ? 's' : ''} ago`;
+    const diffMs = Date.now() - time;
+    if (diffMs < 0) {
+      return 'Just now';
     }
+
+    const minutes = Math.floor(diffMs / 60000);
+    if (minutes < 1) return 'Just now';
+    if (minutes < 60) return `${minutes} minute${minutes === 1 ? '' : 's'} ago`;
 
     const hours = Math.floor(minutes / 60);
-    if (hours < 24) {
-      return ` ${hours} hour${hours > 1 ? 's' : ''} ago`;
-    }
+    if (hours < 24) return `${hours} hour${hours === 1 ? '' : 's'} ago`;
 
     const days = Math.floor(hours / 24);
-    if (days < 30) {
-      return ` ${days} day${days > 1 ? 's' : ''} ago`;
-    }
+    if (days < 30) return `${days} day${days === 1 ? '' : 's'} ago`;
 
     const months = Math.floor(days / 30);
-    if (months < 12) {
-      return ` ${months} month${months > 1 ? 's' : ''} ago`;
-    }
+    if (months < 12) return `${months} month${months === 1 ? '' : 's'} ago`;
 
     const years = Math.floor(days / 365);
-    return ` ${years} year${years > 1 ? 's' : ''} ago`;
+    return `${years} year${years === 1 ? '' : 's'} ago`;
   }
 
   selectJob(job: JobViewDto): void {

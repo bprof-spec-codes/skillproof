@@ -60,14 +60,10 @@ const routes: Routes = [
     data: { roles: ['EMPLOYER'] }
   },
 
-  { path: 'job/:id', component: JobDetail,
-    canActivate: [authGuard],
-    data: { roles: ['ADMIN'] }
+  { path: 'job/:id', component: JobDetail
   },
 
-  { path: 'job/:id/test', component: TestTake,
-    canActivate: [authGuard],
-    data: { roles: ['ADMIN'] }
+  { path: 'job/:id/test', component: TestTake
   },
 
   { path: 'assessments/create', component: AssessmentCreate,

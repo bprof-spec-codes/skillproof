@@ -37,7 +37,7 @@ public class TestsController : ControllerBase
     }
 
     [HttpGet("GetTestUsers")]
-    public async Task<ActionResult<List<string?>>> GetTestUsers(string jobId)
+    public async Task<ActionResult<List<JobApplicationStatusDto>>> GetTestUsers(string jobId)
     {
         var result = await _testLogic.GetTestUsersAsync(jobId);
         return Ok(result);
