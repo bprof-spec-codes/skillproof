@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using SkillProof.Data;
 using SkillProof.Data.Repositorys;
 using SkillProof.Entities.Dtos.Assesment;
 using SkillProof.Entities.Dtos.Questions;
@@ -12,15 +13,18 @@ namespace SkillProof.Logic.Assessments
         private readonly IRepository<Entities.Models.Assessments> _assessmentRepository;
         private readonly IRepository<Entities.Models.Questions> _questionRepository;
         private readonly IRepository<Entities.Models.Job> _jobRepository;
+        private readonly SkillProofDbContext _ctx;
 
         public AssessmentLogic(
             IRepository<Entities.Models.Assessments> assessmentRepository,
             IRepository<Entities.Models.Questions> questionRepository,
-            IRepository<Entities.Models.Job> jobRepository)
+            IRepository<Entities.Models.Job> jobRepository,
+            SkillProofDbContext ctx)
         {
             _assessmentRepository = assessmentRepository;
             _questionRepository = questionRepository;
             _jobRepository = jobRepository;
+            _ctx = ctx;
         }
 
         public async Task<AssessmentViewDto> CreateAssessmentAsync(CreateAssessmentDto model, string userId)
@@ -179,6 +183,56 @@ namespace SkillProof.Logic.Assessments
             assessment.Jobs.Add(job);
 
             await _assessmentRepository.Update(assessment);
+        }
+
+        public async Task AddAssesmenToSkill(AddAssesmentsToSkillDto dto)
+        {
+            var skill = await _ctx.Skills
+            .Include(s => s.Assessments)
+            .FirstOrDefaultAsync(s => s.Id == dto.SkillId);
+
+            if (skill == null)
+                throw new KeyNotFoundException("Skill not found");
+
+            var assessment = await _ctx.Assessments
+                .FirstOrDefaultAsync(a => a.Id == dto.AssessmentId);
+
+            if (assessment == null)
+                throw new KeyNotFoundException("Assessment not found");
+
+            assessment.SkillId = skill.Id;
+
+            await _ctx.SaveChangesAsync();
+        }
+
+        public async Task<ICollection<AssessmentViewDto>> GetAssessmentBySkill(string skillId)
+        {
+            var assessments = await _ctx.Assessments
+                .Include(a => a.Questions)
+                .Where(a => a.SkillId == skillId)
+                .ToListAsync();
+
+            return assessments.Select(a => new AssessmentViewDto
+            {
+                Id = a.Id,
+                Title = a.Title,
+                Description = a.Description,
+                DifficultyLevel = a.DifficultyLevel,
+                CreatedBy = a.CreatedBy,
+                CreatedAt = a.CreatedAt,
+                IsActive = a.IsActive,
+
+                Questions = a.Questions.Select(q => new QuestionResponseDto
+                {
+                    Id = q.Id,
+                    QuestionText = q.QuestionText
+                }).ToList(),
+
+                QuestionIds = a.Questions
+                    .Select(q => q.Id)
+                    .ToList()
+
+            }).ToList();
         }
     }
 }
