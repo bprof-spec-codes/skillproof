@@ -78,7 +78,7 @@ namespace SkillProof.Api.Controllers
             await _assessmentLogic.AddAssesmenToSkill(dto);
         }
 
-        [HttpGet("GetAssesmentToSkill")]
+        [HttpGet("GetAssesmentBySkill")]
         public async Task<ICollection<AssessmentViewDto>> GetAssessmentBySkill(string skillId)
         {
             var assesment = await _assessmentLogic.GetAssessmentBySkill(skillId);
