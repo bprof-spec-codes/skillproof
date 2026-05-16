@@ -12,8 +12,8 @@ using SkillProof.Data;
 namespace SkillProof.Data.Migrations
 {
     [DbContext(typeof(SkillProofDbContext))]
-    [Migration("20260322091850_RenameJobsToJob")]
-    partial class RenameJobsToJob
+    [Migration("20260516164322_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -25,19 +25,79 @@ namespace SkillProof.Data.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("CompaniesUsers", b =>
+            modelBuilder.Entity("AssessmentsJob", b =>
                 {
-                    b.Property<string>("CompaniesId")
+                    b.Property<string>("AssessmentsId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("JobsId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("AssessmentsId", "JobsId");
+
+                    b.HasIndex("JobsId");
+
+                    b.ToTable("AssessmentsJob");
+                });
+
+            modelBuilder.Entity("AssessmentsQuestions", b =>
+                {
+                    b.Property<string>("AssessmentsId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("QuestionsId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("AssessmentsId", "QuestionsId");
+
+                    b.HasIndex("QuestionsId");
+
+                    b.ToTable("AssessmentsQuestions");
+                });
+
+            modelBuilder.Entity("AssessmentsTests", b =>
+                {
+                    b.Property<string>("AssessmentsId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("TestAttemptsId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("AssessmentsId", "TestAttemptsId");
+
+                    b.HasIndex("TestAttemptsId");
+
+                    b.ToTable("AssessmentsTests");
+                });
+
+            modelBuilder.Entity("JobQuestions", b =>
+                {
+                    b.Property<string>("JobsId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("QuestionsId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("JobsId", "QuestionsId");
+
+                    b.HasIndex("QuestionsId");
+
+                    b.ToTable("JobQuestions");
+                });
+
+            modelBuilder.Entity("JobUsers", b =>
+                {
+                    b.Property<string>("SavedJobsId")
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("UsersId")
                         .HasColumnType("nvarchar(450)");
 
-                    b.HasKey("CompaniesId", "UsersId");
+                    b.HasKey("SavedJobsId", "UsersId");
 
                     b.HasIndex("UsersId");
 
-                    b.ToTable("CompaniesUsers");
+                    b.ToTable("UserSavedJobs", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -248,6 +308,44 @@ namespace SkillProof.Data.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("SkillProof.Entities.Models.Assessments", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("DifficultyLevel")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("SkillId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SkillId");
+
+                    b.ToTable("Assessments");
+                });
+
             modelBuilder.Entity("SkillProof.Entities.Models.CodeCompletionQuestions", b =>
                 {
                     b.Property<string>("QuestionId")
@@ -334,6 +432,13 @@ namespace SkillProof.Data.Migrations
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
+
+                    b.Property<int>("Salary")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ShortDescription")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Tags")
                         .IsRequired()
@@ -436,6 +541,10 @@ namespace SkillProof.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.PrimitiveCollection<string>("Tags")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(255)
@@ -450,6 +559,21 @@ namespace SkillProof.Data.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Questions");
+                });
+
+            modelBuilder.Entity("SkillProof.Entities.Models.Skill", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Skills");
                 });
 
             modelBuilder.Entity("SkillProof.Entities.Models.TestAnswers", b =>
@@ -467,12 +591,21 @@ namespace SkillProof.Data.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
+                    b.Property<bool>("Inspected")
+                        .HasColumnType("bit");
+
                     b.Property<bool>("IsCorrect")
                         .HasColumnType("bit");
+
+                    b.Property<string>("ManualFeedback")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("QuestionId")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
+
+                    b.Property<double>("Score")
+                        .HasColumnType("float");
 
                     b.Property<string>("TestId")
                         .IsRequired()
@@ -501,8 +634,8 @@ namespace SkillProof.Data.Migrations
                     b.Property<bool>("Passed")
                         .HasColumnType("bit");
 
-                    b.Property<int>("Score")
-                        .HasColumnType("int");
+                    b.Property<double>("Score")
+                        .HasColumnType("float");
 
                     b.Property<string>("UserId")
                         .HasColumnType("nvarchar(450)");
@@ -565,6 +698,21 @@ namespace SkillProof.Data.Migrations
                     b.ToTable("UserExperiences");
                 });
 
+            modelBuilder.Entity("SkillUsers", b =>
+                {
+                    b.Property<string>("SkillsId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("UsersId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("SkillsId", "UsersId");
+
+                    b.HasIndex("UsersId");
+
+                    b.ToTable("SkillUsers");
+                });
+
             modelBuilder.Entity("SkillProof.Entities.Models.Users", b =>
                 {
                     b.HasBaseType("Microsoft.AspNetCore.Identity.IdentityUser");
@@ -573,6 +721,12 @@ namespace SkillProof.Data.Migrations
                         .IsRequired()
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("CompanyId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("CompanyRole")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
@@ -596,14 +750,76 @@ namespace SkillProof.Data.Migrations
                         .IsRequired()
                         .HasColumnType("varbinary(max)");
 
+                    b.HasIndex("CompanyId");
+
                     b.HasDiscriminator().HasValue("Users");
                 });
 
-            modelBuilder.Entity("CompaniesUsers", b =>
+            modelBuilder.Entity("AssessmentsJob", b =>
                 {
-                    b.HasOne("SkillProof.Entities.Models.Companies", null)
+                    b.HasOne("SkillProof.Entities.Models.Assessments", null)
                         .WithMany()
-                        .HasForeignKey("CompaniesId")
+                        .HasForeignKey("AssessmentsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SkillProof.Entities.Models.Job", null)
+                        .WithMany()
+                        .HasForeignKey("JobsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("AssessmentsQuestions", b =>
+                {
+                    b.HasOne("SkillProof.Entities.Models.Assessments", null)
+                        .WithMany()
+                        .HasForeignKey("AssessmentsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SkillProof.Entities.Models.Questions", null)
+                        .WithMany()
+                        .HasForeignKey("QuestionsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("AssessmentsTests", b =>
+                {
+                    b.HasOne("SkillProof.Entities.Models.Assessments", null)
+                        .WithMany()
+                        .HasForeignKey("AssessmentsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SkillProof.Entities.Models.Tests", null)
+                        .WithMany()
+                        .HasForeignKey("TestAttemptsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("JobQuestions", b =>
+                {
+                    b.HasOne("SkillProof.Entities.Models.Job", null)
+                        .WithMany()
+                        .HasForeignKey("JobsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SkillProof.Entities.Models.Questions", null)
+                        .WithMany()
+                        .HasForeignKey("QuestionsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("JobUsers", b =>
+                {
+                    b.HasOne("SkillProof.Entities.Models.Job", null)
+                        .WithMany()
+                        .HasForeignKey("SavedJobsId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -665,6 +881,17 @@ namespace SkillProof.Data.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("SkillProof.Entities.Models.Assessments", b =>
+                {
+                    b.HasOne("SkillProof.Entities.Models.Skill", "Skill")
+                        .WithMany("Assessments")
+                        .HasForeignKey("SkillId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Skill");
+                });
+
             modelBuilder.Entity("SkillProof.Entities.Models.CodeCompletionQuestions", b =>
                 {
                     b.HasOne("SkillProof.Entities.Models.Questions", "Question")
@@ -714,7 +941,7 @@ namespace SkillProof.Data.Migrations
                     b.HasOne("SkillProof.Entities.Models.Users", "User")
                         .WithMany("JobApplications")
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("Job");
@@ -786,9 +1013,36 @@ namespace SkillProof.Data.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("SkillUsers", b =>
+                {
+                    b.HasOne("SkillProof.Entities.Models.Skill", null)
+                        .WithMany()
+                        .HasForeignKey("SkillsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SkillProof.Entities.Models.Users", null)
+                        .WithMany()
+                        .HasForeignKey("UsersId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("SkillProof.Entities.Models.Users", b =>
+                {
+                    b.HasOne("SkillProof.Entities.Models.Companies", "Companies")
+                        .WithMany("Users")
+                        .HasForeignKey("CompanyId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Companies");
+                });
+
             modelBuilder.Entity("SkillProof.Entities.Models.Companies", b =>
                 {
                     b.Navigation("Jobs");
+
+                    b.Navigation("Users");
                 });
 
             modelBuilder.Entity("SkillProof.Entities.Models.Job", b =>
@@ -807,6 +1061,11 @@ namespace SkillProof.Data.Migrations
                     b.Navigation("TestAnswers");
 
                     b.Navigation("TrueFalseQuestion");
+                });
+
+            modelBuilder.Entity("SkillProof.Entities.Models.Skill", b =>
+                {
+                    b.Navigation("Assessments");
                 });
 
             modelBuilder.Entity("SkillProof.Entities.Models.Tests", b =>

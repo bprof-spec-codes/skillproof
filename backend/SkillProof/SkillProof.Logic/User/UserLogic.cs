@@ -4,12 +4,14 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using SkillProof.Data;
 using SkillProof.Data.Repositorys;
 using SkillProof.Entities.Dtos.Tests;
 using SkillProof.Entities.Dtos.Users;
 using SkillProof.Entities.Enums;
 using SkillProof.Entities.Helper;
 using SkillProof.Entities.Models;
+using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -25,8 +27,10 @@ namespace SkillProof.Logic.User
         private readonly IRepository<Entities.Models.Companies> _companyRepository;
         private readonly IRepository<Job> _jobRepository;
         private readonly IRepository<JobApplication> _applicationRepository;
+        private readonly IRepository<SkillProof.Entities.Models.Skill> _skillRepository;
         private readonly IWebHostEnvironment _env;
         private readonly JwtSettings _jwtSettings;
+        private readonly SkillProofDbContext _ctx;
 
         public UserLogic(
             UserManager<Users> userManager,
@@ -35,7 +39,9 @@ namespace SkillProof.Logic.User
             IRepository<Job> jobRepository,
             IRepository<JobApplication> applicationRepository,
             IWebHostEnvironment env,
-            IOptions<JwtSettings> jwtSettings)
+            IOptions<JwtSettings> jwtSettings,
+            SkillProofDbContext ctx,
+            IRepository<SkillProof.Entities.Models.Skill> skillRepository)
         {
             _userManager = userManager;
             _roleManager = roleManager;
@@ -44,6 +50,8 @@ namespace SkillProof.Logic.User
             _applicationRepository = applicationRepository;
             _env = env;
             _jwtSettings = jwtSettings.Value;
+            _ctx = ctx;
+            this._skillRepository = skillRepository;
         }
 
         public async Task RegisterUserAsync(RegisterUser dto)
@@ -137,26 +145,32 @@ namespace SkillProof.Logic.User
 
         public async Task<IEnumerable<ViewUser>> GetAllUsersAsync()
         {
-            var users = await _userManager.Users.ToListAsync();
-            var result = new List<ViewUser>();
+            var users = await _userManager.Users
+            .Include(u => u.Skills)
+            .ToListAsync();
 
-            foreach (var user in users)
-            {
-                result.Add(new ViewUser
+                var result = new List<ViewUser>();
+
+                foreach (var user in users)
                 {
-                    Id = user.Id,
-                    Email = user.Email,
-                    FullName = user.FirstName + " " + user.LastName,
-                    Image = Convert.ToBase64String(user.ProfilePicture),
-                    Headline = user.Headline,
-                    Bio = user.Bio,
+                    result.Add(new ViewUser
+                    {
+                        Id = user.Id,
+                        Email = user.Email,
+                        FullName = user.FirstName + " " + user.LastName,
 
-                    Skills = user.Skills?
-                        .Split(',', StringSplitOptions.RemoveEmptyEntries)
-                        .Select(s => s.Trim())
-                        .ToList() ?? new List<string>()
-                });
-            }
+                        Image = user.ProfilePicture != null
+                            ? Convert.ToBase64String(user.ProfilePicture)
+                            : string.Empty,
+
+                        Headline = user.Headline,
+                        Bio = user.Bio,
+
+                        Skills = user.Skills?
+                            .Select(s => s.Name)
+                            .ToList() ?? new List<string>()
+                    });
+                }
 
             return result;
         }
@@ -187,9 +201,8 @@ namespace SkillProof.Logic.User
                 AppliedJobIds = user.JobApplications?.Select(ja => ja.JobId).ToList() ?? new List<string>(),
 
                 Skills = user.Skills?
-                        .Split(',', StringSplitOptions.RemoveEmptyEntries)
-                        .Select(s => s.Trim())
-                        .ToList() ?? new List<string>()
+                    .Select(s => s.Name)
+                    .ToList() ?? new List<string>()
             };
         }
 
@@ -388,27 +401,30 @@ namespace SkillProof.Logic.User
             return result;
         }
 
-        public async Task UpdateSkillsToUser(string id, UpdateSkillToUser dto)
+        public async Task UpdateSkillsToUser(UpdateSkillToUser dto)
         {
-            
-            var user = await _userManager.FindByIdAsync(id);
+            var user = await _userManager.Users
+            .Include(u => u.Skills)
+            .FirstOrDefaultAsync(u => u.Id == dto.userId);
 
             if (user == null)
                 throw new KeyNotFoundException("User not found");
 
+            var earnedSkill = await _ctx.Skills
+                .FirstOrDefaultAsync(s => s.Id == dto.skillId);
 
-            var cleanedSkills = dto.Skills
-            .Select(s => s?.Trim())
-            .Where(s => !string.IsNullOrWhiteSpace(s))
-            .Distinct(StringComparer.OrdinalIgnoreCase)
-            .ToList();
+            if (earnedSkill == null)
+                throw new KeyNotFoundException("Skill not found");
 
-            user.Skills = string.Join(", ", cleanedSkills);          
+            var alreadyHasSkill = user.Skills
+                .Any(s => s.Id == earnedSkill.Id);
 
-            var result = await _userManager.UpdateAsync(user);
+            if (!alreadyHasSkill)
+            {
+                user.Skills.Add(earnedSkill);
 
-            if (!result.Succeeded)
-                throw new Exception(string.Join(", ", result.Errors.Select(e => e.Description)));
+                await _ctx.SaveChangesAsync();
+            }
         }
 
         public async Task ApplyToJobAsync(string userId, string jobId)

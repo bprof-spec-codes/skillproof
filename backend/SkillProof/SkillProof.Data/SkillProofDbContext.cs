@@ -41,6 +41,7 @@ namespace SkillProof.Data
             modelBuilder.ApplyConfiguration(new TrueFalseQuestionsConfigurations());
             modelBuilder.ApplyConfiguration(new UserExperiencesConfigurations());
             modelBuilder.ApplyConfiguration(new UsersConfigurations());
+            modelBuilder.ApplyConfiguration(new SkillsConfiguration());
         }
     }
 }

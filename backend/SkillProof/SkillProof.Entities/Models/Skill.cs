@@ -6,22 +6,31 @@ using System.Linq;
 using System.Security.Principal;
 using System.Text;
 using System.Threading.Tasks;
+using SkillProof.Entities;
+using SkillProof.Entities.Helper;
 
 namespace SkillProof.Entities.Models
 {
-    public class Skill : IIdentity
+    public class Skill: Helper.IIdentity
     {
         [Key]
-        public int Id { get; set; }
+        public string Id { get; set; }
+
+        [Required]
+        [MaxLength(100)]
         public string Name { get; set; }
 
-        [ForeignKey("User")]
-        public string UserId { get; set; }
+        // Egy skillhez több assessment
+        public virtual ICollection<Assessments> Assessments { get; set; }
+            = new List<Assessments>();
+
+        // Több usernek lehet ugyanaz a skillje
         public virtual ICollection<Users> Users { get; set; }
-        public virtual ICollection<Assessments> Assesments { get; set; }
+            = new List<Users>();
 
-        public string? AuthenticationType => throw new NotImplementedException();
-
-        public bool IsAuthenticated => throw new NotImplementedException();
+        public Skill()
+        {
+            Id = Guid.NewGuid().ToString();
+        }
     }
 }

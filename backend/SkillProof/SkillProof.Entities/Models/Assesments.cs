@@ -25,7 +25,9 @@ namespace SkillProof.Entities.Models
 
         public bool IsActive { get; set; } = true;
 
-        public virtual Skill Skill { get; set; } = null;
+        public string? SkillId { get; set; } = null;
+
+        public virtual Skill? Skill { get; set; } = null; //????
 
         public virtual ICollection<Questions> Questions { get; set; } = new List<Questions>();
         public virtual ICollection<Job> Jobs { get; set; } = new List<Job>();

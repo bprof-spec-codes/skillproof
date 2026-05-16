@@ -16,13 +16,17 @@ namespace SkillProof.Entities.Configurations
             builder.HasKey(s => s.Id);
 
             builder.Property(s => s.Name)
-                .IsRequired();
+                .IsRequired()
+                .HasMaxLength(100);
 
-            builder.HasMany(s => s.Assesments)
-                .WithOne(s => s.Skill);
+            // Skill -> Assessments
+            builder.HasMany(s => s.Assessments)
+                .WithOne(a => a.Skill)
+                .HasForeignKey(a => a.SkillId);
 
-            builder.HasMany(u => u.Users)
-                .WithMany(s => s.Skills);
+            // User <-> Skill many-to-many
+            builder.HasMany(s => s.Users)
+                .WithMany(u => u.Skills);
         }
     }
 }
