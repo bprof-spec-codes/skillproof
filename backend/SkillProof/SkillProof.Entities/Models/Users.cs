@@ -22,12 +22,13 @@ namespace SkillProof.Entities.Models
         public DateTime CreatedAt { get; set; }
         public string? CompanyId { get; set; }
         public string? CompanyRole { get; set; }      
-        public string? Skills { get; set; } = null;
         public virtual Companies Companies { get; set; }
         public virtual ICollection<UserExperiences>? UserExperiences { get; set; }
         public virtual ICollection<Tests>? Tests { get; set; }
         public virtual ICollection<JobApplication>? JobApplications { get; set; }
         public virtual ICollection<Job> SavedJobs { get; set; } = new List<Job>();
+
+        public virtual ICollection<Skill>? Skills { get; set; }
 
         public Users()
         {
