@@ -7,7 +7,7 @@
     "QuestionText": "C# is a case-sensitive programming language.",
     "Tags": [ "C#" ],
     "CreatedBy": "Seed",
-    "TrueFalsePayload": {
+    "TrueFalse": {
       "CorrectAnswer": true,
       "Explanation": "In C#, 'Variable' and 'variable' are treated as two distinct identifiers."
     }
@@ -20,9 +20,9 @@
     "QuestionText": "Which of the following are reference types in C#?",
     "Tags": [ "C#" ],
     "CreatedBy": "Seed",
-    "MultipleChoicePayload": {
+    "MultipleChoice": {
       "Options": [ "int", "string", "bool", "class" ],
-      "CorrectAnswerIds": [ 1, 3 ],
+      "CorrectOptionIndexes": [ 1, 3 ],
       "AllowMultipleSelection": true
     }
   },
@@ -34,7 +34,7 @@
     "QuestionText": "Strings in C# are mutable, meaning they can be changed after they are created.",
     "Tags": [ "C#" ],
     "CreatedBy": "Seed",
-    "TrueFalsePayload": {
+    "TrueFalse": {
       "CorrectAnswer": false,
       "Explanation": "Strings are immutable. Any operation that appears to modify a string actually creates a new string object."
     }
@@ -47,9 +47,9 @@
     "QuestionText": "Which access modifier restricts access to the containing class or types derived from the containing class?",
     "Tags": [ "C#" ],
     "CreatedBy": "Seed",
-    "MultipleChoicePayload": {
+    "MultipleChoice": {
       "Options": [ "public", "private", "protected", "internal" ],
-      "CorrectAnswerIds": [ 2 ],
+      "CorrectOptionIndexes": [ 2 ],
       "AllowMultipleSelection": false
     }
   },
@@ -61,7 +61,7 @@
     "QuestionText": "You can create a direct instance of an interface using the 'new' keyword.",
     "Tags": [ "C#" ],
     "CreatedBy": "Seed",
-    "TrueFalsePayload": {
+    "TrueFalse": {
       "CorrectAnswer": false,
       "Explanation": "Interfaces cannot be instantiated directly. They must be implemented by a class or struct."
     }
@@ -74,9 +74,9 @@
     "QuestionText": "In ASP.NET Core, which service lifetime creates a new instance every time it is requested?",
     "Tags": [ "C#" ],
     "CreatedBy": "Seed",
-    "MultipleChoicePayload": {
+    "MultipleChoice": {
       "Options": [ "Singleton", "Scoped", "Transient", "Static" ],
-      "CorrectAnswerIds": [ 2 ],
+      "CorrectOptionIndexes": [ 2 ],
       "AllowMultipleSelection": false
     }
   },
@@ -88,7 +88,7 @@
     "QuestionText": "Using the 'await' keyword blocks the calling thread until the awaited task completes.",
     "Tags": [ "C#" ],
     "CreatedBy": "Seed",
-    "TrueFalsePayload": {
+    "TrueFalse": {
       "CorrectAnswer": false,
       "Explanation": "'await' yields control back to the calling method, allowing the thread to do other work without blocking."
     }
@@ -101,9 +101,9 @@
     "QuestionText": "How many generations does the .NET Garbage Collector use to group objects by their lifetime?",
     "Tags": [ "C#" ],
     "CreatedBy": "Seed",
-    "MultipleChoicePayload": {
+    "MultipleChoice": {
       "Options": [ "One (Gen 0)", "Two (Gen 0, Gen 1)", "Three (Gen 0, Gen 1, Gen 2)", "Four (Gen 0, Gen 1, Gen 2, Gen 3)" ],
-      "CorrectAnswerIds": [ 2 ],
+      "CorrectOptionIndexes": [ 2 ],
       "AllowMultipleSelection": false
     }
   },
@@ -115,9 +115,9 @@
     "QuestionText": "Which of the following LINQ operators enforce immediate execution?",
     "Tags": [ "C#" ],
     "CreatedBy": "Seed",
-    "MultipleChoicePayload": {
+    "MultipleChoice": {
       "Options": [ "Where()", "ToList()", "Select()", "Count()" ],
-      "CorrectAnswerIds": [ 1, 3 ],
+      "CorrectOptionIndexes": [ 1, 3 ],
       "AllowMultipleSelection": true
     }
   },
@@ -129,7 +129,7 @@
     "QuestionText": "A struct (struktúra) a C#-ban referenciatípusnak számít.",
     "Tags": [ "C#" ],
     "CreatedBy": "Seed",
-    "TrueFalsePayload": {
+    "TrueFalse": {
       "CorrectAnswer": false,
       "Explanation": "A struct értéktípus (value type), ellentétben a class-szal, ami referenciatípus (reference type)."
     }

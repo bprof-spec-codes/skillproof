@@ -28,4 +28,8 @@
     <Folder Include="wwwroot\image\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="seed-questions.json" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+  </ItemGroup>
+
 </Project>

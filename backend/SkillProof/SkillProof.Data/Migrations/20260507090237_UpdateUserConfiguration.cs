@@ -26,6 +26,9 @@ namespace SkillProof.Data.Migrations
                 table: "JobApplications",
                 column: "UserId1");
 
+            migrationBuilder.Sql(
+                "UPDATE JobApplications SET UserId1 = UserId WHERE UserId1 = ''");
+
             migrationBuilder.AddForeignKey(
                 name: "FK_JobApplications_AspNetUsers_UserId",
                 table: "JobApplications",
