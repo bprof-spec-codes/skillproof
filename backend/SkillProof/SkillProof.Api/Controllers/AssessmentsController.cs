@@ -71,5 +71,13 @@ namespace SkillProof.Api.Controllers
             await _assessmentLogic.AssignAssessmentToJob(assessmentId, jobId);
             return Ok(new { message = "Assessment assigned to job successfully." });
         }
+
+        [HttpPost("assign-to-skill")]
+        public async Task<IActionResult> AssignAssesmentToSkill(string assessmentId, string skillId)
+        {
+            await _assessmentLogic.AssignAssesmentToSkill(assessmentId, skillId);
+            return Ok(new { message = "Assessment assigned to skill successfully." });
+
+        }
     }
 }

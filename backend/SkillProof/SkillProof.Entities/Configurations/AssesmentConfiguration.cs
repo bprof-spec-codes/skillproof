@@ -22,5 +22,8 @@ public class AssessmentConfiguration : IEntityTypeConfiguration<Assessments>
 
         builder.HasMany(a => a.Jobs)
             .WithMany(j => j.Assessments);
+
+        builder.HasMany(a => a.Skills)
+            .WithMany(s => s.Assessments);
     }
 }

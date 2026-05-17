@@ -7,6 +7,7 @@ import { TestResultDto } from '../Models/Dtos/Test/test-result-dto';
 import { TestSubmitDto } from '../Models/Dtos/Test/test-submit-dto';
 import { normalizeCandidateAssessment } from './open-ended-compat';
 import { UserTestsDto } from '../Models/Dtos/User/userTests-dto';
+import { TestSubmitSkillDto } from '../Models/Dtos/Test/test-submit-skill-dto';
 
 @Injectable({
   providedIn: 'root',
@@ -46,4 +47,19 @@ export class TestService {
       params: { score, testAnswerId }
     });
   }
+
+  submitSkillTest(dto: TestSubmitSkillDto): Observable<TestResultDto> {
+  const token = localStorage.getItem('skillProof_token');
+  const headers = token
+    ? new HttpHeaders().set('Authorization', `Bearer ${token}`)
+    : undefined;
+
+  return this.http.post<TestResultDto>(`${this.testsUrl}/submitSkillTest`, dto, { headers });
+}
+
+getCandidateTestForSkill(skillId: string): Observable<CandidateAssessmentDto | null> {
+  return this.http
+    .get<CandidateAssessmentDto>(`${environment.apiUrl}/Skill/${skillId}/test`, { observe: 'response' })
+    .pipe(map((response) => normalizeCandidateAssessment(response.status === 204 ? null : response.body)));
+}
 }

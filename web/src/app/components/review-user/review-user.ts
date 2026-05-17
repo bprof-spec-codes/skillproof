@@ -9,6 +9,7 @@ import { QuestionBankService } from '../../services/question-bank-service';
 import { FeedbackShared } from '../../services/feedback-shared';
 import { ProfileViewDto } from '../../Models/Dtos/User/profile-view-dto';
 import { JobService } from '../../services/job-service';
+import { BadgeDto } from '../../Models/Dtos/User/badge-dto';
 
 @Component({
   selector: 'app-review-user',
@@ -144,5 +145,36 @@ export class ReviewUser implements OnInit {
       },
       error: (err) => console.error('Failed to reject candidate', err)
     });
+  }
+
+  getBadgeIconForSkill(skillName: string, badges: BadgeDto[]): string {
+    if (!badges || !badges.length) {
+      return 'assets/Unknown.svg';
+    }
+
+    const badge = badges.find(b => b.sourceName === skillName);
+
+    if (!badge) {
+      return 'Assets/Unknown.svg'; 
+    }
+    const levelStr = String(badge.difficultyLevel).toLowerCase();
+    
+    switch (levelStr) {
+      case '0':
+      case 'junior':
+        return 'Assets/Junior.svg';
+        
+      case '1':
+      case 'medior':
+        return 'Assets/Medior.svg';
+        
+      case '2':
+      case 'senior':
+        return 'Assets/Senior.svg';
+        
+      default:
+        console.warn('Unknown difficulty level received:', badge.difficultyLevel);
+        return 'Assets/Unknown.svg';
+    }
   }
 }

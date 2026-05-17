@@ -37,17 +37,20 @@ export class ProfileService {
     this._currentProfile$.next(null);
   }
 
-  updateSkills(userId: string, skills: string[]): Observable<any> {
-    return this.http.put(`${environment.apiUrls.updateSkills}/${userId}`, { skills }).pipe(
-      tap(() => {
-        const current = this._currentProfile$.value;
-        if (current) {
-          this._currentProfile$.next({
-            ...current,
-            skills: skills,
-          });
-        }
-      }),
+  addSkillToUser(id: string, skillId: string): Observable<any> {
+    const token = localStorage.getItem('skillProof_token');
+    
+    let headers = new HttpHeaders();
+    if (token) {
+      headers = headers.set('Authorization', `Bearer ${token}`);
+    }
+
+    const baseUrl = environment.apiUrl;
+
+    return this.http.post<any>(
+      `${baseUrl}/User/${id}/skills/${skillId}`, 
+      {},
+      { headers }
     );
   }
 

@@ -64,4 +64,18 @@ export class AssessmentService {
       }),
     );
   }
+
+  assignAssessmentToSkill(assessmentId: string, skillId: string): Observable<any> {
+    const token = localStorage.getItem('skillProof_token');
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+
+    return this.http.post<any>(
+      `${this.apiUrl}/assign-to-skill`, 
+      null,
+      { 
+        headers,
+        params: { assessmentId, skillId }
+      }
+    );
+  }
 }

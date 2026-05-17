@@ -1,4 +1,6 @@
-﻿namespace SkillProof.Entities.Dtos.Users
+﻿using SkillProof.Entities.Dtos.Skill;
+
+namespace SkillProof.Entities.Dtos.Users
 {
     public class ViewUser
     {
@@ -10,8 +12,9 @@
         public string Bio { get; set; } = string.Empty;
         public string? CompanyId { get; set; }
 
-        public List<string>? Skills { get; set; }
+        public List<SkillViewDto>? Skills { get; set; }
         public List<string> SavedJobIds { get; set; } = new List<string>();
         public List<string> AppliedJobIds { get; set; } = new List<string>();
+        public List<BadgeDto> Badges { get; set; } = new List<BadgeDto>();
     }
 }

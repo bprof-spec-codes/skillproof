@@ -88,13 +88,22 @@ namespace SkillProof.Api.Controllers
                 return Ok(tests);
         }
 
-        [HttpPut("UpdateSkills/{id}")]
-
-        public async Task<IActionResult> UpdateSkillsToUser(string id, [FromBody] UpdateSkillToUser dto)
+        [HttpPost("{id}/skills/{skillId}")]
+        public async Task<IActionResult> UpdateSkillsToUser(string id, string skillId)
         {
-            await _userLogic.UpdateSkillsToUser(id, dto);
-
-            return NoContent();
+            try
+            {
+                await _userLogic.UpdateSkillsToUser(id, skillId);
+                return Ok(new { message = "Skill successfully added to user." });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         [HttpPost("toggle-saved-job/{jobId}")]

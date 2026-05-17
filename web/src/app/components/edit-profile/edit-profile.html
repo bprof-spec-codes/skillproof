@@ -44,37 +44,27 @@
 
     </form>
 
-    <div class="mt-4">
-      <label>Skills</label>
-
-      <input
-        class="form-control"
-        [ngModel]="skillInput"
-        (ngModelChange)="skillInput = $event"
-        (keydown.enter)="addSkill()"
-        placeholder="Type a skill and press Enter"
-      />
-
-      <div class="mt-3 d-flex flex-wrap gap-2">
-        <span
-          *ngFor="let skill of skills; let i = index"
-          class="badge bg-secondary"
-        >
-          {{ skill }}
-          <button
-            type="button"
-            class="btn-close btn-close-white ms-2"
-            (click)="removeSkill(i)"
-          ></button>
-        </span>
-      </div>
-
-      <div class="text-center mt-3" style="padding: 0.8rem;">
-        <button class="btn btn-success" (click)="saveSkills()">
-          Save Skills
-        </button>
-      </div>
+    <div class="skills-section">
+  <h3>Your Skills</h3>
+  
+  <div class="skills-list">
+    <div class="skill-chip" *ngFor="let skill of userSkills; let i = index">
+      {{ skill.name }}
+      <button type="button" (click)="removeSkill(i, skill.id)">x</button>
     </div>
+  </div>
+
+  <div class="add-skill-control">
+    <select (change)="onSkillSelected($event)">
+      <option value="">-- Choose a skill to add --</option>
+      <option *ngFor="let skill of availableSkills" [value]="skill.id">
+        {{ skill.name }}
+      </option>
+    </select>
+    
+    <button type="button" (click)="saveSkills()">Save Skills to Profile</button>
+  </div>
+</div>
 
   </div>
 

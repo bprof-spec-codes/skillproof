@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using SkillProof.Data.Repositorys;
+using SkillProof.Entities.Dtos.Skill;
 using SkillProof.Entities.Dtos.Tests;
 using SkillProof.Entities.Dtos.Users;
 using SkillProof.Entities.Enums;
@@ -25,6 +26,7 @@ namespace SkillProof.Logic.User
         private readonly IRepository<Entities.Models.Companies> _companyRepository;
         private readonly IRepository<Job> _jobRepository;
         private readonly IRepository<JobApplication> _applicationRepository;
+        private readonly IRepository<Skill> _skillsRepository;
         private readonly IWebHostEnvironment _env;
         private readonly JwtSettings _jwtSettings;
 
@@ -35,7 +37,8 @@ namespace SkillProof.Logic.User
             IRepository<Job> jobRepository,
             IRepository<JobApplication> applicationRepository,
             IWebHostEnvironment env,
-            IOptions<JwtSettings> jwtSettings)
+            IOptions<JwtSettings> jwtSettings,
+            IRepository<Skill> skillsRepository)
         {
             _userManager = userManager;
             _roleManager = roleManager;
@@ -44,6 +47,7 @@ namespace SkillProof.Logic.User
             _applicationRepository = applicationRepository;
             _env = env;
             _jwtSettings = jwtSettings.Value;
+            _skillsRepository = skillsRepository;
         }
 
         public async Task RegisterUserAsync(RegisterUser dto)
@@ -137,7 +141,9 @@ namespace SkillProof.Logic.User
 
         public async Task<IEnumerable<ViewUser>> GetAllUsersAsync()
         {
-            var users = await _userManager.Users.ToListAsync();
+            var users = await _userManager.Users
+                .Include(u => u.Skills)
+                .ToListAsync();
             var result = new List<ViewUser>();
 
             foreach (var user in users)
@@ -151,10 +157,11 @@ namespace SkillProof.Logic.User
                     Headline = user.Headline,
                     Bio = user.Bio,
 
-                    Skills = user.Skills?
-                        .Split(',', StringSplitOptions.RemoveEmptyEntries)
-                        .Select(s => s.Trim())
-                        .ToList() ?? new List<string>()
+                    Skills = user.Skills?.Select(s => new SkillViewDto
+                    {
+                        Id = s.Id,
+                        Name = s.Name
+                    }).ToList() ?? new List<SkillViewDto>()
                 });
             }
 
@@ -164,13 +171,53 @@ namespace SkillProof.Logic.User
         public async Task<ViewUser> GetUserByIdAsync(string id)
         {
             var user = await _userManager.Users
-          .Include(u => u.SavedJobs)
-          .Include(u => u.JobApplications)
-          .FirstOrDefaultAsync(u => u.Id == id);
+                .Include(u => u.SavedJobs)
+                .Include(u => u.JobApplications)
+                .Include(u => u.Tests)
+                .Include(u => u.Skills)
+                    .ThenInclude(s => s.Assessments)
+                .FirstOrDefaultAsync(u => u.Id == id);
 
             if (user == null)
             {
                 throw new KeyNotFoundException("User not found.");
+            }
+
+            var badges = new List<BadgeDto>();
+
+            // Ensure we handle passed tests
+            var passedTests = user.Tests?.Where(t => t.Passed).ToList() ?? new List<SkillProof.Entities.Models.Tests>();
+
+            if (user.Skills != null)
+            {
+                foreach (var skill in user.Skills)
+                {
+                    // For each skill, pull out its assessments
+                    var asssessment = skill.Assessments.FirstOrDefault();
+                    if (asssessment != null)
+                    {
+                        // Match the difficulty level of the skill's assessment 
+                        // with the user's passed tests to securely map a Badge.
+                        // Since multiple skills could have 'Senior' level tests, we match to the specific
+                        // assessment difficulty. If further precision is needed, you may need a 'SkillId' on Tests.
+
+                        var matchingPassedTest = passedTests.FirstOrDefault(pt => pt.DifficultyLevel == asssessment.DifficultyLevel);
+
+                        // If they have a passed test that corresponds to this skill's difficulty bracket
+                        if (matchingPassedTest != null)
+                        {
+                            badges.Add(new BadgeDto
+                            {
+                                SourceName = skill.Name,
+                                DifficultyLevel = matchingPassedTest.DifficultyLevel,
+                                IssuedAt = matchingPassedTest.CompletedAt
+                            });
+
+                            // Prevent other skills from consuming this exact test instance 
+                            passedTests.Remove(matchingPassedTest);
+                        }
+                    }
+                }
             }
 
             return new ViewUser
@@ -186,10 +233,13 @@ namespace SkillProof.Logic.User
 
                 AppliedJobIds = user.JobApplications?.Select(ja => ja.JobId).ToList() ?? new List<string>(),
 
-                Skills = user.Skills?
-                        .Split(',', StringSplitOptions.RemoveEmptyEntries)
-                        .Select(s => s.Trim())
-                        .ToList() ?? new List<string>()
+                Skills = user.Skills?.Select(s => new SkillViewDto
+                {
+                    Id = s.Id,
+                    Name = s.Name
+                }).ToList() ?? new List<SkillViewDto>(),
+
+                Badges = badges
             };
         }
 
@@ -258,6 +308,12 @@ namespace SkillProof.Logic.User
                 CompanyId = user.CompanyId,
                 SavedJobIds = user.SavedJobs.Select(j => j.Id).ToList(),
                 AppliedJobIds = user.JobApplications?.Select(ja => ja.JobId).ToList() ?? new List<string>(),
+
+                Skills = user.Skills?.Select(s => new SkillViewDto
+                {
+                    Id = s.Id,
+                    Name = s.Name
+                }).ToList() ?? new List<SkillViewDto>()
             };
         }
 
@@ -390,27 +446,31 @@ namespace SkillProof.Logic.User
             return result;
         }
 
-        public async Task UpdateSkillsToUser(string id, UpdateSkillToUser dto)
+        public async Task UpdateSkillsToUser(string id, string skillId)
         {
-            
             var user = await _userManager.FindByIdAsync(id);
 
             if (user == null)
                 throw new KeyNotFoundException("User not found");
 
+            user.Skills ??= new List<Skill>();
 
-            var cleanedSkills = dto.Skills
-            .Select(s => s?.Trim())
-            .Where(s => !string.IsNullOrWhiteSpace(s))
-            .Distinct(StringComparer.OrdinalIgnoreCase)
-            .ToList();
+            var existingSkill = await _skillsRepository.GetOne(skillId);
+            if (existingSkill == null)
+                throw new KeyNotFoundException("Skill not found");
 
-            user.Skills = string.Join(", ", cleanedSkills);          
+            if (!user.Skills.Any(s => s.Id == skillId))
+            {
+                user.Skills.Add(existingSkill);
+            }
 
             var result = await _userManager.UpdateAsync(user);
 
             if (!result.Succeeded)
-                throw new Exception(string.Join(", ", result.Errors.Select(e => e.Description)));
+            {
+                var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                throw new InvalidOperationException($"Failed to update user skills: {errors}");
+            }
         }
 
         public async Task ApplyToJobAsync(string userId, string jobId)

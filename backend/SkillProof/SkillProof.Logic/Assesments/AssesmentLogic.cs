@@ -12,15 +12,18 @@ namespace SkillProof.Logic.Assessments
         private readonly IRepository<Entities.Models.Assessments> _assessmentRepository;
         private readonly IRepository<Entities.Models.Questions> _questionRepository;
         private readonly IRepository<Entities.Models.Job> _jobRepository;
+        private readonly IRepository<Entities.Models.Skill> _skillRepository;
 
         public AssessmentLogic(
             IRepository<Entities.Models.Assessments> assessmentRepository,
             IRepository<Entities.Models.Questions> questionRepository,
-            IRepository<Entities.Models.Job> jobRepository)
+            IRepository<Entities.Models.Job> jobRepository,
+            IRepository<Entities.Models.Skill> skillRepository)
         {
             _assessmentRepository = assessmentRepository;
             _questionRepository = questionRepository;
             _jobRepository = jobRepository;
+            _skillRepository = skillRepository;
         }
 
         public async Task<AssessmentViewDto> CreateAssessmentAsync(CreateAssessmentDto model, string userId)
@@ -178,6 +181,20 @@ namespace SkillProof.Logic.Assessments
 
             assessment.Jobs.Add(job);
 
+            await _assessmentRepository.Update(assessment);
+        }
+
+        public async Task AssignAssesmentToSkill(string assessmentId, string skillId)
+        {
+            var assessment = await _assessmentRepository.GetAll()
+                .Include(a => a.Skills)
+                .FirstOrDefaultAsync(a => a.Id == assessmentId);
+            if (assessment == null)
+                throw new KeyNotFoundException("Assessment not found.");
+            var skill = await _skillRepository.GetOne(skillId);
+            if (skill == null)
+                throw new KeyNotFoundException("Skill not found.");
+            assessment.Skills.Add(skill);
             await _assessmentRepository.Update(assessment);
         }
     }

@@ -15,6 +15,7 @@ using SkillProof.Logic.Gemini;
 using SkillProof.Logic.Helper;
 using SkillProof.Logic.Jobs;
 using SkillProof.Logic.Questions;
+using SkillProof.Logic.Skills;
 using SkillProof.Logic.Tests;
 using SkillProof.Logic.User;
 using System.IdentityModel.Tokens.Jwt;
@@ -178,6 +179,7 @@ namespace SkillProof.Api
             builder.Services.AddScoped<IUserLogic, UserLogic>();
             builder.Services.AddScoped<IAssessmentLogic, AssessmentLogic>();
             builder.Services.AddScoped<ITestLogic, TestLogic>();
+            builder.Services.AddScoped<ISkillLogic, SkillLogic>();
             #endregion
             var app = builder.Build();
 

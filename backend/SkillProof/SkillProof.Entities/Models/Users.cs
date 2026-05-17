@@ -21,8 +21,8 @@ namespace SkillProof.Entities.Models
         public string Bio { get; set; }
         public DateTime CreatedAt { get; set; }
         public string? CompanyId { get; set; }
-        public string? CompanyRole { get; set; }      
-        public string? Skills { get; set; } = null;
+        public string? CompanyRole { get; set; }
+        public virtual ICollection<Skill> Skills { get; set; } = new List<Skill>();
         public virtual Companies Companies { get; set; }
         public virtual ICollection<UserExperiences>? UserExperiences { get; set; }
         public virtual ICollection<Tests>? Tests { get; set; }

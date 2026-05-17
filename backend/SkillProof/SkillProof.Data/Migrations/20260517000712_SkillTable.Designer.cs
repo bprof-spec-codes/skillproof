@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SkillProof.Data;
 
@@ -11,9 +12,11 @@ using SkillProof.Data;
 namespace SkillProof.Data.Migrations
 {
     [DbContext(typeof(SkillProofDbContext))]
-    partial class SkillProofDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260517000712_SkillTable")]
+    partial class SkillTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -57,12 +60,12 @@ namespace SkillProof.Data.Migrations
                     b.Property<string>("AssessmentsId")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<string>("SkillsId")
+                    b.Property<string>("SkillId")
                         .HasColumnType("nvarchar(450)");
 
-                    b.HasKey("AssessmentsId", "SkillsId");
+                    b.HasKey("AssessmentsId", "SkillId");
 
-                    b.HasIndex("SkillsId");
+                    b.HasIndex("SkillId");
 
                     b.ToTable("SkillAssessments", (string)null);
                 });
@@ -804,7 +807,7 @@ namespace SkillProof.Data.Migrations
 
                     b.HasOne("SkillProof.Entities.Models.Skill", null)
                         .WithMany()
-                        .HasForeignKey("SkillsId")
+                        .HasForeignKey("SkillId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

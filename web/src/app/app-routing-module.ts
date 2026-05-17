@@ -18,6 +18,7 @@ import { MyJobs } from './components/my-jobs/my-jobs';
 import { ReviewUser } from './components/review-user/review-user';
 import { ManualFeedback } from './components/manual-feedback/manual-feedback';
 import { authGuard } from './interceptors/auth-guard';
+import { AddSkill } from './components/add-skill/add-skill';
 
 const routes: Routes = [
   { path: '', redirectTo: 'home', pathMatch: 'full' },
@@ -90,6 +91,9 @@ const routes: Routes = [
     canActivate: [authGuard],
     data: { roles: ['EMPLOYER'] }
   },
+
+  { path: 'skills', component: AddSkill },
+  { path: 'skill/:skillId/test', component: TestTake },
 
   { path: '**', redirectTo: 'home', pathMatch: 'full' },
 ];

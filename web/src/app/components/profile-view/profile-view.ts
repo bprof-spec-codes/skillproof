@@ -5,6 +5,7 @@ import { Observable, filter, switchMap, of, combineLatest, map } from 'rxjs';
 import { JobViewDto } from '../../Models/Dtos/Job/JobView-dto';
 import { UserTestsDto } from '../../Models/Dtos/User/userTests-dto';
 import { ProfileViewDto } from '../../Models/Dtos/User/profile-view-dto';
+import { BadgeDto } from '../../Models/Dtos/User/badge-dto';
 
 @Component({
   selector: 'app-profile-view',
@@ -22,7 +23,7 @@ export class ProfileView implements OnInit {
   constructor(
     private profileService: ProfileService,
     private jobService: JobService,
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.profile$ = this.profileService.currentProfile$;
@@ -59,5 +60,36 @@ export class ProfileView implements OnInit {
   removeSavedJob(jobId: string, event: MouseEvent): void {
     event.stopPropagation();
     this.profileService.toggleSavedJob(jobId).subscribe();
+  }
+
+  getBadgeIconForSkill(skillName: string, badges: BadgeDto[]): string {
+    if (!badges || !badges.length) {
+      return 'assets/Unknown.svg';
+    }
+
+    const badge = badges.find(b => b.sourceName === skillName);
+
+    if (!badge) {
+      return 'Assets/Unknown.svg'; 
+    }
+    const levelStr = String(badge.difficultyLevel).toLowerCase();
+    
+    switch (levelStr) {
+      case '0':
+      case 'junior':
+        return 'Assets/Junior.svg';
+        
+      case '1':
+      case 'medior':
+        return 'Assets/Medior.svg';
+        
+      case '2':
+      case 'senior':
+        return 'Assets/Senior.svg';
+        
+      default:
+        console.warn('Unknown difficulty level received:', badge.difficultyLevel);
+        return 'Assets/Unknown.svg';
+    }
   }
 }

@@ -28,5 +28,6 @@ namespace SkillProof.Entities.Models
         public virtual ICollection<Questions> Questions { get; set; } = new List<Questions>();
         public virtual ICollection<Job> Jobs { get; set; } = new List<Job>();
         public virtual ICollection<Tests> TestAttempts { get; set; } = new List<Tests>();
+        public virtual ICollection<Skill> Skills { get; set; } = new List<Skill>();
     }
 }

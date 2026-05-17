@@ -30,6 +30,7 @@ import { AsyncPipe, CommonModule } from '@angular/common';
 import { MyJobs } from './components/my-jobs/my-jobs';
 import { ReviewUser } from './components/review-user/review-user';
 import { ManualFeedback } from './components/manual-feedback/manual-feedback';
+import { AddSkill } from './components/add-skill/add-skill';
 
 @NgModule({
   declarations: [
@@ -57,6 +58,7 @@ import { ManualFeedback } from './components/manual-feedback/manual-feedback';
     MyJobs,
     ReviewUser,
     ManualFeedback,
+    AddSkill,
   ],
   imports: [
     BrowserModule,
