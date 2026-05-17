@@ -15,6 +15,7 @@ using SkillProof.Logic.Gemini;
 using SkillProof.Logic.Helper;
 using SkillProof.Logic.Jobs;
 using SkillProof.Logic.Questions;
+using SkillProof.Logic.Skill;
 using SkillProof.Logic.Tests;
 using SkillProof.Logic.User;
 using System.IdentityModel.Tokens.Jwt;
@@ -71,6 +72,7 @@ namespace SkillProof.Api
                 });
             });
             builder.Services.AddTransient(typeof(Repository<>));
+            builder.Services.AddTransient<SkillLogic>();
             builder.Services.AddScoped<IMarkdownService, MarkdownService>();
             builder.Services.AddScoped<IGeminiService, GeminiService>();
 

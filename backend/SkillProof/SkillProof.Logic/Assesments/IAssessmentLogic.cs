@@ -12,4 +12,8 @@ public interface IAssessmentLogic
     Task DeleteAssessmentAsync(string id);
 
     Task AssignAssessmentToJob(string assessmentId, string jobId);
+
+    Task AddAssesmenToSkill(AddAssesmentsToSkillDto dto);
+
+    Task<ICollection<AssessmentViewDto>> GetAssessmentBySkill(string skillId);
 }

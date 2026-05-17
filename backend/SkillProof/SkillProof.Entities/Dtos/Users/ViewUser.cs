@@ -10,7 +10,7 @@
         public string Bio { get; set; } = string.Empty;
         public string? CompanyId { get; set; }
 
-        public List<string>? Skills { get; set; }
+        public List<string>? Skills { get; set; } // változtatni
         public List<string> SavedJobIds { get; set; } = new List<string>();
         public List<string> AppliedJobIds { get; set; } = new List<string>();
     }
