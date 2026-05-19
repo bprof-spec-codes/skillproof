@@ -6,66 +6,62 @@
 
     <nav class="d-flex align-items-center gap-lg-3">
       @if (profile$ | async; as profile) {
-        @if (isEmployer) {
-          <a class="text-decoration-none header-font" routerLink="/question-banks">
-            <i class="bi bi-question-square me-2 header-icon"></i>Question banks
-          </a>
+      @if (isEmployer) {
+      <a class="text-decoration-none header-font" routerLink="/question-banks">
+        <i class="bi bi-question-square me-2 header-icon"></i>Question banks
+      </a>
 
-          <a class="text-decoration-none header-font" routerLink="/myJobs">
-            <i class="bi bi-envelope me-2 header-icon"></i>Applicants
-          </a>
+      <a class="text-decoration-none header-font" routerLink="/myJobs">
+        <i class="bi bi-envelope me-2 header-icon"></i>Applicants
+      </a>
 
-          <a class="text-decoration-none header-font position-relative" routerLink="/notifications" aria-label="Notifications">
-            <i class="bi bi-bell header-icon"></i>
-          </a>
-        }
+      <a class="text-decoration-none header-font position-relative" routerLink="/notifications"
+        aria-label="Notifications">
+        <i class="bi bi-bell header-icon"></i>
+      </a>
+      }
+      @if(isAdmin) {
+      <a class="text-decoration-none header-font" routerLink="/skills">
+        Skills
+      </a>
+      }
 
-        <div class="dropdown capsule shadow-sm d-flex align-items-center gap-2">
-          <span class="header-font-alt">
-            {{ profile.fullName }}
-          </span>
+      <div class="dropdown capsule shadow-sm d-flex align-items-center gap-2">
+        <span class="header-font-alt">
+          {{ profile.fullName }}
+        </span>
 
-          <button
-            class="btn p-0 avatar-btn dropdown-toggle"
-            type="button"
-            data-bs-toggle="dropdown"
-            aria-expanded="false"
-          >
-            @if (profile.image) {
-              <img
-                [src]="profile.image.startsWith('http')
+        <button class="btn p-0 avatar-btn dropdown-toggle" type="button" data-bs-toggle="dropdown"
+          aria-expanded="false">
+          @if (profile.image) {
+          <img [src]="profile.image.startsWith('http')
                   ? profile.image
-                  : 'data:image/*;base64,' + profile.image"
-                class="avatar" />
-            }
-          </button>
+                  : 'data:image/*;base64,' + profile.image" class="avatar" />
+          }
+        </button>
 
-          <ul class="dropdown-menu dropdown-menu-end mt-2">
-            <li>
-              <a class="dropdown-item" routerLink="/viewProfile">
-                View profile
-              </a>
-            </li>
+        <ul class="dropdown-menu dropdown-menu-end mt-2">
+          <li>
+            <a class="dropdown-item" routerLink="/viewProfile">
+              View profile
+            </a>
+          </li>
 
-            <li>
-              <button
-                class="dropdown-item"
-                (click)="authService.logout()"
-                data-bs-dismiss="dropdown"
-              >
-                Log out
-              </button>
-            </li>
-          </ul>
-        </div>
+          <li>
+            <button class="dropdown-item" (click)="authService.logout()" data-bs-dismiss="dropdown">
+              Log out
+            </button>
+          </li>
+        </ul>
+      </div>
       } @else {
-        <a class="text-decoration-none header-font" [routerLink]="['/register']" [queryParams]="{ role: 'employer' }">
-          <i class="bi bi-briefcase me-2 header-icon"></i>For employers
-        </a>
+      <a class="text-decoration-none header-font" [routerLink]="['/register']" [queryParams]="{ role: 'employer' }">
+        <i class="bi bi-briefcase me-2 header-icon"></i>For employers
+      </a>
 
-        <a class="text-decoration-none header-font divider ps-3" routerLink="/login">
-          Login
-        </a>
+      <a class="text-decoration-none header-font divider ps-3" routerLink="/login">
+        Login
+      </a>
       }
     </nav>
   </div>

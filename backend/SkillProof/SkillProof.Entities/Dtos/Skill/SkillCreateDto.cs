@@ -7,9 +7,8 @@ using System.Threading.Tasks;
 
 namespace SkillProof.Entities.Dtos.Skill
 {
-    public class ViewSkill
+    public class SkillCreateDto
     {
-        public string Id { get; set; }
         public string Name { get; set; }
         public List<AssessmentViewDto> Assessments { get; set; } = new List<AssessmentViewDto>();
     }

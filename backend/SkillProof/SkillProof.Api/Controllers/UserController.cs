@@ -88,12 +88,22 @@ namespace SkillProof.Api.Controllers
                 return Ok(tests);
         }
 
-        [HttpPut("UpdateSkills")]
-
-        public async Task<IActionResult> UpdateSkillsToUser(UpdateSkillToUser dto)
+        [HttpPost("{id}/skills")]
+        public async Task<IActionResult> UpdateSkillsToUser(string id, [FromBody] string[] skillId)
         {
-            await _userLogic.UpdateSkillsToUser(dto);
-            return NoContent();
+            try
+            {
+                await _userLogic.UpdateSkillsToUser(id, skillId);
+                return Ok(new { message = "Skill successfully added to user." });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         [HttpPost("toggle-saved-job/{jobId}")]
@@ -118,6 +128,20 @@ namespace SkillProof.Api.Controllers
             catch (InvalidOperationException ex)
             {
                 return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        [HttpDelete("remove-skill/{skillId}/{userId}")]
+        public async Task<IActionResult> RemoveSkill(string skillId, string userId)
+        {
+            try
+            {
+                await _userLogic.DeleteSkillFromUser(userId, skillId);
+                return Ok(new { message = "Skill removed successfully." });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
             }
         }
     }

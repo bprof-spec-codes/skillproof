@@ -1,3 +1,6 @@
+import { SkillViewDto } from "../Skill/skill-view-dto";
+import { BadgeDto } from "./badge-dto";
+
 export interface ProfileViewDto {
   id: string;
   fullName: string;
@@ -7,5 +10,6 @@ export interface ProfileViewDto {
   image: string;
   companyId?: string;
   savedJobIds: string[];
-  skills: string[] | null;
+  skills: SkillViewDto[];
+  badges: BadgeDto[];
 }

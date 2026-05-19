@@ -13,17 +13,20 @@ namespace SkillProof.Logic.Assessments
         private readonly IRepository<Entities.Models.Assessments> _assessmentRepository;
         private readonly IRepository<Entities.Models.Questions> _questionRepository;
         private readonly IRepository<Entities.Models.Job> _jobRepository;
+        private readonly IRepository<Entities.Models.SkillModel> _skillRepository;
         private readonly SkillProofDbContext _ctx;
 
         public AssessmentLogic(
             IRepository<Entities.Models.Assessments> assessmentRepository,
             IRepository<Entities.Models.Questions> questionRepository,
             IRepository<Entities.Models.Job> jobRepository,
+            IRepository<Entities.Models.SkillModel> skillRepository,
             SkillProofDbContext ctx)
         {
             _assessmentRepository = assessmentRepository;
             _questionRepository = questionRepository;
             _jobRepository = jobRepository;
+            _skillRepository = skillRepository;
             _ctx = ctx;
         }
 
@@ -185,54 +188,29 @@ namespace SkillProof.Logic.Assessments
             await _assessmentRepository.Update(assessment);
         }
 
-        public async Task AddAssesmenToSkill(AddAssesmentsToSkillDto dto)
+        public async Task AddAssessmentToSkill(AddAssesmentsToSkillDto dto)
         {
-            var skill = await _ctx.Skills
-            .Include(s => s.Assessments)
-            .FirstOrDefaultAsync(s => s.Id == dto.SkillId);
-
+            var skill = await _skillRepository.GetOne(dto.SkillId);
             if (skill == null)
-                throw new KeyNotFoundException("Skill not found");
+            {
+                throw new KeyNotFoundException("Skill not found.");
 
-            var assessment = await _ctx.Assessments
-                .FirstOrDefaultAsync(a => a.Id == dto.AssessmentId);
-
-            if (assessment == null)
-                throw new KeyNotFoundException("Assessment not found");
-
-            assessment.SkillId = skill.Id;
-
-            await _ctx.SaveChangesAsync();
+            }
+            foreach (var assessmentId in dto.AssessmentIds)
+            {
+                var assessment = await _assessmentRepository.GetOne(assessmentId);
+                if (assessment == null)
+                {
+                    throw new KeyNotFoundException($"Assessment with ID {assessmentId} not found.");
+                }
+                skill.Assessments.Add(assessment);
+            }
+            await _skillRepository.Update(skill);
         }
 
-        public async Task<ICollection<AssessmentViewDto>> GetAssessmentBySkill(string skillId)
+        public Task<ICollection<AssessmentViewDto>> GetAssessmentBySkill(string skillId)
         {
-            var assessments = await _ctx.Assessments
-                .Include(a => a.Questions)
-                .Where(a => a.SkillId == skillId)
-                .ToListAsync();
-
-            return assessments.Select(a => new AssessmentViewDto
-            {
-                Id = a.Id,
-                Title = a.Title,
-                Description = a.Description,
-                DifficultyLevel = a.DifficultyLevel,
-                CreatedBy = a.CreatedBy,
-                CreatedAt = a.CreatedAt,
-                IsActive = a.IsActive,
-
-                Questions = a.Questions.Select(q => new QuestionResponseDto
-                {
-                    Id = q.Id,
-                    QuestionText = q.QuestionText
-                }).ToList(),
-
-                QuestionIds = a.Questions
-                    .Select(q => q.Id)
-                    .ToList()
-
-            }).ToList();
+            throw new NotImplementedException();
         }
     }
 }

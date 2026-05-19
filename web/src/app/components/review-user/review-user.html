@@ -5,6 +5,8 @@
 
         <div class="card border-0 radius">
           <div class="card-body p-4">
+            @if(testQuestionsData !== null ? testQuestionsData.length > 0 : false)
+            {
             <h4 class="fw-bold color mb-4">{{profileData?.fullName}}'s Answers</h4>
             @for (test of testQuestionsData; track $index) {
             <div class="card shadow-sm border-question radius mb-4"
@@ -15,8 +17,7 @@
                     <h6 class="fw-bold color">{{$index +1}}. {{test.questionText}}</h6>
                     <p class="mb-0"><span class="underline">Answer:</span> {{test.userResponse}}</p>
                   </div>
-                  <div class="col-auto d-flex align-items-center justify-content-center"
-                    style="min-width:90px;">
+                  <div class="col-auto d-flex align-items-center justify-content-center" style="min-width:90px;">
                     <p class="mb-0 color"><b>{{test.score}} point</b></p>
                   </div>
                   <div class="col-auto d-flex align-items-center justify-content-end gap-2" style="min-width:90px;">
@@ -29,6 +30,10 @@
                 </div>
               </div>
             </div>
+            }
+            } @else{
+            <h4 class="fw-bold color mb-4 text-center">This job didn't have an assessment when the candidate applied, so
+              no test results are available.</h4>
             }
 
           </div>
@@ -47,7 +52,7 @@
             <div class="small">
               <h6 class="fw-bold mb-2">Biography:</h6>
               @if(!profileData?.bio) {
-                <p class="mb-2">User did not provide a biography</p>
+              <p class="mb-2">User did not provide a biography</p>
               }
               <p class="mb-2">{{profileData?.bio}}</p>
             </div>
@@ -57,23 +62,32 @@
             <p>{{profileData?.email}}</p>
             <hr class="divider">
             <h6 class="fw-bold mb-2">Skills</h6>
-            <div class="d-flex gap-2 mb-2">
-              @if(profileData?.skills?.length === 0){
-              <p>No skills added</p>
-              }
-              @for (skill of profileData?.skills; track $index){
-              <Li>
-                <ul>{{skill[$index]}}</ul>
-              </Li>
+            @if(profileData?.skills?.length === 0){
+            <p>No skills added</p>
+            }
+            @else {
+            <div class="d-flex flex-column gap-2 mb-4">
+              @for (skill of profileData?.skills; track skill.id) {
+              <div class="d-flex align-items-center gap-2 border p-2 rounded w-100 bg-light">
+                <img [src]="badgeService.getBadgeIconForSkill(skill.name, profileData?.badges ?? [])" />
+                <span class="fs-6 fw-semibold text-dark">
+                  {{ skill.name }}
+                </span>
+              </div>
               }
             </div>
+            }
             <hr class="divider">
+            <div class="d-flex align-items-center justify-content-center">
+              <div class="d-flex justify-content-between gap-4">
+                
+              </div>
+            </div>
           </div>
+
         </div>
       </div>
-
     </div>
-
 
   </div>
 </div>

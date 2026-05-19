@@ -21,7 +21,7 @@ namespace SkillProof.Data
         public DbSet<FillInTheBlankQuestions> FillInTheBlankQuestions { get; set; }
         public DbSet<TrueFalseQuestions> TrueFalseQuestions { get; set; }
 
-        public DbSet<Skill> Skills { get; set; }
+        public DbSet<SkillModel> Skills { get; set; }
         public SkillProofDbContext(DbContextOptions<SkillProofDbContext> options) : base(options)
         {
         }

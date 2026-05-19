@@ -1,0 +1,49 @@
+<div class="add-skill-container">
+  <h2>Add New Skill</h2>
+
+  <div *ngIf="successMessage" class="alert success">{{ successMessage }}</div>
+  <div *ngIf="errorMessage" class="alert error">{{ errorMessage }}</div>
+
+  <form [formGroup]="skillForm" (ngSubmit)="onSubmit()">
+    <div class="form-group">
+      <label for="name">Skill Name:</label>
+      <input 
+        id="name" 
+        type="text" 
+        formControlName="name" 
+        placeholder="Enter skill name (e.g. Angular, C#)"
+      />
+      <div 
+        class="error-text" 
+        *ngIf="skillForm.get('name')?.invalid && (skillForm.get('name')?.dirty || skillForm.get('name')?.touched)">
+        Skill name is required and must be at least 2 characters.
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Assign Assessments (Optional):</label>
+      
+      <div *ngIf="availableAssessments.length === 0" class="no-data">
+        No assessments available to assign.
+      </div>
+
+      <div class="checkbox-list" *ngIf="availableAssessments.length > 0">
+        <div class="checkbox-item" *ngFor="let assessment of availableAssessments">
+          <label>
+            <input 
+              type="checkbox" 
+              class="assessment-checkbox"
+              [value]="assessment.id" 
+              (change)="toggleAssessment(assessment.id, $event)"
+            />
+            {{ assessment.title || assessment.name || 'Unnamed Assessment' }}
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <button type="submit" [disabled]="skillForm.invalid || isSubmitting">
+      {{ isSubmitting ? 'Saving...' : 'Create Skill' }}
+    </button>
+  </form>
+</div>

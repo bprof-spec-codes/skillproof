@@ -5,6 +5,8 @@ import { HttpClient } from '@angular/common/http';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { environment } from '../../../environments/environment.development';
 import { Router } from '@angular/router';
+import { SkillViewDto } from '../../Models/Dtos/Skill/skill-view-dto';
+import { SkillService } from '../../services/skillservice';
 
 @Component({
   selector: 'app-edit-profile',
@@ -19,13 +21,18 @@ export class EditProfile implements OnInit {
     private profileService: ProfileService,
     private authService: AuthService,
     private http: HttpClient,
-    private router:Router
-  ){}
+    private router: Router,
+    private skillService: SkillService
+  ) { }
 
   form!: FormGroup;
   selectedImageBase64: string | null = null;
-  skills: string[] = [];
-  skillInput: string = '';
+
+  userSkills: { id: string; name: string }[] = [];
+  availableSkills: SkillViewDto[] = [];
+
+  pendingSkillAdditions = new Set<string>();
+  
 
   ngOnInit(): void {
     this.form = this.fb.group({
@@ -35,6 +42,8 @@ export class EditProfile implements OnInit {
       headline: [''],
       bio: ['']
     });
+
+    this.getAllSkills();
 
     this.profileService.currentProfile$.subscribe(profile => {
       if (profile) {
@@ -46,8 +55,10 @@ export class EditProfile implements OnInit {
           bio: profile.bio
         });
 
-        if (this.skills.length === 0) {
-          this.skills = profile.skills || [];
+        if (this.userSkills.length === 0 && profile.skills) {
+          this.userSkills = typeof profile.skills[0] === 'string'
+            ? (profile.skills as any as string[]).map(s => ({ id: s, name: s }))
+            : [...profile.skills] as any;
         }
       }
     });
@@ -66,7 +77,6 @@ export class EditProfile implements OnInit {
 
     reader.onload = () => {
       const base64 = reader.result as string;
-
       this.selectedImageBase64 = base64.split(',')[1];
     };
 
@@ -112,40 +122,71 @@ export class EditProfile implements OnInit {
       });
   }
 
-  addSkill(): void {
-    const value = this.skillInput.trim();
+  onSkillSelected(event: Event): void {
+    const selectElement = event.target as HTMLSelectElement;
+    const selectedId = selectElement.value;
 
-    if (!value) return;
+    if (!selectedId) return;
 
-    // duplikáció ellen
-    if (this.skills.includes(value)) {
-      this.skillInput = '';
-      return;
+    const skillObj = this.availableSkills.find(s => s.id === selectedId);
+
+    if (skillObj && !this.userSkills.some(s => s.id === skillObj.id)) {
+      this.userSkills.push({ id: skillObj.id, name: skillObj.name });
+      this.pendingSkillAdditions.add(skillObj.id);
     }
 
-    this.skills.push(value);
-    this.skillInput = '';
+    selectElement.value = "";
   }
 
-  removeSkill(index: number): void {
-    this.skills.splice(index, 1);
+  removeSkill(index: number, skillId: string): void {
+  if (this.pendingSkillAdditions.has(skillId)) {
+    this.userSkills.splice(index, 1);
+    this.pendingSkillAdditions.delete(skillId);
+  } else {
+    const userId = this.authService.getUserId();
+    if (!userId) return;
+
+    this.profileService.removeSkillFromUser(userId, skillId).subscribe({
+      next: () => {
+        this.userSkills.splice(index, 1);
+        console.log('Skill removed successfully');
+      },
+      error: (err) => console.error(`Failed to remove skill ${skillId}`, err)
+    });
   }
+}
 
   saveSkills(): void {
     const userId = this.authService.getUserId();
+    if (!userId || this.pendingSkillAdditions.size === 0) return;
 
-    if (!userId) return;
+    const newSkillsArray = Array.from(this.pendingSkillAdditions);
+    console.log("SENDING NEW SKILLS:", newSkillsArray);
 
-    console.log("SENDING SKILLS:", this.skills);
-
-    this.profileService.updateSkills(userId, this.skills).subscribe({
-      next: () => console.log('Skills saved'),
-      error: (err) => console.error(err)
+    this.profileService.addSkillsToUser(userId, newSkillsArray).subscribe({
+      next: () => {
+        console.log('All new skills saved');
+        this.pendingSkillAdditions.clear();
+        this.profileService.loadProfile(userId);
+      },
+      error: (err) => console.error(`Failed to assign skills`, err)
     });
   }
+  getAllSkills(): void {
+    this.skillService.skills$.subscribe({
+      next: (skills) => {
+        this.availableSkills = skills;
+        console.log('skills', skills)
+      }
+    });
 
+    if (this.availableSkills.length === 0) {
+      this.skillService.getAllSkills().subscribe({
+        error: (err) => console.error('Failed to load skills list', err)
+      });
+    }
+  }
 
+  
 
 }
-
-

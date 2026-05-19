@@ -9,6 +9,6 @@ namespace SkillProof.Entities.Dtos.Assesment
     public class AddAssesmentsToSkillDto
     {
         public string SkillId { get; set; }
-        public string AssessmentId { get; set; }
+        public string[] AssessmentIds { get; set; }
     }
 }
