@@ -402,6 +402,44 @@ namespace SkillProof.Data.Migrations
                     b.ToTable("Companies");
                 });
 
+            modelBuilder.Entity("SkillProof.Entities.Models.Education", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Degree")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("EndDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("FieldOfStudy")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("School")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Educations");
+                });
+
             modelBuilder.Entity("SkillProof.Entities.Models.FillInTheBlankQuestions", b =>
                 {
                     b.Property<string>("QuestionId")
@@ -915,6 +953,17 @@ namespace SkillProof.Data.Migrations
                     b.Navigation("Question");
                 });
 
+            modelBuilder.Entity("SkillProof.Entities.Models.Education", b =>
+                {
+                    b.HasOne("SkillProof.Entities.Models.Users", "User")
+                        .WithMany("Educations")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("SkillProof.Entities.Models.FillInTheBlankQuestions", b =>
                 {
                     b.HasOne("SkillProof.Entities.Models.Questions", "Question")
@@ -1074,6 +1123,8 @@ namespace SkillProof.Data.Migrations
 
             modelBuilder.Entity("SkillProof.Entities.Models.Users", b =>
                 {
+                    b.Navigation("Educations");
+
                     b.Navigation("JobApplications");
 
                     b.Navigation("Tests");

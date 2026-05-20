@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { Observable, filter, switchMap, of } from 'rxjs';
+import { Observable, filter, switchMap, of, map } from 'rxjs';
 import { JobViewDto } from '../../Models/Dtos/Job/JobView-dto';
 import { JobService } from '../../services/job-service';
 import { ProfileViewDto } from '../../Models/Dtos/User/profile-view-dto';
@@ -32,6 +32,7 @@ export class CompanyHome implements OnInit {
         }
         return this.jobService.getJobsByCompanyId(profile.companyId);
       }),
+      map((jobs) => this.parseJobsTags(jobs))
     );
     if(!this.selectedJob) {
       this.companyJobs$.subscribe(jobs => { this.selectedJob = jobs[0] ?? null})
@@ -72,5 +73,34 @@ export class CompanyHome implements OnInit {
 
   selectJob(job: JobViewDto): void {
     this.selectedJob = job;
+  }
+
+  private parseJobsTags(jobs: JobViewDto[]): JobViewDto[] {
+    return jobs.map((job) => {
+      const parsedJob = { ...job };
+      if (typeof parsedJob.tags === 'string') {
+        const tagString = parsedJob.tags as unknown as string;
+        parsedJob.tags = tagString
+          .split(',')
+          .map((t) => t
+            .trim()
+            .replace(/[\[\]"']/g, '')
+          )
+          .filter((t) => t !== '')
+      }
+      if (Array.isArray(parsedJob.tags)) {
+        parsedJob.tags = parsedJob.tags
+          .map((t) =>
+            typeof t === 'string' ?
+              t.replace(/[\[\]"']/g, '').trim()
+              : t
+          )
+      }
+      if (!Array.isArray(parsedJob.tags)) {
+        parsedJob.tags = [];
+      }
+
+      return parsedJob
+    })
   }
 }

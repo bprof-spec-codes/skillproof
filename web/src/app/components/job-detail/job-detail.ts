@@ -48,6 +48,7 @@ export class JobDetail implements OnInit, OnDestroy {
 
     this.profileSub = this.profileService.currentProfile$.subscribe((profile) => {
       this.updateUIStatus(profile);
+      this.profileService.loadProfile(profile!.id!)
     });
     this.checkUserJobStatus()
   }

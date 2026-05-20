@@ -1,76 +1,259 @@
-<div class="container py-5">
+<main class="container mt-4 position-relative">
+  <div class="back-link mb-4">
+    <a class="click" routerLink="/viewProfile">&larr; Back to Profile</a>
+  </div>
 
-  <div class="card p-4 mx-auto" style="max-width: 600px;">
+  <div class="form-card">
+    <h1 class="form-title">Edit Profile</h1>
+    <h6>Update your profile details, skills, education, and experience.</h6>
 
-    <h3 class="mb-4 text-center">Edit Profile</h3>
-
-    <form [formGroup]="form" (ngSubmit)="onSubmit()">
-
-      <div class="mb-3">
-        <label>Email</label>
-        <input class="form-control" formControlName="email">
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="profile-form">
+      <div class="form-group mb-3">
+        <label class="mb-2 fw-bold" for="email">Email</label>
+        <input id="email" class="form-control" type="email" formControlName="email" />
       </div>
 
-      <div class="mb-3">
-        <label>First Name</label>
-        <input class="form-control" formControlName="firstName">
-      </div>
+      <div class="form-row">
+        <div class="form-group mb-3">
+          <label class="mb-2 fw-bold" for="firstName">First Name</label>
+          <input id="firstName" class="form-control" type="text" formControlName="firstName" />
+        </div>
 
-      <div class="mb-3">
-        <label>Last Name</label>
-        <input class="form-control" formControlName="lastName">
-      </div>
-
-      <div class="mb-3">
-        <label>Headline</label>
-        <input class="form-control" formControlName="headline">
-      </div>
-
-      <div class="mb-3">
-        <label>Bio</label>
-        <textarea class="form-control" formControlName="bio"></textarea>
-      </div>
-
-      <div class="mb-3">
-        <label>Profile Image (JPG/PNG)</label>
-        <input type="file" class="form-control" (change)="onFileSelected($event)">
-      </div>
-
-      <div class="text-center" style="padding: 0.8rem;">
-        <button class="btn btn-primary" type="submit">
-          Save Changes
-        </button>
-      </div>
-
-    </form>
-
-    <div class="skills-section">
-      <h3>Your Skills</h3>
-
-      <div class="skills-list">
-        <div class="skill-chip" *ngFor="let skill of userSkills; let i = index">
-          {{ skill.name }}
-          <button type="button" (click)="removeSkill(i, skill.id)">x</button>
+        <div class="form-group mb-3">
+          <label class="mb-2 fw-bold" for="lastName">Last Name</label>
+          <input id="lastName" class="form-control" type="text" formControlName="lastName" />
         </div>
       </div>
 
-      <div class="add-skill-control">
-        <select (change)="onSkillSelected($event)">
+      <div class="form-group mb-3">
+        <label class="mb-2 fw-bold" for="headline">Headline</label>
+        <input id="headline" class="form-control" type="text" formControlName="headline" />
+      </div>
+
+      <div class="form-group mb-3">
+        <label class="mb-2 fw-bold" for="bio">Bio</label>
+        <textarea id="bio" class="preview-textarea form-control" rows="5" formControlName="bio"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label class="mb-2 mt-3 fw-bold me-2" for="profileImage">Profile Image (JPG/PNG)</label>
+        <div class="d-flex align-items-center gap-2 file-row">
+          <input id="profileImage" type="file" class="form-control file-input-inline"
+            (change)="onFileSelected($event)" />
+          <button class="search-btn btn-sm" type="submit">Save Changes</button>
+        </div>
+      </div>
+    </form>
+
+    <div class="section-card">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3 class="mb-0">Your Skills</h3>
+      </div>
+
+      <div class="card-list mb-5">
+        @if(educations.length > 0) {
+        @for (skill of userSkills; track skill.id) {
+        <div class="skill-chip">
+          <span>{{ skill.name }}</span>
+          <button type="button" class="btn btn-sm text-danger" (click)="removeSkill($index, skill.id)">
+            <i class="bi bi-x-circle fs-5"></i>
+          </button>
+        </div>
+        }
+        } @else {
+        <p class="text-center mt-3 text-muted"><strong>Add a skill</strong></p>
+        }
+
+      </div>
+
+      <div class="add-skill-control d-flex gap-2 align-items-center">
+        <select class="form-control" (change)="onSkillSelected($event)">
           <option value="">-- Choose a skill to add --</option>
-          @for( skill of availableSkills; track $index) {
-            <option [value]="skill.id">
+          @for (skill of availableSkills; track skill.id) {
+          <option [value]="skill.id">
             {{ skill.name }}
           </option>
           }
-          
         </select>
 
-        <button type="button" (click)="saveSkills()">Save Skills to Profile</button>
+        <button type="button" class="search-btn" (click)="saveSkills()">
+          Save Skills
+        </button>
       </div>
     </div>
 
+    <div class="section-card">
+      <div class="d-flex justify-content-between align-items-center mb-3 mt-5">
+        <h3 class="mb-0">Your Education</h3>
+        <button type="button" class="search-btn" (click)="showEducationModal = true">
+          Add New Education
+        </button>
+      </div>
+
+      @if (educations.length > 0) {
+      <div class="card-list p-3">
+        @for (education of educations; track $index) {
+        <div class="education-card">
+          <div class="card-left">
+            <h4 class="mb-1">{{ education.school }}</h4>
+            <h5 class="mb-1">{{ education.fieldOfStudy }}</h5>
+            <p class="mb-1"><strong>{{ education.degree }}</strong></p>
+            @if(education.isOngoing) {
+            <p class="mb-1">Ongoing</p>
+            }
+            <p class="mb-0">
+              {{ education.startDate | date:'yyyy-MM-dd' }} - {{ education.endDate ? (education.endDate |
+              date:'yyyy-MM-dd') : 'Ongoing' }}
+            </p>
+          </div>
+
+          <div class="card-actions">
+            <button type="button" class="btn btn-sm btn-outline-danger" (click)="deleteEducation(education.id)">
+              Delete
+            </button>
+          </div>
+        </div>
+        }
+      </div>
+      } @else {
+      <p class="text-muted small mb-0">No education entries yet.</p>
+      }
+    </div>
+
+    <div class="section-card">
+      <div class="d-flex justify-content-between align-items-center mb-3 mt-5">
+        <h3 class="mb-0">Your Experiences</h3>
+        <button type="button" class="search-btn" (click)="showExperienceModal = true">
+          Add New Experience
+        </button>
+      </div>
+
+      @if (experiences.length > 0) {
+      <div class="card-list">
+        @for (experience of experiences; track $index) {
+        <div class="experience-card">
+          <div class="card-left">
+            <h4 class="mb-1">{{ experience.companyName }}</h4>
+            <h5 class="mb-1">{{ experience.jobTitle }}</h5>
+            <p class="mb-0">
+              {{ experience.startDate | date:'yyyy-MM-dd' }} - {{ experience.endDate | date:'yyyy-MM-dd' }}
+            </p>
+          </div>
+
+          <div class="card-actions">
+            <button type="button" class="btn btn-sm btn-outline-danger" (click)="deleteExperience(experience.id)">
+              Delete
+            </button>
+          </div>
+        </div>
+
+        }
+      </div>
+      } @else {
+      <p class="text-muted small mb-0">No experience entries yet.</p>
+      }
+    </div>
   </div>
 
+  @if (showExperienceModal) {
+  <div class="modal-backdrop fade show"></div>
+  <div class="modal fade show d-block" tabindex="-1" role="dialog" aria-modal="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header border-bottom-0 pb-0">
+          <h5 class="modal-title">Add Experience</h5>
+          <button type="button" class="btn-close shadow-none me-1" (click)="showExperienceModal = false"
+            aria-label="Close"></button>
+        </div>
 
+        <div class="modal-body py-4">
+          <form [formGroup]="experienceForm" class="d-grid gap-3">
+            <div class="form-group">
+              <label class="form-label">Job Title</label>
+              <input class="form-control" formControlName="jobTitle" />
+            </div>
 
-</div>
+            <div class="form-group">
+              <label class="form-label">Company Name</label>
+              <input class="form-control" formControlName="companyName" />
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Start Date</label>
+                <input type="date" class="form-control" formControlName="startDate" />
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">End Date</label>
+                <input type="date" class="form-control" formControlName="endDate" />
+              </div>
+            </div>
+          </form>
+        </div>
+
+        <div class="modal-footer border-top-0 pt-0 justify-content-end gap-2">
+          <button type="button" class="btn btn-secondary" (click)="showExperienceModal = false">Cancel</button>
+          <button type="button" class="search-btn" (click)="saveExperience()">Save</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  }
+
+  @if (showEducationModal) {
+  <div class="modal-backdrop fade show"></div>
+  <div class="modal fade show d-block" tabindex="-1" role="dialog" aria-modal="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header border-bottom-0 pb-0">
+          <h5 class="modal-title">Add Education</h5>
+          <button type="button" class="btn-close shadow-none me-1" (click)="showEducationModal = false"
+            aria-label="Close"></button>
+        </div>
+
+        <div class="modal-body py-4">
+          <form [formGroup]="educationForm" class="d-grid gap-3">
+            <div class="form-group">
+              <label class="form-label">School</label>
+              <input class="form-control" formControlName="school" />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Degree</label>
+              <input class="form-control" formControlName="degree" />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Field of Study</label>
+              <input class="form-control" formControlName="fieldOfStudy" />
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Start Date</label>
+                <input type="date" class="form-control" formControlName="startDate" />
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">End Date</label>
+                <input type="date" class="form-control" formControlName="endDate" />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Description</label>
+              <textarea class="form-control" rows="4" formControlName="description"></textarea>
+            </div>
+          </form>
+        </div>
+
+        <div class="modal-footer border-top-0 pt-0 justify-content-end gap-2">
+          <button type="button" class="btn btn-secondary" (click)="showEducationModal = false">Cancel</button>
+          <button type="button" class="search-btn" (click)="saveEducation()">Save</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  }
+</main>

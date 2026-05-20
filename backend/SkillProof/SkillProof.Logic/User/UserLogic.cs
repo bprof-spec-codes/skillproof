@@ -18,6 +18,8 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using System.Text.RegularExpressions;
+using SkillProof.Entities.Dtos.Education;
+using SkillProof.Entities.Dtos.Experience;
 
 namespace SkillProof.Logic.User
 {
@@ -185,6 +187,8 @@ namespace SkillProof.Logic.User
                 .Include(u => u.SavedJobs)
                 .Include(u => u.JobApplications)
                 .Include(u => u.Tests)
+                .Include(u => u.Educations)
+                .Include(u => u.UserExperiences)
                 .Include(u => u.Skills)
                     .ThenInclude(s => s.Assessments)
                     .ThenInclude(a => a.TestAttempts)
@@ -248,7 +252,22 @@ namespace SkillProof.Logic.User
                     }).ToList() ?? new List<AssessmentViewDto>()
                 }).ToList() ?? new List<ViewSkill>(),
 
-                Badges = badges
+                Badges = badges,
+                Educations = user.Educations?.Select(e => new EducationViewDto
+                {
+                    School = e.School,
+                    Degree = e.Degree,
+                    FieldOfStudy = e.FieldOfStudy,
+                    StartDate = e.StartDate,
+                    EndDate = e.EndDate
+                }).ToList() ?? new List<EducationViewDto>(),
+                Experiences = user.UserExperiences?.Select(ex => new ExperienceViewDto
+                {
+                    JobTitle = ex.JobTitle,
+                    CompanyName = ex.CompanyName,
+                    StartDate = ex.StartDate,
+                    EndDate = ex.EndDate
+                }).ToList() ?? new List<ExperienceViewDto>()
             };
         }
 

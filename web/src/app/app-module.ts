@@ -31,6 +31,8 @@ import { MyJobs } from './components/my-jobs/my-jobs';
 import { ReviewUser } from './components/review-user/review-user';
 import { ManualFeedback } from './components/manual-feedback/manual-feedback';
 import { AdminSkill } from './components/admin-skill/admin-skill';
+import { JobSearch } from './components/job-search/job-search';
+import { FullJobView } from './components/full-job-view/full-job-view';
 @NgModule({
   declarations: [
     App,
@@ -57,7 +59,9 @@ import { AdminSkill } from './components/admin-skill/admin-skill';
     MyJobs,
     ReviewUser,
     ManualFeedback,
-    AdminSkill
+    AdminSkill,
+    JobSearch,
+    FullJobView,
   ],
   imports: [
     BrowserModule,

@@ -14,14 +14,14 @@ export class DashboardRoutingService {
     private router: Router
   ) {}
 
-  routeToDashboard(): void {
+    routeToDashboard(): void {
     if (!this.authService.isLoggedIn()) {
       this.router.navigate(['/home']);
       return;
     }
 
     const userId = this.authService.getUserId();
-    if (userId && !this.getValueFromBehaviorSubject()) {
+    if (userId) {
        this.profileService.loadProfile(userId);
     }
 
@@ -33,12 +33,12 @@ export class DashboardRoutingService {
         if (profile?.companyId) {
           this.router.navigate(['/company']);
         } else {
-          this.router.navigate(['/home']);
+          this.router.navigate(['/search']);
         }
       },
       error: (err) => {
         console.error('Failed to get profile for routing:', err);
-        this.router.navigate(['/home']);
+        this.router.navigate(['/search']);
       }
     });
   }

@@ -69,7 +69,7 @@
             <div class="d-flex flex-column gap-2 mb-4">
               @for (skill of profileData?.skills; track skill.id) {
               <div class="d-flex align-items-center gap-2 border p-2 rounded w-100 bg-light">
-                <img [src]="badgeService.getBadgeIconForSkill(skill.name, profileData?.badges ?? [])" />
+                <img class="size" [src]="badgeService.getBadgeIconForSkill(skill.name, profileData?.badges ?? [])" />
                 <span class="fs-6 fw-semibold text-dark">
                   {{ skill.name }}
                 </span>
