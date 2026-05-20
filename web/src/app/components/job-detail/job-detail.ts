@@ -49,6 +49,7 @@ export class JobDetail implements OnInit, OnDestroy {
     this.profileSub = this.profileService.currentProfile$.subscribe((profile) => {
       this.updateUIStatus(profile);
     });
+    this.checkUserJobStatus()
   }
 
   private updateUIStatus(profile: any | null): void {
@@ -166,6 +167,7 @@ export class JobDetail implements OnInit, OnDestroy {
           if (userId) {
             this.profileService.loadProfile(userId);
           }
+          this.hasApplied = true
         },
         error: () => {
           this.modalService.open({
@@ -239,6 +241,9 @@ export class JobDetail implements OnInit, OnDestroy {
   }
 
   getEmploymentTypeLabel(type: EmploymentType | null | undefined): string {
+    const name = type === undefined || null ? 'Unknown' : type?.toString()
+    return name as string
+    /*
     switch (type) {
       case EmploymentType.FullTime:
         return 'Full-time';
@@ -251,6 +256,7 @@ export class JobDetail implements OnInit, OnDestroy {
       default:
         return 'Unknown';
     }
+    */
   }
 
   private loadJob(id: string): void {
@@ -262,7 +268,7 @@ export class JobDetail implements OnInit, OnDestroy {
     this.loadSubscription = this.jobService.getJobById(id).subscribe({
       next: (job) => {
         this.ngZone.run(() => {
-          this.job = job;
+          this.job = this.parseJobTags(job);
           this.checkUserJobStatus();
           this.isLoading = false;
           this.cdr.detectChanges();
@@ -276,5 +282,36 @@ export class JobDetail implements OnInit, OnDestroy {
         });
       },
     });
+  }
+
+  private parseJobTags(job: JobViewDto): JobViewDto {
+    const parsedJob = { ...job }
+
+    if (typeof parsedJob.tags === 'string') {
+      const tagString = parsedJob.tags as unknown as string
+
+      parsedJob.tags = tagString
+        .split(',')
+        .map((t) =>
+          t
+            .trim()
+            .replace(/[\[\]"']/g, '')
+        )
+        .filter((t) => t !== '')
+    }
+
+    if (Array.isArray(parsedJob.tags)) {
+      parsedJob.tags = parsedJob.tags.map((t) =>
+        typeof t === 'string'
+          ? t.replace(/[\[\]"']/g, '').trim()
+          : t
+      );
+    }
+
+    if (!Array.isArray(parsedJob.tags)) {
+      parsedJob.tags = [];
+    }
+
+    return parsedJob
   }
 }

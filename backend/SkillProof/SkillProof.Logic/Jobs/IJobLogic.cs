@@ -23,4 +23,11 @@ public interface IJobLogic
     Task<IEnumerable<JobViewDto>> GetJobsOfCompanyAsync(string currentUserId);
 
     Task<string> ApplyForJobAsync(string jobId, string userId);
+    Task AcceptCandidateAsync(string userId, string jobId);
+
+    Task RejectCandidateAsync(string userId, string jobId);
+
+    Task<IEnumerable<JobNotificationDto>> GetNotificationsAsync(string userId);
+
+    Task MarkNotificationAsReadAsync(string applicationId, string userId);
 }

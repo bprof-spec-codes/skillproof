@@ -7,17 +7,12 @@
     <nav class="d-flex align-items-center gap-lg-3">
       @if (profile$ | async; as profile) {
       @if (isEmployer) {
-      <a class="text-decoration-none header-font" routerLink="/question-banks">
+      <a class="text-decoration-none header-font" routerLink="/question-bank">
         <i class="bi bi-question-square me-2 header-icon"></i>Question banks
       </a>
 
       <a class="text-decoration-none header-font" routerLink="/myJobs">
         <i class="bi bi-envelope me-2 header-icon"></i>Applicants
-      </a>
-
-      <a class="text-decoration-none header-font position-relative" routerLink="/notifications"
-        aria-label="Notifications">
-        <i class="bi bi-bell header-icon"></i>
       </a>
       }
       @if(isAdmin) {
@@ -25,6 +20,42 @@
         Skills
       </a>
       }
+
+      }
+
+      <div class="dropdown d-flex align-items-center gap-2">
+        <button class="btn p-0 dropdown-toggle position-relative" type="button" data-bs-toggle="dropdown"
+          aria-expanded="false">
+          <i class="bi bi-bell header-icon"></i>
+
+          <!-- Red notification badge -->
+          @if (unreadCount > 0) {
+          <span
+            class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-light"
+            style="font-size: 0.65em;">
+            {{ unreadCount }}
+          </span>
+          }
+        </button>
+
+        <ul class="dropdown-menu dropdown-menu-end mt-2 p-2 shadow-sm" style="min-width: 300px;">
+          <li>
+            <h6 class="dropdown-header font-color px-0 ms-1">Unread Notifications</h6>
+          </li>
+
+          @for (notification of notifications; track notification.id) {
+          <li>
+            <a class="dropdown-item py-2 shadow-sm color border font-size" (click)="markAsRead(notification.id)"
+              style="cursor: pointer; white-space: normal;">
+              Your application for <strong>{{ notification.jobTitle }}</strong> was {{ notification.status === 4 ?
+              'Accepted' : (notification.status === 5 ? 'Rejected' : notification.status) }}.
+            </a>
+          </li>
+          } @empty {
+          <li><span class="dropdown-item text-muted text-center">No new notifications</span></li>
+          }
+        </ul>
+      </div>
 
       <div class="dropdown capsule shadow-sm d-flex align-items-center gap-2">
         <span class="header-font-alt">

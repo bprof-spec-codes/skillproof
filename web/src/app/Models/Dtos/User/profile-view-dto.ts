@@ -12,4 +12,5 @@ export interface ProfileViewDto {
   savedJobIds: string[];
   skills: SkillViewDto[];
   badges: BadgeDto[];
+  appliedJobIds: string[];
 }

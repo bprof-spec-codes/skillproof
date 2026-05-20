@@ -46,7 +46,7 @@ export class AuthService {
   logout() {
     localStorage.removeItem(this.storageKey);
     this.profileService.clearProfile();
-    window.location.href = '/homePage';
+    window.location.href = '/login';
   }
 
   isLoggedIn(): boolean {
@@ -135,5 +135,11 @@ export class AuthService {
         .map((c) => '%' + c.charCodeAt(0).toString(16).padStart(2, '0'))
         .join(''),
     );
+  }
+
+  hasRole(required: string | string[]): boolean {
+    const have = this.getRoles().map(r => r.toUpperCase())
+    const need = (Array.isArray(required) ? required : [required]).map(r => r.toUpperCase())
+    return need.some(r => have.includes(r))
   }
 }

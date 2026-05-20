@@ -5,6 +5,8 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { environment } from '../../environments/environment.development';
 import { JobCreateDto } from '../Models/Dtos/Job/JobCreate-dto';
 import { Job } from '../Models/Dtos/Job/job';
+import { JobNotificationDto } from '../Models/Dtos/Job/jobNotificationDto';
+import { JobApplicationStatusDto } from '../Models/Dtos/Job/job-application-status-dto';
 
 @Injectable({
   providedIn: 'root',
@@ -145,8 +147,8 @@ export class JobService {
       .filter((t) => t.length > 0);
   }
 
-  getTestUsers(jobId: string): Observable<string[]> {
-    return this.http.get<string[]>(`${environment.apiUrl}/Tests/GetTestUsers`, {
+  getTestUsers(jobId: string): Observable<JobApplicationStatusDto[]> {
+    return this.http.get<JobApplicationStatusDto[]>(`${environment.apiUrl}/Tests/GetTestUsers`, {
       params: { jobId: jobId },
     });
   }
@@ -172,6 +174,26 @@ export class JobService {
       });
   }
 
+  acceptCandidate(userId: string, jobId: string){
+    const token = localStorage.getItem('skillProof_token');
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    
+    return this.http.put(`${this.apiUrl}/${jobId}/accept`, {}, { 
+      headers: headers,
+      params: { userId: userId } 
+    });
+  }
+
+  rejectCandidate(userId: string, jobId: string){
+    const token = localStorage.getItem('skillProof_token');
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    
+    return this.http.put(`${this.apiUrl}/${jobId}/reject`, {}, { 
+      headers: headers,
+      params: { userId: userId } 
+    });
+  }
+
   private normalizeJob(job: any): JobViewDto {
     return {
       id: job.id,
@@ -187,5 +209,17 @@ export class JobService {
       assessments: job.assessments || [],
       tags: this.normalizeTags(job.tags),
     } as JobViewDto;
+  }
+
+  getNotifications(): Observable<JobNotificationDto[]> {
+    const token = localStorage.getItem('skillProof_token');
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    return this.http.get<JobNotificationDto[]>(`${this.apiUrl}/notifications`, { headers });
+  }
+
+  markNotificationAsRead(applicationId: string): Observable<JobNotificationDto> {
+    const token = localStorage.getItem('skillProof_token');
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    return this.http.put<JobNotificationDto>(`${this.apiUrl}/notifications/${applicationId}/read`, {}, { headers });
   }
 }

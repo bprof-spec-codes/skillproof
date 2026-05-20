@@ -530,4 +530,60 @@ public class JobLogic : IJobLogic
 
         return jobApplication.Id;
     }
+
+    public async Task AcceptCandidateAsync(string userId, string jobId)
+    {
+        var jobApplication = await _ctx.JobApplications
+            .FirstOrDefaultAsync(ja => ja.UserId == userId && ja.JobId == jobId);
+        if (jobApplication == null)
+        {
+            throw new KeyNotFoundException("The job application was not found.");
+        }
+        jobApplication.Status = JobApplicationStatus.Accepted;
+        jobApplication.IsRead = false;
+        await _ctx.SaveChangesAsync();
+    }
+
+    public async Task RejectCandidateAsync(string userId, string jobId)
+    {
+        var jobApplication = await _ctx.JobApplications
+            .FirstOrDefaultAsync(ja => ja.UserId == userId && ja.JobId == jobId);
+        if (jobApplication == null)
+        {
+            throw new KeyNotFoundException("The job application was not found.");
+        }
+        jobApplication.Status = JobApplicationStatus.Rejected;
+        jobApplication.IsRead = false;
+        await _ctx.SaveChangesAsync();
+    }
+
+    public async Task<IEnumerable<JobNotificationDto>> GetNotificationsAsync(string userId)
+    {
+        var notifications = await _ctx.JobApplications
+            .Where(x => x.UserId == userId && !x.IsRead &&
+                       (x.Status == JobApplicationStatus.Accepted || x.Status == JobApplicationStatus.Rejected))
+            .Select(x => new JobNotificationDto
+            {
+                Id = x.Id,
+                JobTitle = x.Job.Title,
+                Status = x.Status
+            })
+            .ToListAsync();
+
+        return notifications;
+    }
+
+    public async Task MarkNotificationAsReadAsync(string applicationId, string userId)
+    {
+        var application = await _ctx.JobApplications
+            .FirstOrDefaultAsync(ja => ja.Id == applicationId && ja.UserId == userId);
+
+        if (application == null)
+        {
+            throw new KeyNotFoundException("The job application/notification was not found or does not belong to you.");
+        }
+
+        application.IsRead = true;
+        await _ctx.SaveChangesAsync();
+    }
 }

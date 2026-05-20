@@ -18,29 +18,83 @@ import { MyJobs } from './components/my-jobs/my-jobs';
 import { ReviewUser } from './components/review-user/review-user';
 import { ManualFeedback } from './components/manual-feedback/manual-feedback';
 import { AdminSkill } from './components/admin-skill/admin-skill';
+import { authGuard } from './interceptors/auth-guard';
 
 const routes: Routes = [
   { path: '', redirectTo: 'home', pathMatch: 'full' },
-  { path: 'home', component: HomePage },
+
+  { path: 'home', component: HomePage},
+  
   { path: 'login', component: Login },
   { path: 'register', component: Register },
-  { path: 'question-bank', component: QuestionBankList },
-  { path: 'question-bank/create', component: QuestionBankForm },
-  { path: 'question-bank/:id/edit', component: QuestionBankForm },
-  { path: 'question-bank/:id', component: QuestionBankDetails },
-  { path: 'editProfile', component: EditProfile },
-  { path: 'viewProfile', component: ProfileView },
-  { path: 'job-upload', component: Jobupload },
-  { path: 'editJob/:id', component: JobEdit },
-  { path: 'job/:id', component: JobDetail },
-  { path: 'job/:id/test', component: TestTake },
-  { path: 'assessments/create', component: AssessmentCreate },
-  { path: 'company', component: CompanyHome },
-  { path: 'myJobs', component: MyJobs },
-  { path: 'reviewUser/:id', component: ReviewUser },
-  { path: 'manualFeedback/:id', component: ManualFeedback },
+
+  { path: 'question-bank', component: QuestionBankList,
+    canActivate: [authGuard],
+    data: { roles: ['EMPLOYER'] }
+  },
+
+  { path: 'question-bank/create', component: QuestionBankForm,
+    canActivate: [authGuard],
+    data: { roles: ['EMPLOYER'] }
+  },
+
+  { path: 'question-bank/:id/edit', component: QuestionBankForm,
+    canActivate: [authGuard],
+    data: { roles: ['EMPLOYER'] }
+  },
+
+  { path: 'question-bank/:id', component: QuestionBankDetails,
+    canActivate: [authGuard],
+    data: { roles: ['EMPLOYER'] }
+  },
+
+  { path: 'editProfile', component: EditProfile, canActivate: [authGuard] },
+  { path: 'viewProfile', component: ProfileView, canActivate: [authGuard] },
+
+  { path: 'job-upload', component: Jobupload,
+    canActivate: [authGuard],
+    data: { roles: ['EMPLOYER'] }
+  },
+
+  { path: 'editJob/:id', component: JobEdit,
+    canActivate: [authGuard],
+    data: { roles: ['EMPLOYER'] }
+  },
+
+  { path: 'job/:id', component: JobDetail
+  },
+
+  { path: 'job/:id/test', component: TestTake
+  },
+
+  { path: 'assessments/create', component: AssessmentCreate,
+    canActivate: [authGuard],
+    data: { roles: ['EMPLOYER'] }
+  },
+
+  { path: 'company', component: CompanyHome,
+    canActivate: [authGuard],
+    data: { roles: ['EMPLOYER'] }
+  },
+
+  { path: 'myJobs', component: MyJobs,
+    canActivate: [authGuard],
+    data: { roles: ['EMPLOYER'] }
+  },
+
+  { path: 'reviewUser/:id', component: ReviewUser,
+    canActivate: [authGuard],
+    data: { roles: ['EMPLOYER'] }
+  },
+
+  { path: 'manualFeedback/:id', component: ManualFeedback,
+    canActivate: [authGuard],
+    data: { roles: ['EMPLOYER'] }
+  },
+  
   { path: 'skills', component: AdminSkill},
   { path: 'skill/:skillId/test/:assessmentId', component: TestTake },
+
   { path: '**', redirectTo: 'home', pathMatch: 'full' },
 ];
 
