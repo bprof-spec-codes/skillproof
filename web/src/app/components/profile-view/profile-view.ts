@@ -5,6 +5,7 @@ import { Observable, filter, switchMap, of, combineLatest, map } from 'rxjs';
 import { JobViewDto } from '../../Models/Dtos/Job/JobView-dto';
 import { UserTestsDto } from '../../Models/Dtos/User/userTests-dto';
 import { ProfileViewDto } from '../../Models/Dtos/User/profile-view-dto';
+import { BadgeService } from '../../services/badgeservice';
 
 @Component({
   selector: 'app-profile-view',
@@ -22,7 +23,8 @@ export class ProfileView implements OnInit {
   constructor(
     private profileService: ProfileService,
     private jobService: JobService,
-  ) {}
+    public badgeService: BadgeService
+  ) { }
 
   ngOnInit(): void {
     this.profile$ = this.profileService.currentProfile$;

@@ -62,16 +62,21 @@
             <p>{{profileData?.email}}</p>
             <hr class="divider">
             <h6 class="fw-bold mb-2">Skills</h6>
-            <div class="d-flex gap-2 mb-2">
-              @if(profileData?.skills?.length === 0){
-              <p>No skills added</p>
-              }
-              @for (skill of profileData?.skills; track $index){
-              <Li>
-                <ul>{{skill[$index]}}</ul>
-              </Li>
+            @if(profileData?.skills?.length === 0){
+            <p>No skills added</p>
+            }
+            @else {
+            <div class="d-flex flex-column gap-2 mb-4">
+              @for (skill of profileData?.skills; track skill.id) {
+              <div class="d-flex align-items-center gap-2 border p-2 rounded w-100 bg-light">
+                <img [src]="badgeService.getBadgeIconForSkill(skill.name, profileData?.badges ?? [])" />
+                <span class="fs-6 fw-semibold text-dark">
+                  {{ skill.name }}
+                </span>
+              </div>
               }
             </div>
+            }
             <hr class="divider">
             <div class="d-flex align-items-center justify-content-center">
               <div class="d-flex justify-content-between gap-4">
@@ -80,11 +85,10 @@
               </div>
             </div>
           </div>
+
         </div>
       </div>
-
     </div>
-
 
   </div>
 </div>

@@ -15,6 +15,13 @@
         <i class="bi bi-envelope me-2 header-icon"></i>Applicants
       </a>
       }
+      @if(isAdmin) {
+      <a class="text-decoration-none header-font" routerLink="/skills">
+        Skills
+      </a>
+      }
+
+      }
 
       <div class="dropdown d-flex align-items-center gap-2">
         <button class="btn p-0 dropdown-toggle position-relative" type="button" data-bs-toggle="dropdown"

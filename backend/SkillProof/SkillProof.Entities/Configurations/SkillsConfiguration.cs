@@ -9,9 +9,9 @@ using SkillProof.Entities.Models;
 
 namespace SkillProof.Entities.Configurations
 {
-    public class SkillsConfiguration : IEntityTypeConfiguration<Skill>
+    public class SkillsConfiguration : IEntityTypeConfiguration<SkillModel>
     {
-        public void Configure(EntityTypeBuilder<Skill> builder)
+        public void Configure(EntityTypeBuilder<SkillModel> builder)
         {
             builder.HasKey(s => s.Id);
 

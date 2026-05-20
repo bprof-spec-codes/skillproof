@@ -11,7 +11,7 @@ using SkillProof.Entities.Helper;
 
 namespace SkillProof.Entities.Models
 {
-    public class Skill: Helper.IIdentity
+    public class SkillModel: Helper.IIdentity
     {
         [Key]
         public string Id { get; set; }
@@ -28,7 +28,7 @@ namespace SkillProof.Entities.Models
         public virtual ICollection<Users> Users { get; set; }
             = new List<Users>();
 
-        public Skill()
+        public SkillModel()
         {
             Id = Guid.NewGuid().ToString();
         }

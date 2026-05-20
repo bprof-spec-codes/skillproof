@@ -21,12 +21,14 @@ public class TestLogic : ITestLogic
     private readonly IRepository<Job> _jobRepository;
     private readonly SkillProofDbContext _ctx;
     private readonly IGeminiService _geminiService;
+    private readonly IRepository<SkillModel> _skillRepository;
 
-    public TestLogic(IRepository<Job> jobRepository, SkillProofDbContext ctx, IGeminiService geminiService)
+    public TestLogic(IRepository<Job> jobRepository, SkillProofDbContext ctx, IGeminiService geminiService, IRepository<SkillModel> skillRepository)
     {
         _jobRepository = jobRepository;
         _ctx = ctx;
         _geminiService = geminiService;
+        _skillRepository = skillRepository;
     }
 
     public async Task<TestResultDto> SubmitTestAsync(TestSubmitDto dto, string userId)
@@ -190,6 +192,134 @@ public class TestLogic : ITestLogic
             JobApplicationId = jobApplication.Id,
             Score = test.Score,
             MaxScore = allQuestions.Count,
+            Passed = test.Passed,
+            DifficultyLevel = test.DifficultyLevel,
+            QuestionResults = questionResults
+        };
+    }
+
+    public async Task<TestResultDto> SubmitTestSkillAsync(TestSubmitSkillDto dto, string userId)
+    {
+        if (string.IsNullOrWhiteSpace(userId))
+            throw new UnauthorizedAccessException("A user identity is required to submit a test.");
+
+        if (dto == null || string.IsNullOrWhiteSpace(dto.SkillId))
+            throw new ArgumentException("Skill id is required.");
+
+        if (string.IsNullOrWhiteSpace(dto.AssessmentId))
+            throw new ArgumentException("Assessment id is required.");
+
+        if (dto.Answers == null)
+            throw new ArgumentException("Answers must be provided (may be empty per question, but the list itself is required).");
+
+        var duplicateIds = dto.Answers
+            .GroupBy(a => a.QuestionId)
+            .Where(g => g.Count() > 1)
+            .Select(g => g.Key)
+            .ToList();
+
+        if (duplicateIds.Count > 0)
+            throw new ArgumentException($"Duplicate answers provided for question(s): {string.Join(", ", duplicateIds)}.");
+
+        var skill = await _skillRepository.GetAll()
+            .Include(s => s.Assessments)
+                .ThenInclude(a => a.Questions)
+                    .ThenInclude(q => q.MultipleChoiceQuestion)
+            .Include(s => s.Assessments)
+                .ThenInclude(a => a.Questions)
+                    .ThenInclude(q => q.CodeCompletionQuestion)
+            .Include(s => s.Assessments)
+                .ThenInclude(a => a.Questions)
+                    .ThenInclude(q => q.FillInTheBlankQuestions)
+            .Include(s => s.Assessments)
+                .ThenInclude(a => a.Questions)
+                    .ThenInclude(q => q.TrueFalseQuestion)
+            .Include(s => s.Assessments)
+                .ThenInclude(t => t.TestAttempts)
+            .FirstOrDefaultAsync(s => s.Id == dto.SkillId);
+
+        if (skill == null)
+            throw new KeyNotFoundException($"Skill '{dto.SkillId}' not found.");
+
+        var targetAssessment = skill.Assessments.FirstOrDefault(a => a.Id == dto.AssessmentId);
+        if (targetAssessment == null)
+            throw new InvalidOperationException("The requested assessment was not found on this skill.");
+
+        var targetQuestions = targetAssessment.Questions.ToList();
+        if (targetQuestions.Count == 0)
+            throw new ArgumentException("The specified assessment has no questions.");
+
+        var questionIdSet = targetQuestions.Select(q => q.Id).ToHashSet();
+        var foreignIds = dto.Answers
+            .Where(a => !questionIdSet.Contains(a.QuestionId))
+            .Select(a => a.QuestionId)
+            .ToList();
+
+        if (foreignIds.Count > 0)
+            throw new ArgumentException($"Answer(s) provided for question(s) that do not belong to this specific assessment: {string.Join(", ", foreignIds)}.");
+
+        var answersByQuestionId = dto.Answers.ToDictionary(a => a.QuestionId, a => a);
+
+        var test = new TestEntity
+        {
+            Id = Guid.NewGuid().ToString(),
+            UserId = userId,
+            DifficultyLevel = targetAssessment.DifficultyLevel,
+            CompletedAt = DateTime.UtcNow,
+            Score = 0,
+            Passed = false,
+            TestAnswers = new List<TestAnswerEntity>()
+        };
+
+        targetAssessment.TestAttempts.Add(test);
+
+        var questionResults = new List<QuestionResultDto>();
+        double totalScore = 0;
+
+        foreach (var question in targetQuestions)
+        {
+            answersByQuestionId.TryGetValue(question.Id, out var submitted);
+            var scored = ScoreQuestion(question, submitted, _geminiService);
+
+            var answerEntity = new TestAnswerEntity
+            {
+                Id = Guid.NewGuid().ToString(),
+                QuestionId = question.Id,
+                TestId = test.Id,
+                FreeTextResponse = scored.FreeTextResponse,
+                IsCorrect = scored.IsCorrect,
+                Score = scored.Points,
+                Inspected = false,
+                AiFeedback = scored.AiFeedback
+            };
+
+            test.TestAnswers.Add(answerEntity);
+            totalScore += scored.Points;
+
+            questionResults.Add(new QuestionResultDto
+            {
+                QuestionId = question.Id,
+                QuestionTitle = question.Title,
+                Type = question.Type,
+                IsCorrect = scored.IsCorrect,
+                PointsAwarded = scored.Points,
+                MaxPoints = 1,
+                UserResponse = scored.FreeTextResponse,
+                AiFeedback = scored.AiFeedback
+            });
+        }
+
+        test.Score = totalScore;
+        test.Passed = totalScore * 2 >= targetQuestions.Count;
+
+        _ctx.Tests.Add(test);
+        await _ctx.SaveChangesAsync();
+
+        return new TestResultDto
+        {
+            TestId = test.Id,
+            Score = test.Score,
+            MaxScore = targetQuestions.Count,
             Passed = test.Passed,
             DifficultyLevel = test.DifficultyLevel,
             QuestionResults = questionResults

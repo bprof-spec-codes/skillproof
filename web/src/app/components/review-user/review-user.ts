@@ -9,6 +9,9 @@ import { QuestionBankService } from '../../services/question-bank-service';
 import { FeedbackShared } from '../../services/feedback-shared';
 import { ProfileViewDto } from '../../Models/Dtos/User/profile-view-dto';
 import { JobService } from '../../services/job-service';
+import { BadgeDto } from '../../Models/Dtos/User/badge-dto';
+import { BadgeService } from '../../services/badgeservice';
+
 
 @Component({
   selector: 'app-review-user',
@@ -33,6 +36,7 @@ export class ReviewUser implements OnInit {
     private questionBankService: QuestionBankService,
     private feedbackSharedService: FeedbackShared,
     private router: Router,
+    public badgeService: BadgeService
     private jobService: JobService
   ) { }
 

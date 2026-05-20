@@ -37,19 +37,16 @@ export class ProfileService {
     this._currentProfile$.next(null);
   }
 
-  updateSkills(userId: string, skills: string[]): Observable<any> {
-    return this.http.put(`${environment.apiUrls.updateSkills}/${userId}`, { skills }).pipe(
-      tap(() => {
-        const current = this._currentProfile$.value;
-        if (current) {
-          this._currentProfile$.next({
-            ...current,
-            skills: skills,
-          });
-        }
-      }),
-    );
+  addSkillsToUser(id: string, skillIds: string[]): Observable<any> {
+  const token = localStorage.getItem('skillProof_token');
+  let headers = new HttpHeaders();
+  if (token) {
+    headers = headers.set('Authorization', `Bearer ${token}`);
   }
+
+  const baseUrl = environment.apiUrl;
+  return this.http.post<any>(`${baseUrl}/User/${id}/skills`, skillIds, { headers });
+}
 
   toggleSavedJob(jobId: string): Observable<ProfileViewDto> {
     const token = localStorage.getItem('skillProof_token');
@@ -86,6 +83,17 @@ export class ProfileService {
       }),
     );
   }
+
+  removeSkillFromUser(userId: string, skillId: string): Observable<any> {
+  const token = localStorage.getItem('skillProof_token');
+  let headers = new HttpHeaders();
+  if (token) {
+    headers = headers.set('Authorization', `Bearer ${token}`);
+  }
+
+  const baseUrl = environment.apiUrl;
+  return this.http.delete<any>(`${baseUrl}/User/remove-skill/${skillId}/${userId}`, { headers });
+}
 
   /*loadUserTests(userId: string): void {
    this.http.get<UserTestsDto[]>(`${environment.apiUrls.getProfileTests}/${userId}`)

@@ -6,6 +6,8 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using SkillProof.Data;
 using SkillProof.Data.Repositorys;
+using SkillProof.Entities.Dtos.Assesment;
+using SkillProof.Entities.Dtos.Skill;
 using SkillProof.Entities.Dtos.Tests;
 using SkillProof.Entities.Dtos.Users;
 using SkillProof.Entities.Enums;
@@ -27,7 +29,7 @@ namespace SkillProof.Logic.User
         private readonly IRepository<Entities.Models.Companies> _companyRepository;
         private readonly IRepository<Job> _jobRepository;
         private readonly IRepository<JobApplication> _applicationRepository;
-        private readonly IRepository<SkillProof.Entities.Models.Skill> _skillRepository;
+        private readonly IRepository<SkillModel> _skillRepository;
         private readonly IWebHostEnvironment _env;
         private readonly JwtSettings _jwtSettings;
         private readonly SkillProofDbContext _ctx;
@@ -41,7 +43,7 @@ namespace SkillProof.Logic.User
             IWebHostEnvironment env,
             IOptions<JwtSettings> jwtSettings,
             SkillProofDbContext ctx,
-            IRepository<SkillProof.Entities.Models.Skill> skillRepository)
+            IRepository<SkillModel> skillRepository)
         {
             _userManager = userManager;
             _roleManager = roleManager;
@@ -166,9 +168,11 @@ namespace SkillProof.Logic.User
                         Headline = user.Headline,
                         Bio = user.Bio,
 
-                        Skills = user.Skills?
-                            .Select(s => s.Name)
-                            .ToList() ?? new List<string>()
+                        Skills = user.Skills?.Select(s => new ViewSkill
+                        {
+                            Id = s.Id,
+                            Name = s.Name
+                        }).ToList() ?? new List<ViewSkill>()
                     });
                 }
 
@@ -178,13 +182,45 @@ namespace SkillProof.Logic.User
         public async Task<ViewUser> GetUserByIdAsync(string id)
         {
             var user = await _userManager.Users
-          .Include(u => u.SavedJobs)
-          .Include(u => u.JobApplications)
-          .FirstOrDefaultAsync(u => u.Id == id);
+                .Include(u => u.SavedJobs)
+                .Include(u => u.JobApplications)
+                .Include(u => u.Tests)
+                .Include(u => u.Skills)
+                    .ThenInclude(s => s.Assessments)
+                    .ThenInclude(a => a.TestAttempts)
+                .FirstOrDefaultAsync(u => u.Id == id);
 
             if (user == null)
             {
                 throw new KeyNotFoundException("User not found.");
+            }
+
+            var badges = new List<BadgeDto>();
+
+            var passedTests = user.Tests?.Where(t => t.Passed).ToList() ?? new List<SkillProof.Entities.Models.Tests>();
+
+            if (user.Skills != null)
+            {
+                foreach (var skill in user.Skills)
+                {
+                    foreach (var assessment in skill.Assessments)
+                    {
+                        var passedTest = assessment.TestAttempts
+                            .Where(t => t.UserId == user.Id && t.Passed)
+                            .OrderByDescending(t => t.CompletedAt)
+                            .FirstOrDefault();
+
+                        if (passedTest != null)
+                        {
+                            badges.Add(new BadgeDto
+                            {
+                                SourceName = skill.Name,
+                                DifficultyLevel = assessment.DifficultyLevel,
+                                IssuedAt = passedTest.CompletedAt
+                            });
+                        }
+                    }
+                }
             }
 
             return new ViewUser
@@ -200,9 +236,19 @@ namespace SkillProof.Logic.User
 
                 AppliedJobIds = user.JobApplications?.Select(ja => ja.JobId).ToList() ?? new List<string>(),
 
-                Skills = user.Skills?
-                    .Select(s => s.Name)
-                    .ToList() ?? new List<string>()
+                Skills = user.Skills?.Select(s => new ViewSkill
+                {
+                    Id = s.Id,
+                    Name = s.Name,
+                    Assessments = s.Assessments?.Select(a => new AssessmentViewDto
+                    {
+                        Id = a.Id,
+                        Title = a.Title,
+                        DifficultyLevel = a.DifficultyLevel
+                    }).ToList() ?? new List<AssessmentViewDto>()
+                }).ToList() ?? new List<ViewSkill>(),
+
+                Badges = badges
             };
         }
 
@@ -332,6 +378,11 @@ namespace SkillProof.Logic.User
             if (user == null)
                 throw new KeyNotFoundException("User not found.");
 
+            if (!await _roleManager.RoleExistsAsync("Admin"))
+            {
+                await _roleManager.CreateAsync(new IdentityRole("Admin"));
+            }
+
             var roles = await _userManager.GetRolesAsync(user);
             if (roles.Contains("Admin"))
             {
@@ -403,30 +454,41 @@ namespace SkillProof.Logic.User
             return result;
         }
 
-        public async Task UpdateSkillsToUser(UpdateSkillToUser dto)
+        public async Task UpdateSkillsToUser(string id, string[] skillsId)
         {
             var user = await _userManager.Users
             .Include(u => u.Skills)
-            .FirstOrDefaultAsync(u => u.Id == dto.userId);
+            .FirstOrDefaultAsync(u => u.Id == id);
 
             if (user == null)
-                throw new KeyNotFoundException("User not found");
-
-            var earnedSkill = await _ctx.Skills
-                .FirstOrDefaultAsync(s => s.Id == dto.skillId);
-
-            if (earnedSkill == null)
-                throw new KeyNotFoundException("Skill not found");
-
-            var alreadyHasSkill = user.Skills
-                .Any(s => s.Id == earnedSkill.Id);
-
-            if (!alreadyHasSkill)
             {
-                user.Skills.Add(earnedSkill);
-
-                await _ctx.SaveChangesAsync();
+                throw new KeyNotFoundException("User not found");
             }
+
+            user.Skills ??= new List<SkillModel>();
+
+            if (skillsId != null)
+            {
+                foreach (var skillId in skillsId)
+                {
+                    var existingSkill = await _skillRepository.GetOne(skillId);
+                    if (existingSkill == null)
+                    {
+                        continue;
+                    }
+
+                    if (user.Skills.Any(s => s.Id == skillId))
+                    {
+                        continue;
+                    }
+
+                    user.Skills.Add(existingSkill);
+                }
+            }
+
+            var result = await _userManager.UpdateAsync(user);
+
+            await _ctx.SaveChangesAsync();
         }
 
         public async Task ApplyToJobAsync(string userId, string jobId)
@@ -451,6 +513,25 @@ namespace SkillProof.Logic.User
             };
 
             await _applicationRepository.Create(application);
+        }
+
+        public async Task DeleteSkillFromUser(string userId, string skillId)
+        {
+            var user = await _userManager.Users
+                .Include(u => u.Skills)
+                .FirstOrDefaultAsync(u => u.Id == userId);
+            if (user == null)
+            {
+                throw new KeyNotFoundException("User not found");
+            }
+            var skillToRemove = user.Skills.FirstOrDefault(s => s.Id == skillId);
+            if (skillToRemove == null)
+            {
+                throw new KeyNotFoundException("Skill not found in user's skills");
+            }
+            user.Skills.Remove(skillToRemove);
+            var result = await _userManager.UpdateAsync(user);
+            await _ctx.SaveChangesAsync();
         }
     }
 }

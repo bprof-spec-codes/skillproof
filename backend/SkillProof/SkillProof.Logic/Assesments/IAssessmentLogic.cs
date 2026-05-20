@@ -10,10 +10,7 @@ public interface IAssessmentLogic
     Task<AssessmentViewDto?> GetAssessmentByIdAsync(string id);
     Task<AssessmentViewDto> UpdateAssessmentAsync(string id, UpdateAssessmentDto model, string userId);
     Task DeleteAssessmentAsync(string id);
-
     Task AssignAssessmentToJob(string assessmentId, string jobId);
-
-    Task AddAssesmenToSkill(AddAssesmentsToSkillDto dto);
-
+    Task AddAssessmentToSkill(AddAssesmentsToSkillDto dto);
     Task<ICollection<AssessmentViewDto>> GetAssessmentBySkill(string skillId);
 }
