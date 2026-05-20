@@ -96,7 +96,9 @@ const routes: Routes = [
   
   { path: 'skills', component: AdminSkill},
   
-  { path: 'skill/:skillId/test/:assessmentId', component: TestTake },
+  { path: 'skill/:skillId/test/:assessmentId', component: TestTake,
+    canActivate: [authGuard]
+   },
 
   {path: 'search', component: JobSearch},
 

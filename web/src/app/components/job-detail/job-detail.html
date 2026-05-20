@@ -1,6 +1,6 @@
 <section class="job-detail-page py-4">
   <div class="container">
-    <a class="back-link" routerLink="/home">&larr; Back to jobs</a>
+    <a class="back-link" routerLink="/search">&larr; Back to jobs</a>
 
     <div class="job-detail-card mt-3">
       <div *ngIf="isLoading" class="state-block">
@@ -9,7 +9,7 @@
 
       <div *ngIf="!isLoading && errorMessage" class="state-block state-error">
         <p class="mb-3">{{ errorMessage }}</p>
-        <a class="btn btn-outline-secondary" routerLink="/home">Back to Home</a>
+        <a class="btn btn-outline-secondary" routerLink="/search">Back to Home</a>
       </div>
 
       <ng-container *ngIf="!isLoading && !errorMessage && job">
