@@ -47,8 +47,13 @@
             <hr class="divider">
             <h6 class="fw-bold mb-3">Job characteristics</h6>
             <div class="d-flex gap-2 mb-4">
+              <!-- Szerintem ez véletlen maradt bent
               <span class="badge bg-light text-dark border p-2"><i class="bi bi-briefcase text-danger"></i>
-                Full-time</span>
+                Full-time</span> 
+                
+              Ilyesmit lehetne, ha majd a skill tábla meglesz hozzá
+              <span class="badge bg-light text-dark border p-2"><i
+                  class="bi bi-person text-danger"></i>{{selectedJob.skill.difficulty}}</span> --> 
               <span class="badge bg-light text-dark border p-2"><i
                   class="bi bi-laptop text-danger"></i>{{selectedJob.employmentType}}</span>
             </div>
@@ -57,11 +62,6 @@
             <h6 class="fw-bold mb-2">Office location</h6>
             <p class="small text-muted mb-0">{{selectedJob.location}}</p>
 
-          </div>
-        </div>
-        } @else {
-        <div class="card sample border-0" style="border-radius: 16px;">
-          <div class="card-body p-4">
           </div>
         </div>
         }

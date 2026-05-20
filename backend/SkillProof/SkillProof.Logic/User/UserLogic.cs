@@ -233,6 +233,7 @@ namespace SkillProof.Logic.User
         {
             var user = await _userManager.Users
                 .Include(u => u.SavedJobs)
+                .Include(u => u.JobApplications)
                 .FirstOrDefaultAsync(u => u.Id == userId);
 
             if (user == null)
@@ -268,7 +269,8 @@ namespace SkillProof.Logic.User
                 Headline = user.Headline,
                 Bio = user.Bio,
                 CompanyId = user.CompanyId,
-                SavedJobIds = user.SavedJobs.Select(j => j.Id).ToList()
+                SavedJobIds = user.SavedJobs.Select(j => j.Id).ToList(),
+                AppliedJobIds = user.JobApplications?.Select(ja => ja.JobId).ToList() ?? new List<string>(),
             };
         }
 

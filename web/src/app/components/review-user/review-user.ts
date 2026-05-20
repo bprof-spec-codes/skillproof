@@ -8,6 +8,7 @@ import { combineLatest, of } from 'rxjs';
 import { QuestionBankService } from '../../services/question-bank-service';
 import { FeedbackShared } from '../../services/feedback-shared';
 import { ProfileViewDto } from '../../Models/Dtos/User/profile-view-dto';
+import { JobService } from '../../services/job-service';
 
 @Component({
   selector: 'app-review-user',
@@ -32,7 +33,8 @@ export class ReviewUser implements OnInit {
     private questionBankService: QuestionBankService,
     private feedbackSharedService: FeedbackShared,
     private router: Router,
-  ) {}
+    private jobService: JobService
+  ) { }
 
   ngOnInit(): void {
     combineLatest([this.route.paramMap, this.route.queryParamMap]).subscribe(
@@ -118,5 +120,29 @@ export class ReviewUser implements OnInit {
     this.feedbackSharedService.selectedUser = this.profileData as any;
     this.feedbackSharedService.jobId = this.jobId;
     this.router.navigate(['/manualFeedback', question.questionId]);
+  }
+
+  acceptCandidate() {
+    if (!this.jobId || !this.userId) return;
+
+    this.jobService.acceptCandidate(this.userId, this.jobId).subscribe({
+      next: () => {
+        console.log('Candidate accepted successfully');
+        this.router.navigate(['/myJobs']); // or wherever makes sense
+      },
+      error: (err) => console.error('Failed to accept candidate', err)
+    });
+  }
+
+  rejectCandidate() {
+    if (!this.jobId || !this.userId) return;
+
+    this.jobService.rejectCandidate(this.userId, this.jobId).subscribe({
+      next: () => {
+        console.log('Candidate rejected successfully');
+        this.router.navigate(['/myJobs']);
+      },
+      error: (err) => console.error('Failed to reject candidate', err)
+    });
   }
 }

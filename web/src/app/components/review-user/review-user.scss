@@ -45,3 +45,25 @@
         background-color: #0a5680;
     }
 }
+
+.btn-color-red {
+    background-color: #C1121F;
+    border-color: #C1121F;
+    color: white;
+
+    &:hover {
+        background-color: #681217;
+        border-color: #681217;
+    }
+}
+
+.btn-color-blue {
+    background-color: #003049;
+    border-color: #003049;
+    color: white;
+
+    &:hover {
+        background-color: #072636;
+        border-color: #072636;
+    }
+}

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SkillProof.Data;
 
@@ -11,9 +12,11 @@ using SkillProof.Data;
 namespace SkillProof.Data.Migrations
 {
     [DbContext(typeof(SkillProofDbContext))]
-    partial class SkillProofDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260512151547_IsReadProperty")]
+    partial class IsReadProperty
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -327,17 +330,12 @@ namespace SkillProof.Data.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
-                    b.Property<string>("SkillId")
-                        .HasColumnType("nvarchar(450)");
-
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("SkillId");
 
                     b.ToTable("Assessments");
                 });
@@ -560,21 +558,6 @@ namespace SkillProof.Data.Migrations
                     b.ToTable("Questions");
                 });
 
-            modelBuilder.Entity("SkillProof.Entities.Models.Skill", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Skills");
-                });
-
             modelBuilder.Entity("SkillProof.Entities.Models.TestAnswers", b =>
                 {
                     b.Property<string>("Id")
@@ -697,21 +680,6 @@ namespace SkillProof.Data.Migrations
                     b.ToTable("UserExperiences");
                 });
 
-            modelBuilder.Entity("SkillUsers", b =>
-                {
-                    b.Property<string>("SkillsId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("UsersId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("SkillsId", "UsersId");
-
-                    b.HasIndex("UsersId");
-
-                    b.ToTable("SkillUsers");
-                });
-
             modelBuilder.Entity("SkillProof.Entities.Models.Users", b =>
                 {
                     b.HasBaseType("Microsoft.AspNetCore.Identity.IdentityUser");
@@ -748,6 +716,9 @@ namespace SkillProof.Data.Migrations
                     b.Property<byte[]>("ProfilePicture")
                         .IsRequired()
                         .HasColumnType("varbinary(max)");
+
+                    b.Property<string>("Skills")
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasIndex("CompanyId");
 
@@ -880,15 +851,6 @@ namespace SkillProof.Data.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("SkillProof.Entities.Models.Assessments", b =>
-                {
-                    b.HasOne("SkillProof.Entities.Models.Skill", "Skill")
-                        .WithMany("Assessments")
-                        .HasForeignKey("SkillId");
-
-                    b.Navigation("Skill");
-                });
-
             modelBuilder.Entity("SkillProof.Entities.Models.CodeCompletionQuestions", b =>
                 {
                     b.HasOne("SkillProof.Entities.Models.Questions", "Question")
@@ -1010,21 +972,6 @@ namespace SkillProof.Data.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("SkillUsers", b =>
-                {
-                    b.HasOne("SkillProof.Entities.Models.Skill", null)
-                        .WithMany()
-                        .HasForeignKey("SkillsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("SkillProof.Entities.Models.Users", null)
-                        .WithMany()
-                        .HasForeignKey("UsersId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("SkillProof.Entities.Models.Users", b =>
                 {
                     b.HasOne("SkillProof.Entities.Models.Companies", "Companies")
@@ -1058,11 +1005,6 @@ namespace SkillProof.Data.Migrations
                     b.Navigation("TestAnswers");
 
                     b.Navigation("TrueFalseQuestion");
-                });
-
-            modelBuilder.Entity("SkillProof.Entities.Models.Skill", b =>
-                {
-                    b.Navigation("Assessments");
                 });
 
             modelBuilder.Entity("SkillProof.Entities.Models.Tests", b =>

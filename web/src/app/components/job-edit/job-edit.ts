@@ -4,6 +4,7 @@ import { BehaviorSubject } from 'rxjs';
 import { JobService } from '../../services/job-service';
 import { AssessmentService } from '../../services/assesmentservice';
 import { DashboardRoutingService } from '../../services/dashboardRouting';
+import { JobViewDto } from '../../Models/Dtos/Job/JobView-dto';
 
 @Component({
   selector: 'app-job-edit',
@@ -147,9 +148,9 @@ export class JobEdit implements OnInit {
       companyId: this.companyId,
       title: this.title,
       location: this.location,
-      salary: this.salary ? Number(this.salary) : null,
+      salary: this.salary ? Number(this.salary) : 0, // vagy ha null-t akarunk küldeni, akkor adatb módosítás kell
       employmentType: Number(this.employmentType),
-      description: this.description,
+      description: this.description,  
       shortDescription: this.shortDescription,
       tags: tagsArray.join(','),
       assessmentIds: this.selectedAssessments.map((a) => a.id),

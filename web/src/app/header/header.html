@@ -6,66 +6,86 @@
 
     <nav class="d-flex align-items-center gap-lg-3">
       @if (profile$ | async; as profile) {
-        @if (isEmployer) {
-          <a class="text-decoration-none header-font" routerLink="/question-banks">
-            <i class="bi bi-question-square me-2 header-icon"></i>Question banks
-          </a>
+      @if (isEmployer) {
+      <a class="text-decoration-none header-font" routerLink="/question-bank">
+        <i class="bi bi-question-square me-2 header-icon"></i>Question banks
+      </a>
 
-          <a class="text-decoration-none header-font" routerLink="/myJobs">
-            <i class="bi bi-envelope me-2 header-icon"></i>Applicants
-          </a>
+      <a class="text-decoration-none header-font" routerLink="/myJobs">
+        <i class="bi bi-envelope me-2 header-icon"></i>Applicants
+      </a>
+      }
 
-          <a class="text-decoration-none header-font position-relative" routerLink="/notifications" aria-label="Notifications">
-            <i class="bi bi-bell header-icon"></i>
-          </a>
-        }
+      <div class="dropdown d-flex align-items-center gap-2">
+        <button class="btn p-0 dropdown-toggle position-relative" type="button" data-bs-toggle="dropdown"
+          aria-expanded="false">
+          <i class="bi bi-bell header-icon"></i>
 
-        <div class="dropdown capsule shadow-sm d-flex align-items-center gap-2">
-          <span class="header-font-alt">
-            {{ profile.fullName }}
+          <!-- Red notification badge -->
+          @if (unreadCount > 0) {
+          <span
+            class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-light"
+            style="font-size: 0.65em;">
+            {{ unreadCount }}
           </span>
+          }
+        </button>
 
-          <button
-            class="btn p-0 avatar-btn dropdown-toggle"
-            type="button"
-            data-bs-toggle="dropdown"
-            aria-expanded="false"
-          >
-            @if (profile.image) {
-              <img
-                [src]="profile.image.startsWith('http')
+        <ul class="dropdown-menu dropdown-menu-end mt-2 p-2 shadow-sm" style="min-width: 300px;">
+          <li>
+            <h6 class="dropdown-header font-color px-0 ms-1">Unread Notifications</h6>
+          </li>
+
+          @for (notification of notifications; track notification.id) {
+          <li>
+            <a class="dropdown-item py-2 shadow-sm color border font-size" (click)="markAsRead(notification.id)"
+              style="cursor: pointer; white-space: normal;">
+              Your application for <strong>{{ notification.jobTitle }}</strong> was {{ notification.status === 4 ?
+              'Accepted' : (notification.status === 5 ? 'Rejected' : notification.status) }}.
+            </a>
+          </li>
+          } @empty {
+          <li><span class="dropdown-item text-muted text-center">No new notifications</span></li>
+          }
+        </ul>
+      </div>
+
+      <div class="dropdown capsule shadow-sm d-flex align-items-center gap-2">
+        <span class="header-font-alt">
+          {{ profile.fullName }}
+        </span>
+
+        <button class="btn p-0 avatar-btn dropdown-toggle" type="button" data-bs-toggle="dropdown"
+          aria-expanded="false">
+          @if (profile.image) {
+          <img [src]="profile.image.startsWith('http')
                   ? profile.image
-                  : 'data:image/*;base64,' + profile.image"
-                class="avatar" />
-            }
-          </button>
+                  : 'data:image/*;base64,' + profile.image" class="avatar" />
+          }
+        </button>
 
-          <ul class="dropdown-menu dropdown-menu-end mt-2">
-            <li>
-              <a class="dropdown-item" routerLink="/viewProfile">
-                View profile
-              </a>
-            </li>
+        <ul class="dropdown-menu dropdown-menu-end mt-2">
+          <li>
+            <a class="dropdown-item" routerLink="/viewProfile">
+              View profile
+            </a>
+          </li>
 
-            <li>
-              <button
-                class="dropdown-item"
-                (click)="authService.logout()"
-                data-bs-dismiss="dropdown"
-              >
-                Log out
-              </button>
-            </li>
-          </ul>
-        </div>
+          <li>
+            <button class="dropdown-item" (click)="authService.logout()" data-bs-dismiss="dropdown">
+              Log out
+            </button>
+          </li>
+        </ul>
+      </div>
       } @else {
-        <a class="text-decoration-none header-font" [routerLink]="['/register']" [queryParams]="{ role: 'employer' }">
-          <i class="bi bi-briefcase me-2 header-icon"></i>For employers
-        </a>
+      <a class="text-decoration-none header-font" [routerLink]="['/register']" [queryParams]="{ role: 'employer' }">
+        <i class="bi bi-briefcase me-2 header-icon"></i>For employers
+      </a>
 
-        <a class="text-decoration-none header-font divider ps-3" routerLink="/login">
-          Login
-        </a>
+      <a class="text-decoration-none header-font divider ps-3" routerLink="/login">
+        Login
+      </a>
       }
     </nav>
   </div>

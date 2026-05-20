@@ -63,13 +63,14 @@ export class Jobupload {
     this.jobService.createJobs(dto).subscribe({
       next: () => {
         this.loading = false;
-        this.router.navigate(['/']);
+        this.router.navigate(['/company']);
       },
       error: (err: any) => {
         this.loading = false;
         this.error = err?.error?.message || 'Failed to post the job advertisement.';
       },
     });
+
   }
 
   preView(): void {

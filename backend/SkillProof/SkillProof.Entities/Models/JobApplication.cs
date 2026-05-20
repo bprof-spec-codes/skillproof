@@ -22,6 +22,8 @@ namespace SkillProof.Entities.Models
         [Required]
         public JobApplicationStatus Status { get; set; }
 
+        public bool IsRead { get; set; } = false;
+
         public DateTime AppliedAt { get; set; } = DateTime.UtcNow;
 
         public virtual Job Job { get; set; }
