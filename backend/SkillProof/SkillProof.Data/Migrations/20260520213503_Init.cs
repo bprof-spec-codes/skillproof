@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace SkillProof.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class Init : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -248,7 +248,7 @@ namespace SkillProof.Data.Migrations
                     CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
-                    SkillId = table.Column<string>(type: "nvarchar(450)", nullable: false)
+                    SkillId = table.Column<string>(type: "nvarchar(450)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -257,8 +257,7 @@ namespace SkillProof.Data.Migrations
                         name: "FK_Assessments_Skills_SkillId",
                         column: x => x.SkillId,
                         principalTable: "Skills",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -347,7 +346,31 @@ namespace SkillProof.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "SkillUsers",
+                name: "Educations",
+                columns: table => new
+                {
+                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    School = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Degree = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    FieldOfStudy = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    StartDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    EndDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Educations", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Educations_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "SkillModelUsers",
                 columns: table => new
                 {
                     SkillsId = table.Column<string>(type: "nvarchar(450)", nullable: false),
@@ -355,15 +378,15 @@ namespace SkillProof.Data.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_SkillUsers", x => new { x.SkillsId, x.UsersId });
+                    table.PrimaryKey("PK_SkillModelUsers", x => new { x.SkillsId, x.UsersId });
                     table.ForeignKey(
-                        name: "FK_SkillUsers_AspNetUsers_UsersId",
+                        name: "FK_SkillModelUsers_AspNetUsers_UsersId",
                         column: x => x.UsersId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_SkillUsers_Skills_SkillsId",
+                        name: "FK_SkillModelUsers_Skills_SkillsId",
                         column: x => x.SkillsId,
                         principalTable: "Skills",
                         principalColumn: "Id",
@@ -544,6 +567,7 @@ namespace SkillProof.Data.Migrations
                     UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     TestId = table.Column<string>(type: "nvarchar(450)", nullable: true),
                     Status = table.Column<int>(type: "int", nullable: false),
+                    IsRead = table.Column<bool>(type: "bit", nullable: false),
                     AppliedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
@@ -664,6 +688,11 @@ namespace SkillProof.Data.Migrations
                 column: "TestAttemptsId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Educations_UserId",
+                table: "Educations",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_JobApplications_JobId",
                 table: "JobApplications",
                 column: "JobId");
@@ -691,8 +720,8 @@ namespace SkillProof.Data.Migrations
                 column: "CompanyId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_SkillUsers_UsersId",
-                table: "SkillUsers",
+                name: "IX_SkillModelUsers_UsersId",
+                table: "SkillModelUsers",
                 column: "UsersId");
 
             migrationBuilder.CreateIndex(
@@ -752,6 +781,9 @@ namespace SkillProof.Data.Migrations
                 name: "CodeCompletionQuestions");
 
             migrationBuilder.DropTable(
+                name: "Educations");
+
+            migrationBuilder.DropTable(
                 name: "FillInTheBlankQuestions");
 
             migrationBuilder.DropTable(
@@ -764,7 +796,7 @@ namespace SkillProof.Data.Migrations
                 name: "MultipleChoiceQuestion");
 
             migrationBuilder.DropTable(
-                name: "SkillUsers");
+                name: "SkillModelUsers");
 
             migrationBuilder.DropTable(
                 name: "TestAnswers");
