@@ -16,5 +16,7 @@ namespace SkillProof.Entities.Dtos.Users
         public List<string> SavedJobIds { get; set; } = new List<string>();
         public List<string> AppliedJobIds { get; set; } = new List<string>();
         public List<BadgeDto> Badges { get; set; } = new List<BadgeDto>();
+        public List<Education.EducationViewDto> Educations { get; set; } = new List<Education.EducationViewDto>();
+        public List<Experience.ExperienceViewDto> Experiences { get; set; } = new List<Experience.ExperienceViewDto>();
     }
 }

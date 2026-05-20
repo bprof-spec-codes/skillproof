@@ -36,7 +36,7 @@ export class ReviewUser implements OnInit {
     private questionBankService: QuestionBankService,
     private feedbackSharedService: FeedbackShared,
     private router: Router,
-    public badgeService: BadgeService
+    public badgeService: BadgeService,
     private jobService: JobService
   ) { }
 

@@ -1,0 +1,57 @@
+<section class="py-5 background min-vh-100">
+    <div class="container">
+        <div class="mb-4">
+            <a class="text-decoration-none text-dark" style="cursor: pointer;" routerLink="/search">
+                <i class="bi bi-arrow-left me-1"></i> Back to search
+            </a>
+        </div>
+
+        @if (loading) {
+        <div class="text-center py-5">
+            <div class="spinner-border text-primary" role="status"></div>
+        </div>
+        } @else if (job) {
+        <div class="card border-0 shadow-sm" style="border-radius: 16px;">
+            <div class="card-body p-5">
+                <div class="text-secondary d-flex gap-3 mt-3 mb-3 justify-content-between">
+                    <h2 class="fw-bold color">{{job.title}}</h2>
+                    <button class="btn apply-btn px-4 py-2 fw-semibold shadow-sm" [routerLink]="['/job', job.id]">
+                        Apply Now
+                    </button>
+                </div>
+                
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="container">
+                            <div [innerHTML]="parsedMarkdown"></div>
+                        </div>
+                    </div>
+                </div>
+                <hr class="divider">
+                <div class="d-flex justify-content-between align-items-center gap-2">
+                    <div class="d-flex flex-wrap gap-2">
+                        <span class="badge bg-light text-dark border p-2">
+                            <i class="bi bi-laptop text-danger me-1"></i> {{ job.employmentType }}
+                        </span>
+                        @for (tag of job.tags; track $index) {
+                        <span class="badge bg-light text-dark border p-2">
+                            <i class="bi bi-briefcase text-danger me-1"></i> {{ tag }}
+                        </span>
+                        }
+                    </div>
+                    <div class="text-secondary d-flex gap-3 align-items-center ms-auto">
+                        <span><i class="bi bi-geo-alt text-danger me-1"></i> {{ job.location }}</span>
+                        <span><i class="bi bi-clock text-danger me-1"></i> {{ getTimeAgo(job.createdAt) }}</span>
+                    </div>
+                </div>
+
+
+            </div>
+        </div>
+        } @else {
+        <div class="text-center py-5">
+            <h3 class="text-muted">Job not found</h3>
+        </div>
+        }
+    </div>
+</section>

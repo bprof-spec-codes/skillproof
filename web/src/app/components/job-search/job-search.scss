@@ -1,0 +1,51 @@
+.button-medium {
+    width: 50%;
+    justify-content: center;
+    border: 0px;
+}
+
+.bi {
+  -webkit-text-stroke: 0.5px;
+}
+
+.color {
+    color: #003049;
+}
+
+.radius {
+    border-radius: 18px;
+    cursor: pointer;
+}
+
+.border-highlight {
+  border: 1px solid #003049 !important;
+}
+
+.weight {
+    font-weight: 500 !important;
+}
+
+.sample {
+    height: 150px;
+}
+
+.search-button {
+    color: white;
+    background-color: #003049;
+}
+
+.review {
+    width: auto;
+    height: auto;
+    background-color: #003049;
+    border-radius: 10px;
+    border: 1px solid #003049;
+    color: #FFFF;
+    padding-left: 6px;
+    padding-right: 6px;
+    font-size: 15px;
+
+    &:hover {
+        background-color: #0a5680;
+    }
+}

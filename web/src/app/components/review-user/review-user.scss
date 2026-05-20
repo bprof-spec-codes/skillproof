@@ -30,21 +30,7 @@
     background-color: rgba(#beadad, 0.4);
 }
 
-.review {
-    width: auto;
-    height: auto;
-    background-color: #003049;
-    border-radius: 10px;
-    border: 1px solid #003049;
-    color: #FFFF;
-    padding-left: 6px;
-    padding-right: 6px;
-    font-size: 15px;
 
-    &:hover {
-        background-color: #0a5680;
-    }
-}
 
 .btn-color-red {
     background-color: #C1121F;
@@ -66,4 +52,9 @@
         background-color: #072636;
         border-color: #072636;
     }
+}
+
+.size {
+    width: 18px;
+    height: 18px;
 }

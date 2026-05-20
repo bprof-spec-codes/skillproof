@@ -46,7 +46,7 @@ export class AuthService {
   logout() {
     localStorage.removeItem(this.storageKey);
     this.profileService.clearProfile();
-    window.location.href = '/login';
+    window.location.href = '/home';
   }
 
   isLoggedIn(): boolean {
