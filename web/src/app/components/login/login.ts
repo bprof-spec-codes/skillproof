@@ -4,6 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import { LoginDto } from '../../Models/Dtos/User/login-dto';
 import { AuthService } from '../../services/auth-service';
 import { Router } from '@angular/router';
+import { DashboardRoutingService } from '../../services/dashboardRouting';
 
 @Component({
   selector: 'app-login',
@@ -19,7 +20,8 @@ export class Login {
   error = '';
   loading = false;
 
-  constructor(private fb: FormBuilder, private http: HttpClient, private authService:AuthService, private router:Router){
+  constructor(private fb: FormBuilder, private http: HttpClient, 
+    private dashRoute:DashboardRoutingService, private authService:AuthService, private router:Router){
     this.loginForm = this.fb.group({
         email: [''],
         password: ['']
@@ -45,7 +47,7 @@ export class Login {
           return;
         }
         this.authService.saveToken(token);
-        this.router.navigate(['/homePage']);
+        this.dashRoute.routeToDashboard();
       },
       error: (err) => {
         this.loading = false;

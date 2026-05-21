@@ -11,6 +11,7 @@ public class JobCreateDto
     public EmploymentType EmploymentType { get; set; }
     public string? Salary { get; set; }
     public string Description { get; set; }
+    public string ShortDescription { get; set; }
     public string Tags { get; set; }
     public List<string>? AssessmentIds { get; set; }
 }

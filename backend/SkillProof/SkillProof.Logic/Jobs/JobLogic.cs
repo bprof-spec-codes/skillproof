@@ -50,6 +50,7 @@ public class JobLogic : IJobLogic
             CompanyId = companyId,
             Title = model.Title,
             Description = _markdownService.ToHtml(model.Description),
+            ShortDescription = model.ShortDescription,
             Location = model.Location,
             Tags = model.Tags,
             EmploymentType = model.EmploymentType,
@@ -75,6 +76,7 @@ public class JobLogic : IJobLogic
             CompanyId = newJob.CompanyId,
             Title = newJob.Title,
             Description = newJob.Description,
+            ShortDescription = newJob.ShortDescription,
             Location = newJob.Location,
             Tags = newJob.Tags,
             EmploymentType = newJob.EmploymentType,
@@ -94,6 +96,7 @@ public class JobLogic : IJobLogic
                 CompanyId = j.CompanyId,
                 Title = j.Title,
                 Description = j.Description,
+                ShortDescription = j.ShortDescription,
                 Location = j.Location,
                 Tags = j.Tags,
                 EmploymentType = j.EmploymentType,
@@ -139,10 +142,12 @@ public class JobLogic : IJobLogic
             CompanyId = job.CompanyId,
             Title = job.Title,
             Description = job.Description,
+            ShortDescription = job.ShortDescription,
             Location = job.Location,
             Tags = job.Tags,
             EmploymentType = job.EmploymentType,
             CreatedAt = job.CreatedAt,
+            Salary = job.Salary,
             Id = job.Id,
             AssessmentIds = job.Assessments.Select(a => a.Id).ToList(),
             Assessments = job.Assessments.Select(a => new AssessmentViewDto
@@ -183,6 +188,7 @@ public class JobLogic : IJobLogic
                 CompanyId = j.CompanyId,
                 Title = j.Title,
                 Description = j.Description,
+                ShortDescription = j.ShortDescription,
                 Location = j.Location,
                 Tags = j.Tags,
                 EmploymentType = j.EmploymentType,
@@ -213,6 +219,12 @@ public class JobLogic : IJobLogic
 
     public async Task<JobViewDto> UpdateJobAsync(string id, JobViewDto model, string companyId)
     {
+
+        if (model == null)
+        {
+            throw new ArgumentNullException(nameof(model), "Model cannot be null.");
+        }
+
         var job = await _jobRepository.GetAll()
             .Include(j => j.Assessments)
             .FirstOrDefaultAsync(j => j.Id == id);
@@ -229,9 +241,11 @@ public class JobLogic : IJobLogic
 
         job.Title = model.Title;
         job.Description = model.Description;
+        job.ShortDescription = model.ShortDescription;
         job.Location = model.Location;
         job.Tags = model.Tags;
         job.EmploymentType = model.EmploymentType;
+        job.Salary = model.Salary;
 
         job.Assessments.Clear();
 
@@ -251,15 +265,23 @@ public class JobLogic : IJobLogic
 
         return new JobViewDto
         {
+            Id = job.Id,
             CompanyId = job.CompanyId,
             Title = job.Title,
             Description = job.Description,
+            ShortDescription = job.ShortDescription,
             Location = job.Location,
             Tags = job.Tags,
             EmploymentType = job.EmploymentType,
+            Salary = job.Salary,
             CreatedAt = job.CreatedAt,
-            Id = job.Id,
-            AssessmentIds = job.Assessments.Select(a => a.Id).ToList()
+            AssessmentIds = job.Assessments.Select(a => a.Id).ToList(),
+            Assessments = job.Assessments.Select(a => new AssessmentViewDto
+            {
+                Id = a.Id,
+                Title = a.Title,
+                DifficultyLevel = a.DifficultyLevel
+            }).ToList()
         };
     }
 
@@ -397,7 +419,11 @@ public class JobLogic : IJobLogic
             return null;
         }
 
-        var firstAssessment = job.Assessments.First();
+        var firstAssessment = job.Assessments.FirstOrDefault();
+        if (firstAssessment == null)
+        {
+            return null;
+        }
         var allQuestions = job.Assessments.SelectMany(a => a.Questions).ToList();
 
         if (allQuestions.Count == 0)
@@ -440,4 +466,124 @@ public class JobLogic : IJobLogic
     }
 
 
+    public async Task<IEnumerable<JobViewDto>> GetJobsOfCompanyAsync(string currentUserId)
+    {
+        var user = await _userManager.FindByIdAsync(currentUserId);
+        if (user == null || user.CompanyId == null)
+        {
+            throw new UnauthorizedAccessException("User profile not found or not associated with a company.");
+        }
+
+        return await _jobRepository.GetAll()
+            .Include(j => j.Assessments)
+            .Where(j => j.CompanyId == user.CompanyId)
+            .Select(j => new JobViewDto
+            {
+                Id = j.Id,
+                CompanyId = j.CompanyId,
+                Title = j.Title,
+                ShortDescription = j.ShortDescription,
+                Location = j.Location,
+                Tags = j.Tags,
+                EmploymentType = j.EmploymentType,
+                Salary = j.Salary,
+                CreatedAt = j.CreatedAt,
+                AssessmentIds = j.Assessments.Select(a => a.Id).ToList(),
+                Assessments = j.Assessments.Select(a => new AssessmentViewDto
+                {
+                    Id = a.Id,
+                    Title = a.Title,
+                    DifficultyLevel = a.DifficultyLevel
+                }).ToList()
+            })
+            .ToListAsync();
+    }
+
+    public async Task<string> ApplyForJobAsync(string jobId, string userId)
+    {
+        var jobExists = await _jobRepository.GetAll().AnyAsync(j => j.Id == jobId);
+        if (!jobExists)
+        {
+            throw new KeyNotFoundException("The job was not found.");
+        }
+
+        var existingApplication = await _ctx.JobApplications
+            .FirstOrDefaultAsync(ja => ja.JobId == jobId && ja.UserId == userId);
+
+        if (existingApplication != null)
+        {
+            throw new InvalidOperationException("You have already applied for this job.");
+        }
+
+        var jobApplication = new JobApplication
+        {
+            Id = Guid.NewGuid().ToString(),
+            JobId = jobId,
+            UserId = userId,
+            TestId = null,
+            Status = JobApplicationStatus.Submitted,
+            AppliedAt = DateTime.UtcNow
+        };
+
+        _ctx.JobApplications.Add(jobApplication);
+        await _ctx.SaveChangesAsync();
+
+        return jobApplication.Id;
+    }
+
+    public async Task AcceptCandidateAsync(string userId, string jobId)
+    {
+        var jobApplication = await _ctx.JobApplications
+            .FirstOrDefaultAsync(ja => ja.UserId == userId && ja.JobId == jobId);
+        if (jobApplication == null)
+        {
+            throw new KeyNotFoundException("The job application was not found.");
+        }
+        jobApplication.Status = JobApplicationStatus.Accepted;
+        jobApplication.IsRead = false;
+        await _ctx.SaveChangesAsync();
+    }
+
+    public async Task RejectCandidateAsync(string userId, string jobId)
+    {
+        var jobApplication = await _ctx.JobApplications
+            .FirstOrDefaultAsync(ja => ja.UserId == userId && ja.JobId == jobId);
+        if (jobApplication == null)
+        {
+            throw new KeyNotFoundException("The job application was not found.");
+        }
+        jobApplication.Status = JobApplicationStatus.Rejected;
+        jobApplication.IsRead = false;
+        await _ctx.SaveChangesAsync();
+    }
+
+    public async Task<IEnumerable<JobNotificationDto>> GetNotificationsAsync(string userId)
+    {
+        var notifications = await _ctx.JobApplications
+            .Where(x => x.UserId == userId && !x.IsRead &&
+                       (x.Status == JobApplicationStatus.Accepted || x.Status == JobApplicationStatus.Rejected))
+            .Select(x => new JobNotificationDto
+            {
+                Id = x.Id,
+                JobTitle = x.Job.Title,
+                Status = x.Status
+            })
+            .ToListAsync();
+
+        return notifications;
+    }
+
+    public async Task MarkNotificationAsReadAsync(string applicationId, string userId)
+    {
+        var application = await _ctx.JobApplications
+            .FirstOrDefaultAsync(ja => ja.Id == applicationId && ja.UserId == userId);
+
+        if (application == null)
+        {
+            throw new KeyNotFoundException("The job application/notification was not found or does not belong to you.");
+        }
+
+        application.IsRead = true;
+        await _ctx.SaveChangesAsync();
+    }
 }

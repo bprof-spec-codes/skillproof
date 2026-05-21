@@ -8,6 +8,8 @@ using System.Text.Json;
 using QuestionEntity = SkillProof.Entities.Models.Questions;
 using TestEntity = SkillProof.Entities.Models.Tests;
 using TestAnswerEntity = SkillProof.Entities.Models.TestAnswers;
+using SkillProof.Logic.Gemini;
+using SkillProof.Entities.Models.Gemini;
 
 namespace SkillProof.Logic.Tests;
 
@@ -18,11 +20,15 @@ public class TestLogic : ITestLogic
 
     private readonly IRepository<Job> _jobRepository;
     private readonly SkillProofDbContext _ctx;
+    private readonly IGeminiService _geminiService;
+    private readonly IRepository<SkillModel> _skillRepository;
 
-    public TestLogic(IRepository<Job> jobRepository, SkillProofDbContext ctx)
+    public TestLogic(IRepository<Job> jobRepository, SkillProofDbContext ctx, IGeminiService geminiService, IRepository<SkillModel> skillRepository)
     {
         _jobRepository = jobRepository;
         _ctx = ctx;
+        _geminiService = geminiService;
+        _skillRepository = skillRepository;
     }
 
     public async Task<TestResultDto> SubmitTestAsync(TestSubmitDto dto, string userId)
@@ -66,6 +72,8 @@ public class TestLogic : ITestLogic
             .Include(j => j.Assessments)
                 .ThenInclude(a => a.Questions)
                     .ThenInclude(q => q.TrueFalseQuestion)
+            .Include(j => j.Assessments)
+                .ThenInclude(t => t.TestAttempts)
             .FirstOrDefaultAsync(j => j.Id == dto.JobId);
 
         if (job == null)
@@ -109,15 +117,16 @@ public class TestLogic : ITestLogic
             Passed = false,
             TestAnswers = new List<TestAnswerEntity>()
         };
+        job.Assessments.First().TestAttempts.Add(test);
 
         var questionResults = new List<QuestionResultDto>();
-        var totalScore = 0;
+        double totalScore = 0;
 
         foreach (var question in allQuestions)
         {
             answersByQuestionId.TryGetValue(question.Id, out var submitted);
 
-            var scored = ScoreQuestion(question, submitted);
+            var scored = ScoreQuestion(question, submitted, _geminiService);
 
             var answerEntity = new TestAnswerEntity
             {
@@ -126,6 +135,8 @@ public class TestLogic : ITestLogic
                 TestId = test.Id,
                 FreeTextResponse = scored.FreeTextResponse,
                 IsCorrect = scored.IsCorrect,
+                Score = scored.Points,
+                Inspected = false,
                 AiFeedback = scored.AiFeedback
             };
 
@@ -171,7 +182,7 @@ public class TestLogic : ITestLogic
             existingApplication.Status = JobApplicationStatus.TestCompleted;
             jobApplication = existingApplication;
         }
-
+        
         _ctx.Tests.Add(test);
         await _ctx.SaveChangesAsync();
 
@@ -187,16 +198,144 @@ public class TestLogic : ITestLogic
         };
     }
 
-    private sealed record ScoredAnswer(int Points, bool IsCorrect, string FreeTextResponse, string AiFeedback);
+    public async Task<TestResultDto> SubmitTestSkillAsync(TestSubmitSkillDto dto, string userId)
+    {
+        if (string.IsNullOrWhiteSpace(userId))
+            throw new UnauthorizedAccessException("A user identity is required to submit a test.");
 
-    private static ScoredAnswer ScoreQuestion(QuestionEntity question, TestAnswerSubmitDto? submitted)
+        if (dto == null || string.IsNullOrWhiteSpace(dto.SkillId))
+            throw new ArgumentException("Skill id is required.");
+
+        if (string.IsNullOrWhiteSpace(dto.AssessmentId))
+            throw new ArgumentException("Assessment id is required.");
+
+        if (dto.Answers == null)
+            throw new ArgumentException("Answers must be provided (may be empty per question, but the list itself is required).");
+
+        var duplicateIds = dto.Answers
+            .GroupBy(a => a.QuestionId)
+            .Where(g => g.Count() > 1)
+            .Select(g => g.Key)
+            .ToList();
+
+        if (duplicateIds.Count > 0)
+            throw new ArgumentException($"Duplicate answers provided for question(s): {string.Join(", ", duplicateIds)}.");
+
+        var skill = await _skillRepository.GetAll()
+            .Include(s => s.Assessments)
+                .ThenInclude(a => a.Questions)
+                    .ThenInclude(q => q.MultipleChoiceQuestion)
+            .Include(s => s.Assessments)
+                .ThenInclude(a => a.Questions)
+                    .ThenInclude(q => q.CodeCompletionQuestion)
+            .Include(s => s.Assessments)
+                .ThenInclude(a => a.Questions)
+                    .ThenInclude(q => q.FillInTheBlankQuestions)
+            .Include(s => s.Assessments)
+                .ThenInclude(a => a.Questions)
+                    .ThenInclude(q => q.TrueFalseQuestion)
+            .Include(s => s.Assessments)
+                .ThenInclude(t => t.TestAttempts)
+            .FirstOrDefaultAsync(s => s.Id == dto.SkillId);
+
+        if (skill == null)
+            throw new KeyNotFoundException($"Skill '{dto.SkillId}' not found.");
+
+        var targetAssessment = skill.Assessments.FirstOrDefault(a => a.Id == dto.AssessmentId);
+        if (targetAssessment == null)
+            throw new InvalidOperationException("The requested assessment was not found on this skill.");
+
+        var targetQuestions = targetAssessment.Questions.ToList();
+        if (targetQuestions.Count == 0)
+            throw new ArgumentException("The specified assessment has no questions.");
+
+        var questionIdSet = targetQuestions.Select(q => q.Id).ToHashSet();
+        var foreignIds = dto.Answers
+            .Where(a => !questionIdSet.Contains(a.QuestionId))
+            .Select(a => a.QuestionId)
+            .ToList();
+
+        if (foreignIds.Count > 0)
+            throw new ArgumentException($"Answer(s) provided for question(s) that do not belong to this specific assessment: {string.Join(", ", foreignIds)}.");
+
+        var answersByQuestionId = dto.Answers.ToDictionary(a => a.QuestionId, a => a);
+
+        var test = new TestEntity
+        {
+            Id = Guid.NewGuid().ToString(),
+            UserId = userId,
+            DifficultyLevel = targetAssessment.DifficultyLevel,
+            CompletedAt = DateTime.UtcNow,
+            Score = 0,
+            Passed = false,
+            TestAnswers = new List<TestAnswerEntity>()
+        };
+
+        targetAssessment.TestAttempts.Add(test);
+
+        var questionResults = new List<QuestionResultDto>();
+        double totalScore = 0;
+
+        foreach (var question in targetQuestions)
+        {
+            answersByQuestionId.TryGetValue(question.Id, out var submitted);
+            var scored = ScoreQuestion(question, submitted, _geminiService);
+
+            var answerEntity = new TestAnswerEntity
+            {
+                Id = Guid.NewGuid().ToString(),
+                QuestionId = question.Id,
+                TestId = test.Id,
+                FreeTextResponse = scored.FreeTextResponse,
+                IsCorrect = scored.IsCorrect,
+                Score = scored.Points,
+                Inspected = false,
+                AiFeedback = scored.AiFeedback
+            };
+
+            test.TestAnswers.Add(answerEntity);
+            totalScore += scored.Points;
+
+            questionResults.Add(new QuestionResultDto
+            {
+                QuestionId = question.Id,
+                QuestionTitle = question.Title,
+                Type = question.Type,
+                IsCorrect = scored.IsCorrect,
+                PointsAwarded = scored.Points,
+                MaxPoints = 1,
+                UserResponse = scored.FreeTextResponse,
+                AiFeedback = scored.AiFeedback
+            });
+        }
+
+        test.Score = totalScore;
+        test.Passed = totalScore * 2 >= targetQuestions.Count;
+
+        _ctx.Tests.Add(test);
+        await _ctx.SaveChangesAsync();
+
+        return new TestResultDto
+        {
+            TestId = test.Id,
+            Score = test.Score,
+            MaxScore = targetQuestions.Count,
+            Passed = test.Passed,
+            DifficultyLevel = test.DifficultyLevel,
+            QuestionResults = questionResults
+        };
+    }
+
+    private sealed record ScoredAnswer(double Points, bool IsCorrect, string FreeTextResponse, string AiFeedback);
+
+    private static ScoredAnswer ScoreQuestion(QuestionEntity question, TestAnswerSubmitDto? submitted, IGeminiService geminiService)
     {
         return question.Type switch
         {
             QuestionType.MultipleChoice => ScoreMultipleChoice(question, submitted),
             QuestionType.TrueFalse => ScoreTrueFalse(question, submitted),
             QuestionType.CodeCompletion => ScoreCodeCompletion(question, submitted),
-            QuestionType.FillInTheBlank => ScoreFillInTheBlank(submitted),
+            QuestionType.FillInTheBlank => ScoreFillInTheBlank(question, submitted, geminiService),
             _ => new ScoredAnswer(0, false, string.Empty, AiFeedbackNotApplicable)
         };
     }
@@ -253,9 +392,141 @@ public class TestLogic : ITestLogic
         return new ScoredAnswer(isCorrect ? 1 : 0, isCorrect, text, AiFeedbackNotApplicable);
     }
 
-    private static ScoredAnswer ScoreFillInTheBlank(TestAnswerSubmitDto? submitted)
+    private static ScoredAnswer ScoreFillInTheBlank(QuestionEntity question, TestAnswerSubmitDto? submitted, IGeminiService geminiService)
     {
         var text = submitted?.TextAnswer ?? string.Empty;
-        return new ScoredAnswer(1, true, text, AiFeedbackPending);
+        GradingRequest request = new GradingRequest
+        {
+            Question = question.QuestionText,
+            StudentAnswer = text,
+            AnswerToQuestion = question.FillInTheBlankQuestions?.Answer ?? string.Empty
+        };
+        double score = geminiService.EvaluateAnswerAsync(request).GetAwaiter().GetResult();
+        
+        bool isCorrect = score >= 0.5;
+        return new ScoredAnswer(score, isCorrect, text, AiFeedbackPending);
     }
+
+    public async Task<List<UserTestReviewDto>> GetUserTestQuestionsAsync(string jobId, string userId)
+    {
+        if (jobId == null || string.IsNullOrWhiteSpace(jobId))
+        {
+            throw new ArgumentException("Job id is required.");
+        }
+        var job = await _jobRepository.GetAll()
+            .Include(j => j.JobApplications)
+            .Include(j => j.Assessments)
+                .ThenInclude(Assessments => Assessments.TestAttempts)
+                    .ThenInclude(TestAttempts => TestAttempts.TestAnswers)
+                        .ThenInclude(TestAnswers => TestAnswers.Question)
+            .FirstOrDefaultAsync(j => j.Id == jobId);
+
+        if (job == null)
+        {
+            throw new KeyNotFoundException($"Job '{jobId}' not found.");
+        }
+
+        if (job.Assessments.Count == 0)
+        {
+            return new List<UserTestReviewDto>();
+        }
+
+        var attempt = job.Assessments.SelectMany(a => a.TestAttempts).FirstOrDefault(a => a.UserId == userId);
+
+
+
+        if (attempt == null)
+        {
+            return new List<UserTestReviewDto>();
+        }
+        var jobApplication = job.JobApplications.FirstOrDefault(ja => ja.UserId == userId);
+        if (jobApplication != null && jobApplication.Status != JobApplicationStatus.Accepted && jobApplication.Status != JobApplicationStatus.Rejected)
+        {
+            jobApplication.Status = JobApplicationStatus.UnderReview;
+            _ctx.JobApplications.Update(jobApplication);
+            await _ctx.SaveChangesAsync();
+        }
+        var reviews = attempt.TestAnswers.Select(testAnswers => new UserTestReviewDto
+        {
+            QuestionId = testAnswers.QuestionId,
+            TestAnswerId = testAnswers.Id,
+            QuestionText = testAnswers.Question.QuestionText,
+            UserResponse = testAnswers.FreeTextResponse,
+            Score = testAnswers.Score,
+            Inspected = testAnswers.Inspected,
+            UserId = userId,
+            QuestionType = testAnswers.Question.Type
+        }).ToList();
+        return reviews;
+    }
+
+    public async Task<FeedbackResponseDto> ManualFeedbackAsync(string? feedback, double score, string testAnswerId)
+    {
+        if (testAnswerId == null || string.IsNullOrWhiteSpace(testAnswerId))
+        {
+            throw new ArgumentException("Test answer id is required.");
+        }
+
+        var testAnwser = await _ctx.TestAnswers
+             .Include(a => a.Question)
+             .FirstOrDefaultAsync(a => a.Id == testAnswerId);
+
+        if (testAnwser == null)
+        {
+            throw new KeyNotFoundException($"Test answer '{testAnswerId}' not found.");
+        }
+
+        if (!(testAnwser.Question.Type == QuestionType.FillInTheBlank))
+        {
+            throw new ArgumentException("Manual feedback can only be provided for fill-in-the-blank questions.");
+        }
+
+        testAnwser.Score = score;
+        testAnwser.IsCorrect = score >= 0.5;
+        testAnwser.Inspected = true;
+        if (!string.IsNullOrWhiteSpace(feedback))
+        {
+            testAnwser.ManualFeedback = feedback;
+        }
+
+        var result = new FeedbackResponseDto
+        {
+            TestAnswerId = testAnwser.Id,
+            QuestionText = testAnwser.Question.QuestionText,
+            UserResponse = testAnwser.FreeTextResponse,
+            Score = testAnwser.Score,
+            Inspected = testAnwser.Inspected
+        };
+        _ctx.TestAnswers.Update(testAnwser);
+        await _ctx.SaveChangesAsync();
+        return result;
+    }
+
+    public async Task<List<JobApplicationStatusDto>> GetTestUsersAsync(string jobId)
+    {
+        if (jobId == null || string.IsNullOrWhiteSpace(jobId))
+        {
+            throw new ArgumentException("Job id is required.");
+        }
+        var job = await _jobRepository.GetAll()
+            .Include(j => j.JobApplications)
+            .FirstOrDefaultAsync(j => j.Id == jobId);
+
+        if (job == null)
+        {
+            throw new KeyNotFoundException($"Job '{jobId}' not found.");
+        }
+
+        List<JobApplicationStatusDto> JobApplicationStatusDto = job.JobApplications
+            .Select(a => new JobApplicationStatusDto
+            {
+                UserId = a.UserId,
+                jobApplicationStatus = a.Status
+            })
+            .Distinct()
+            .ToList();
+
+        return JobApplicationStatusDto;
+    }
+
 }

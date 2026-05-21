@@ -1,0 +1,60 @@
+.icon {
+    height: 40px;
+    width: 40px;
+}
+
+.radius {
+    border-radius: 16px;
+}
+
+.color {
+    color: #003049;
+}
+
+.underline {
+    text-decoration: underline;
+    width: fit-content;
+    border: none;
+    cursor: default;
+}
+
+.border-question {
+    border: 1px solid rgba(#003049, 0.5);
+}
+
+.background-color {
+    background-color: rgba(#C1121F, 0.5)
+}
+
+.background-color2 {
+    background-color: rgba(#beadad, 0.4);
+}
+
+
+
+.btn-color-red {
+    background-color: #C1121F;
+    border-color: #C1121F;
+    color: white;
+
+    &:hover {
+        background-color: #681217;
+        border-color: #681217;
+    }
+}
+
+.btn-color-blue {
+    background-color: #003049;
+    border-color: #003049;
+    color: white;
+
+    &:hover {
+        background-color: #072636;
+        border-color: #072636;
+    }
+}
+
+.size {
+    width: 18px;
+    height: 18px;
+}

@@ -1,4 +1,4 @@
-import { EmploymentType } from "../../Enums/EmploymentType"
+import { EmploymentType } from '../../Enums/EmploymentType';
 import { AssessmentViewDto } from '../Assesment/AssessmentViewDto';
 
 export class JobViewDto {
@@ -6,7 +6,9 @@ export class JobViewDto {
   companyId: string = '';
   title: string = '';
   description: string = '';
-  EmploymentType: EmploymentType | null = null;
+  employmentType: EmploymentType | null = null;
+  shortDescription = '';
+  salary: number | null = null;
   location: string = '';
   tags: string[] = [];
   createdAt: string = '';

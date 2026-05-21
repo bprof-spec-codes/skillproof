@@ -28,4 +28,49 @@ public class TestsController : ControllerBase
         var result = await _testLogic.SubmitTestAsync(dto, userId);
         return Ok(result);
     }
+
+    [HttpPost("submitSkillTest")]
+    public async Task<ActionResult<TestResultDto>> SubmitSkillTest([FromBody] TestSubmitSkillDto dto)
+    {
+        var userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(userId))
+        {
+            return Unauthorized(new { message = "You must be logged in to submit a skill test." });
+        }
+
+        try
+        {
+            var result = await _testLogic.SubmitTestSkillAsync(dto, userId);
+            return Ok(result);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new { message = ex.Message });
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
+    [HttpGet("GetUserTestQuestions")]
+    public async Task<ActionResult<List<UserTestReviewDto>>> GetUserTestQuestions(string userId, string jobId)
+    {
+        var result = await _testLogic.GetUserTestQuestionsAsync(jobId, userId);
+        return Ok(result);
+    }
+
+    [HttpGet("GetTestUsers")]
+    public async Task<ActionResult<List<JobApplicationStatusDto>>> GetTestUsers(string jobId)
+    {
+        var result = await _testLogic.GetTestUsersAsync(jobId);
+        return Ok(result);
+    }
+
+    [HttpPut("ManualFeedbackAsync")]
+    public async Task<ActionResult<FeedbackResponseDto>> ManualFeedback([FromBody] string? feedback, double score, string testAnswerId)
+    {
+        var result = await _testLogic.ManualFeedbackAsync(feedback, score, testAnswerId);
+        return Ok(result);
+    }
 }

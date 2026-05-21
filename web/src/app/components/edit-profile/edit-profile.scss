@@ -1,0 +1,248 @@
+$bg-color: #FDF0D5;
+$card-bg: #ffffff;
+$text-main: #003049;
+$text-muted: #5e6c79;
+$btn-blue: #003049;
+$btn-blue-hover: #0a5680;
+$border-color: #003049;
+$input-bg: #ffffff;
+$red-accent: #C1121F;
+
+:host {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+  background-color: $bg-color;
+  color: $text-main;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  width: 100%;
+
+  * {
+    box-sizing: border-box;
+  }
+}
+
+.container {
+  width: 100%;
+  max-width: 800px;
+  padding: 20px;
+  margin-top: 20px;
+}
+
+.form-card {
+  background-color: $card-bg;
+  border-radius: 12px;
+  padding: 40px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.form-title {
+  font-size: 28px;
+  color: $text-main;
+  margin-bottom: 8px;
+}
+
+.form-subtitle {
+  color: $text-muted;
+  font-size: 14px;
+  margin-bottom: 30px;
+}
+
+.section-card {
+  margin-top: 1.5rem;
+}
+
+.section-card h3 {
+  margin: 0 0 0.75rem 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: $text-main;
+}
+
+.card-list {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  border: 2px solid $border-color;
+  border-radius: 10px;
+}
+
+.card-list > .education-card,
+.card-list > .experience-card,
+.card-list > .skill-chip {
+  width: 100%;
+  max-width: 740px;
+  box-sizing: border-box;
+  margin: 0;
+}
+
+.skill-chip,
+.education-card,
+.experience-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+  border-radius: 10px;
+  border: 2px solid $border-color;
+  background: #fff;
+  margin-bottom: 0.75rem;
+}
+
+.education-card .card-left,
+.experience-card .card-left {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.education-card .card-actions,
+.experience-card .card-actions {
+  width: 96px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.education-card h4,
+.experience-card h4,
+.education-card h5,
+.experience-card h5 {
+  margin: 0;
+  line-height: 1.15;
+}
+
+.education-card h4,
+.experience-card h4 {
+  font-size: 1rem;
+  color: $text-main;
+  font-weight: 700;
+}
+
+.education-card h5,
+.experience-card h5 {
+  font-size: 0.95rem;
+  color: #4b5963;
+  font-weight: 600;
+}
+
+.skill-chip {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.edit-link,
+.click {
+  cursor: pointer;
+  text-decoration: none;
+  color: $text-main;
+  font-weight: 600;
+}
+
+.search-btn,
+.submit-btn {
+  background-color: $btn-blue;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 14px 24px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.search-btn:hover,
+.submit-btn:hover {
+  background-color: $btn-blue-hover;
+}
+
+.form-control,
+input,
+select,
+textarea {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid $border-color;
+  border-radius: 8px;
+  background-color: $input-bg;
+  font-size: 16px;
+  color: $text-main;
+  outline: none;
+  transition: border-color 0.2s;
+  appearance: none;
+}
+
+.form-control:focus,
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: $red-accent;
+}
+
+.modal-backdrop {
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal-content {
+  border-radius: 12px;
+  border: 2px solid $border-color;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+}
+
+.modal-header,
+.modal-footer {
+  border-color: rgba(0, 48, 73, 0.12);
+}
+
+.modal-title {
+  color: $text-main;
+  font-weight: 700;
+}
+
+.file-row {
+  width: 100%;
+}
+
+.file-input-inline {
+  flex: 1 1 auto;
+  min-width: 0; 
+}
+
+.search-btn.btn-sm {
+  padding: 8px 12px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.education-card,
+.experience-card {
+  padding: 0.75rem 1rem;
+}
+
+@media (max-width: 576px) {
+  .education-card,
+  .experience-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .education-card .card-actions,
+  .experience-card .card-actions {
+    width: 100%;
+    justify-content: flex-end;
+    margin-top: 0.5rem;
+  }
+
+  .search-btn.btn-sm {
+    height: 38px;
+  }
+}

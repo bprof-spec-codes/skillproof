@@ -21,11 +21,15 @@ namespace SkillProof.Entities.Models
         public string Bio { get; set; }
         public DateTime CreatedAt { get; set; }
         public string? CompanyId { get; set; }
-        public string? CompanyRole { get; set; }
+        public string? CompanyRole { get; set; }      
         public virtual Companies Companies { get; set; }
         public virtual ICollection<UserExperiences>? UserExperiences { get; set; }
+        public virtual ICollection<Education> Educations { get; set; } = new List<Education>();
         public virtual ICollection<Tests>? Tests { get; set; }
         public virtual ICollection<JobApplication>? JobApplications { get; set; }
+        public virtual ICollection<Job> SavedJobs { get; set; } = new List<Job>();
+
+        public virtual ICollection<SkillModel> Skills { get; set; } = new List<SkillModel>();
 
         public Users()
         {

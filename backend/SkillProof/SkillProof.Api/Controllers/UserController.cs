@@ -1,18 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Tokens;
 using SkillProof.Entities.Dtos.Users;
-using SkillProof.Entities.Helper;
-using SkillProof.Entities.Models;
-using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using SkillProof.Logic.User;
 
 namespace SkillProof.Api.Controllers
@@ -90,6 +79,70 @@ namespace SkillProof.Api.Controllers
         {
                 await _userLogic.RevokeRoleAsync(userId);
                 return Ok(new { message = "Roles revoked successfully." });
+        }
+
+        [HttpGet("UserTests/{userId}")]
+        public async Task<IActionResult> GetUserTests(string userId)
+        {
+                var tests = await _userLogic.GetUserTestsAsync(userId);
+                return Ok(tests);
+        }
+
+        [HttpPost("{id}/skills")]
+        public async Task<IActionResult> UpdateSkillsToUser(string id, [FromBody] string[] skillId)
+        {
+            try
+            {
+                await _userLogic.UpdateSkillsToUser(id, skillId);
+                return Ok(new { message = "Skill successfully added to user." });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        [HttpPost("toggle-saved-job/{jobId}")]
+        public async Task<IActionResult> ToggleSavedJob(string jobId)
+        {
+            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var updatedProfile = await _userLogic.ToggleSavedJobAsync(currentUserId, jobId);
+            return Ok(updatedProfile);
+        }
+
+        [HttpPost("apply/{jobId}")]
+        public async Task<IActionResult> ApplyToJob(string jobId)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId)) return Unauthorized();
+
+            try
+            {
+                await _userLogic.ApplyToJobAsync(userId, jobId);
+                return Ok();
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        [HttpDelete("remove-skill/{skillId}/{userId}")]
+        public async Task<IActionResult> RemoveSkill(string skillId, string userId)
+        {
+            try
+            {
+                await _userLogic.DeleteSkillFromUser(userId, skillId);
+                return Ok(new { message = "Skill removed successfully." });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
         }
     }
 }

@@ -23,8 +23,16 @@ import { TestTake } from './components/test-take/test-take';
 import { QuestionTrueFalse } from './components/question-true-false/question-true-false';
 import { QuestionMultipleChoice } from './components/question-multiple-choice/question-multiple-choice';
 import { QuestionCodeCompletion } from './components/question-code-completion/question-code-completion';
-import { QuestionFillInTheBlank } from './components/question-fill-in-the-blank/question-fill-in-the-blank';
-
+import { CompanyHome } from './components/company-home/company-home';
+import { QuestionOpenEnded } from './components/question-open-ended/question-open-ended';
+import { Router, RouterModule } from '@angular/router';
+import { AsyncPipe, CommonModule } from '@angular/common';
+import { MyJobs } from './components/my-jobs/my-jobs';
+import { ReviewUser } from './components/review-user/review-user';
+import { ManualFeedback } from './components/manual-feedback/manual-feedback';
+import { AdminSkill } from './components/admin-skill/admin-skill';
+import { JobSearch } from './components/job-search/job-search';
+import { FullJobView } from './components/full-job-view/full-job-view';
 @NgModule({
   declarations: [
     App,
@@ -46,9 +54,24 @@ import { QuestionFillInTheBlank } from './components/question-fill-in-the-blank/
     QuestionTrueFalse,
     QuestionMultipleChoice,
     QuestionCodeCompletion,
-    QuestionFillInTheBlank,
+    CompanyHome,
+    QuestionOpenEnded,
+    MyJobs,
+    ReviewUser,
+    ManualFeedback,
+    AdminSkill,
+    JobSearch,
+    FullJobView,
   ],
-  imports: [BrowserModule, AppRoutingModule, ReactiveFormsModule, FormsModule],
+  imports: [
+    BrowserModule,
+    AppRoutingModule,
+    ReactiveFormsModule,
+    FormsModule,
+    RouterModule,
+    CommonModule,
+    AsyncPipe,
+  ],
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideHttpClient(withInterceptors([errorInterceptor])),

@@ -20,7 +20,11 @@ namespace SkillProof.Entities.Models
         public string Description { get; set; }
 
         [Required]
+        public string ShortDescription { get; set; }
+
+        [Required]
         public string Location { get; set; }
+        public int Salary { get; set; }
 
         public string Tags { get; set; } // Json array of strings
 

@@ -1,84 +1,193 @@
-<section class="container py-4">
-  <div class="d-flex justify-content-between align-items-center mb-3">
-    <h2 class="m-0">Question Bank</h2>
-    <button class="btn btn-primary" type="button" (click)="goToCreate()">Create Question</button>
-  </div>
+<section class="qb-page">
+  <div class="qb-shell">
+    <header class="qb-header">
+      <div>
+        <h2 class="qb-title">Create or add more questions to your question banks</h2>
+        <p class="qb-subtitle">Showing {{ questions.length }} of {{ allQuestions.length }} questions</p>
+      </div>
+      <button class="qb-create-btn" type="button" (click)="goToCreate()">New question +</button>
+    </header>
 
-  <div class="card p-3 mb-3">
-    <div class="row g-2">
-      <div class="col-12 col-md-3">
-        <label class="form-label">Type</label>
-        <select class="form-select" [(ngModel)]="filterType">
-          <option value="">All</option>
-          <option *ngFor="let option of questionTypeOptions" [value]="option.value">{{ option.label }}</option>
-        </select>
+    <section class="qb-filters">
+      <div class="qb-filter-grid">
+        <label class="qb-filter-field">
+          <span>Type</span>
+          <select [(ngModel)]="filterType" (ngModelChange)="onFilterChange()">
+            <option value="">All</option>
+            <option *ngFor="let option of questionTypeOptions" [value]="option.value">{{ option.label }}</option>
+          </select>
+        </label>
+
+        <label class="qb-filter-field">
+          <span>Difficulty</span>
+          <select [(ngModel)]="filterDifficulty" (ngModelChange)="onFilterChange()">
+            <option value="">All</option>
+            <option *ngFor="let option of difficultyOptions" [value]="option.value">{{ option.label }}</option>
+          </select>
+        </label>
+
+        <label class="qb-filter-field">
+          <span>Status</span>
+          <select [(ngModel)]="filterIsActive" (ngModelChange)="onFilterChange()">
+            <option value="">All</option>
+            <option value="true">Active</option>
+            <option value="false">Inactive</option>
+          </select>
+        </label>
+
+        <div class="qb-filter-field tag-filter">
+          <span>Tags</span>
+          <div class="tag-input-shell">
+            <div class="tag-chip-list" *ngIf="selectedTags.length > 0">
+              <button
+                class="tag-chip"
+                type="button"
+                *ngFor="let tag of selectedTags"
+                (click)="removeTag(tag)"
+                [attr.aria-label]="'Remove tag ' + tag"
+              >
+                {{ tag }} <strong>&times;</strong>
+              </button>
+            </div>
+
+            <input
+              type="text"
+              [ngModel]="tagQuery"
+              (ngModelChange)="onTagInputChange($event)"
+              (focus)="onTagInputFocus()"
+              (keydown)="onTagInputKeydown($event)"
+              placeholder="Start typing a tag..."
+            />
+
+            <div class="tag-dropdown" *ngIf="showTagDropdown">
+              <button
+                class="tag-option"
+                type="button"
+                *ngFor="let tag of filteredTagSuggestions"
+                (mousedown)="$event.preventDefault(); selectTag(tag)"
+              >
+                {{ tag }}
+              </button>
+
+              <div class="tag-empty" *ngIf="filteredTagSuggestions.length === 0">
+                No matching tags
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div class="col-12 col-md-3">
-        <label class="form-label">Difficulty</label>
-        <select class="form-select" [(ngModel)]="filterDifficulty">
-          <option value="">All</option>
-          <option *ngFor="let option of difficultyOptions" [value]="option.value">{{ option.label }}</option>
-        </select>
+      <div class="qb-filter-actions">
+        <button class="qb-group-btn" type="button" (click)="toggleGroupByTags()">
+          {{ groupByTagsEnabled ? 'Ungroup' : 'Group by tags' }}
+        </button>
+        <button class="qb-clear-btn" type="button" (click)="clearFilters()">Clear filters</button>
+      </div>
+    </section>
+
+    <div *ngIf="loading" class="qb-info">Loading questions...</div>
+
+    <section class="qb-list-panel" *ngIf="!loading && questions.length > 0 && !groupByTagsEnabled">
+      <div class="qb-list-header">
+        <span>#</span>
+        <span>Title</span>
+        <span>Type</span>
+        <span>Difficulty</span>
+        <span>Tags</span>
+        <span>Status</span>
+        <span class="text-end">Actions</span>
       </div>
 
-      <div class="col-12 col-md-3">
-        <label class="form-label">Language</label>
-        <input class="form-control" type="text" [(ngModel)]="filterLanguage" placeholder="e.g. C#" />
+      <div class="qb-row" *ngFor="let question of questions; let i = index">
+        <span class="qb-index">{{ i + 1 }}.</span>
+        <span class="qb-title-cell" [title]="question.title">{{ question.title }}</span>
+        <span class="qb-type-cell">{{ getQuestionTypeLabel(question.type) }}</span>
+        <span class="qb-difficulty-cell">{{ getDifficultyLabel(question.difficulty) }}</span>
+
+        <span class="qb-tags-cell">
+          <ng-container *ngIf="question.tags.length > 0; else noTags">
+            <span class="qb-tag-pill" *ngFor="let tag of question.tags">{{ tag }}</span>
+          </ng-container>
+          <ng-template #noTags>
+            <span class="qb-empty">-</span>
+          </ng-template>
+        </span>
+
+        <span [class]="question.isActive ? 'qb-status active' : 'qb-status inactive'">
+          {{ question.isActive ? 'Active' : 'Inactive' }}
+        </span>
+
+        <span class="qb-actions">
+          <button class="qb-action-btn" type="button" (click)="viewQuestion(question.id)">View</button>
+          <button class="qb-action-btn" type="button" (click)="editQuestion(question.id)">Edit</button>
+          <button class="qb-action-btn danger" type="button" (click)="deleteQuestion(question.id)">Delete</button>
+        </span>
       </div>
+    </section>
 
-      <div class="col-12 col-md-3">
-        <label class="form-label">Status</label>
-        <select class="form-select" [(ngModel)]="filterIsActive">
-          <option value="">All</option>
-          <option value="true">Active</option>
-          <option value="false">Inactive</option>
-        </select>
-      </div>
-    </div>
+    <section class="qb-groups" *ngIf="!loading && questions.length > 0 && groupByTagsEnabled">
+      <article class="qb-group-card" *ngFor="let group of groupedQuestionsByTag">
+        <button class="qb-group-header" type="button" (click)="toggleGroup(group.key)">
+          <div>
+            <h3>{{ group.tag }}</h3>
+            <p>{{ group.count }} item{{ group.count === 1 ? '' : 's' }}</p>
+          </div>
+          <span class="qb-group-arrow" [class.open]="!isGroupCollapsed(group.key)">⌄</span>
+        </button>
 
-    <div class="d-flex gap-2 mt-3">
-      <button class="btn btn-outline-primary" type="button" (click)="applyFilters()">Apply</button>
-      <button class="btn btn-outline-secondary" type="button" (click)="clearFilters()">Clear</button>
-    </div>
-  </div>
-
-  <div *ngIf="loading" class="alert alert-info">Loading questions...</div>
-
-  <div *ngIf="!loading && questions.length === 0" class="alert alert-warning">
-    No questions found for the selected filters.
-  </div>
-
-  <div class="table-responsive" *ngIf="!loading && questions.length > 0">
-    <table class="table table-striped align-middle">
-      <thead>
-        <tr>
-          <th>Title</th>
-          <th>Type</th>
-          <th>Difficulty</th>
-          <th>Language</th>
-          <th>Status</th>
-          <th class="text-end">Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let question of questions">
-          <td>{{ question.title }}</td>
-          <td>{{ getQuestionTypeLabel(question.type) }}</td>
-          <td>{{ getDifficultyLabel(question.difficulty) }}</td>
-          <td>{{ question.language }}</td>
-          <td>
-            <span [class]="question.isActive ? 'badge text-bg-success' : 'badge text-bg-secondary'">
+        <div class="qb-group-body" *ngIf="!isGroupCollapsed(group.key)">
+          <div class="qb-group-row" *ngFor="let question of group.questions; let i = index">
+            <span class="qb-index">{{ i + 1 }}.</span>
+            <span class="qb-title-cell" [title]="question.title">{{ question.title }}</span>
+            <span class="qb-type-cell">{{ getQuestionTypeLabel(question.type) }}</span>
+            <span class="qb-difficulty-cell">{{ getDifficultyLabel(question.difficulty) }}</span>
+            <span [class]="question.isActive ? 'qb-status active' : 'qb-status inactive'">
               {{ question.isActive ? 'Active' : 'Inactive' }}
             </span>
-          </td>
-          <td class="text-end d-flex justify-content-end gap-2">
-            <button class="btn btn-sm btn-outline-primary" type="button" (click)="viewQuestion(question.id)">View</button>
-            <button class="btn btn-sm btn-outline-secondary" type="button" (click)="editQuestion(question.id)">Edit</button>
-            <button class="btn btn-sm btn-outline-danger" type="button" (click)="deleteQuestion(question.id)">Delete</button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+            <span class="qb-actions">
+              <button class="qb-action-btn" type="button" (click)="viewQuestion(question.id)">View</button>
+              <button class="qb-action-btn" type="button" (click)="editQuestion(question.id)">Edit</button>
+              <button class="qb-action-btn danger" type="button" (click)="deleteQuestion(question.id)">Delete</button>
+            </span>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <div *ngIf="!loading && questions.length === 0" class="qb-info">
+      No questions found for the selected filters.
+    </div>
+  </div>
+
+  <div class="qb-modal-backdrop" *ngIf="showCreateModal">
+    <div class="qb-modal-dialog" (click)="$event.stopPropagation()">
+      <app-question-bank-form
+        [isModalMode]="true"
+        (closed)="closeCreateModal()"
+        (saved)="onCreateModalSaved()"
+      ></app-question-bank-form>
+    </div>
+  </div>
+
+  <div class="qb-modal-backdrop" *ngIf="viewedQuestionId">
+    <div class="qb-modal-dialog qb-details-dialog" (click)="$event.stopPropagation()">
+      <app-question-bank-details
+        [isModalMode]="true"
+        [questionId]="viewedQuestionId"
+        (closed)="closeViewModal()"
+        (editRequested)="openEditFromView($event)"
+      ></app-question-bank-details>
+    </div>
+  </div>
+
+  <div class="qb-modal-backdrop" *ngIf="editedQuestionId">
+    <div class="qb-modal-dialog" (click)="$event.stopPropagation()">
+      <app-question-bank-form
+        [isModalMode]="true"
+        [questionId]="editedQuestionId"
+        (closed)="closeEditModal()"
+        (saved)="onEditModalSaved()"
+      ></app-question-bank-form>
+    </div>
   </div>
 </section>

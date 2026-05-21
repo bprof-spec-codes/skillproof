@@ -20,6 +20,9 @@ namespace SkillProof.Data
         public DbSet<CodeCompletionQuestions> CodeCompletionQuestions { get; set; }
         public DbSet<FillInTheBlankQuestions> FillInTheBlankQuestions { get; set; }
         public DbSet<TrueFalseQuestions> TrueFalseQuestions { get; set; }
+        public DbSet<Education> Educations { get; set; }
+
+        public DbSet<SkillModel> Skills { get; set; }
         public SkillProofDbContext(DbContextOptions<SkillProofDbContext> options) : base(options)
         {
         }
@@ -39,6 +42,7 @@ namespace SkillProof.Data
             modelBuilder.ApplyConfiguration(new TrueFalseQuestionsConfigurations());
             modelBuilder.ApplyConfiguration(new UserExperiencesConfigurations());
             modelBuilder.ApplyConfiguration(new UsersConfigurations());
+            modelBuilder.ApplyConfiguration(new SkillsConfiguration());
         }
     }
 }

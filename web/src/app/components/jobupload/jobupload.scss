@@ -1,11 +1,11 @@
 /* Változók - a Merit arculati színei */
-$bg-color: #f7eedf;
+$bg-color: #FDF0D5;
 $card-bg: #ffffff;
-$text-main: #1a2b3c;
+$text-main: #003049;
 $text-muted: #5e6c79;
-$btn-blue: #002b49;
-$btn-blue-hover: #001f36;
-$border-color: #002b49;
+$btn-blue: #003049;
+$btn-blue-hover: #0a5680;
+$border-color: #003049;
 $input-bg: #ffffff;
 $red-accent: #b91c22;
 
@@ -65,7 +65,7 @@ $red-accent: #b91c22;
 .prev-container {
     justify-content: right;
     text-align: right;
-    margin-top: -46px;
+    margin-top: -48px;
 }
 
 /* Fő tartalom */
@@ -141,7 +141,7 @@ $red-accent: #b91c22;
         textarea {
             width: 100%;
             padding: 12px 16px;
-            border: 1px solid $border-color;
+            border: 2px solid $border-color;
             border-radius: 8px;
             background-color: $input-bg;
             font-size: 16px;
@@ -200,10 +200,10 @@ $red-accent: #b91c22;
 }
 
 .preview-content {
-  border: 1px solid $border-color;
+  border: 2px solid $border-color;
   padding: 10px;
   min-height: 150px;
-  border-radius: 4px;
+  border-radius: 8px;
   background-color: #ffffff;
   overflow-y: auto;
   font-weight: 400;
@@ -212,4 +212,8 @@ $red-accent: #b91c22;
 /* Ha azt akarod, hogy a p, h1, ul elemek szépen nézzenek ki benne */
 .preview-content :first-child {
   margin-top: 0;
+}
+
+.click {
+    cursor: pointer;
 }

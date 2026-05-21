@@ -3,7 +3,8 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { BehaviorSubject } from 'rxjs';
 import { JobService } from '../../services/job-service';
 import { AssessmentService } from '../../services/assesmentservice';
-
+import { DashboardRoutingService } from '../../services/dashboardRouting';
+import { JobViewDto } from '../../Models/Dtos/Job/JobView-dto';
 
 @Component({
   selector: 'app-job-edit',
@@ -20,6 +21,7 @@ export class JobEdit implements OnInit {
   salary = '';
   tags = '';
   description = '';
+  shortDescription = '';
   error = '';
   loading = false;
 
@@ -39,6 +41,7 @@ export class JobEdit implements OnInit {
     private jobService: JobService,
     private assessmentService: AssessmentService,
     private cdr: ChangeDetectorRef,
+    private dashRoute: DashboardRoutingService,
   ) {}
 
   ngOnInit(): void {
@@ -46,14 +49,45 @@ export class JobEdit implements OnInit {
 
     if (this.jobId) {
       this.jobService.getJobById(this.jobId).subscribe({
-        next: (job) => {
+        next: (job: any) => {
           this.companyId = job.companyId ?? '';
           this.title = job.title;
           this.location = job.location;
-          this.employmentType = job.EmploymentType ?? 0;
-          this.tags = job.tags ? job.tags.join(', ') : '';
+          this.salary = job.salary ?? '';
+
+          let parsedTags: string[] = [];
+          if (Array.isArray(job.tags)) {
+            parsedTags = job.tags;
+          } else if (typeof job.tags === 'string') {
+            try {
+              const parsed = JSON.parse(job.tags);
+              parsedTags = Array.isArray(parsed) ? parsed : [job.tags];
+            } catch {
+              parsedTags = job.tags.split(',');
+            }
+          }
+          this.tags = parsedTags
+            .map((t) => t.replace(/[\[\]"]/g, '').trim())
+            .filter((t) => t !== '')
+            .join(', ');
+
+          if (typeof job.employmentType === 'string') {
+            const enumMap: Record<string, number> = {
+              FullTime: 0,
+              PartTime: 1,
+              Contract: 2,
+              Freelance: 3,
+            };
+            this.employmentType = enumMap[job.employmentType] ?? 0;
+          } else {
+            this.employmentType = job.employmentType ?? 0;
+          }
+
           this.description = job.description;
-          this.selectedAssessments = job.assessments || [];
+          this.shortDescription = job.shortDescription;
+
+          this.selectedAssessments = job.assessments || job.Assessments || [];
+
           this.cdr.detectChanges();
         },
         error: () => {
@@ -98,30 +132,45 @@ export class JobEdit implements OnInit {
     this.loading = true;
     this.error = '';
 
-    const tagsArray = this.tags
-      .split(',')
-      .map((t) => t.trim())
-      .filter((t) => t !== '');
+    let tagsArray: string[] = [];
+
+    if (Array.isArray(this.tags)) {
+      tagsArray = this.tags;
+    } else if (typeof this.tags === 'string') {
+      tagsArray = this.tags
+        .split(',')
+        .map((t) => t.trim())
+        .filter((t) => t !== '');
+    }
 
     const updateDto = {
       id: this.jobId,
       companyId: this.companyId,
       title: this.title,
       location: this.location,
+      salary: this.salary ? Number(this.salary) : 0, // vagy ha null-t akarunk küldeni, akkor adatb módosítás kell
       employmentType: Number(this.employmentType),
-      description: this.description,
-      tags: tagsArray,
+      description: this.description,  
+      shortDescription: this.shortDescription,
+      tags: tagsArray.join(','),
       assessmentIds: this.selectedAssessments.map((a) => a.id),
     };
 
-    try {
-      this.jobService.updateJob(this.jobId, updateDto as any);
-      setTimeout(() => {
-        this.router.navigate(['/profile']);
-      }, 500);
-    } catch (err) {
-      this.error = 'An error occurred while updating the job.';
-      this.loading = false;
-    }
+    this.jobService.updateJob(this.jobId, updateDto as any).subscribe({
+      next: () => {
+        setTimeout(() => {
+          this.router.navigate(['/company']);
+        }, 500);
+      },
+      error: () => {
+        this.error = 'An error occurred while updating the job.';
+        this.loading = false;
+        this.cdr.detectChanges();
+      },
+    });
+  }
+
+  goHome() {
+    this.dashRoute.routeToDashboard();
   }
 }

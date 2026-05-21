@@ -5,6 +5,8 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { environment } from '../../environments/environment.development';
 import { JobCreateDto } from '../Models/Dtos/Job/JobCreate-dto';
 import { Job } from '../Models/Dtos/Job/job';
+import { JobNotificationDto } from '../Models/Dtos/Job/jobNotificationDto';
+import { JobApplicationStatusDto } from '../Models/Dtos/Job/job-application-status-dto';
 
 @Injectable({
   providedIn: 'root',
@@ -13,6 +15,8 @@ export class JobService {
   apiUrl = `${environment.apiUrl}/Jobs`;
   jobs = new BehaviorSubject<JobViewDto[]>([]);
   jobs$ = this.jobs.asObservable();
+  private _currentCompanyJobs$ = new BehaviorSubject<JobViewDto[] | null>(null);
+  public currentCompanyJobs$ = this._currentCompanyJobs$.asObservable();
 
   constructor(private http: HttpClient) {
     this.getAllJobs();
@@ -23,10 +27,7 @@ export class JobService {
       .get<Job[]>(this.apiUrl)
       .pipe(
         map((result) => {
-          return result.map((job) => ({
-            ...job,
-            tags: this.normalizeTags(job.tags),
-          })) as JobViewDto[];
+          return result.map((job) => this.normalizeJob(job));
         }),
       )
       .subscribe({
@@ -42,10 +43,7 @@ export class JobService {
   getJobsByCompanyId(companyId: string): Observable<JobViewDto[]> {
     return this.http.get<Job[]>(`${this.apiUrl}/company/${companyId}`).pipe(
       map((result) => {
-        return result.map((job) => ({
-          ...job,
-          tags: this.normalizeTags(job.tags),
-        })) as JobViewDto[];
+        return result.map((job) => this.normalizeJob(job));
       }),
     );
   }
@@ -74,7 +72,7 @@ export class JobService {
   getJobById(id: string): Observable<JobViewDto> {
     return this.http.get<Job>(`${this.apiUrl}/${id}`).pipe(
       map((job) => {
-        return { ...job, tags: this.normalizeTags(job.tags) } as JobViewDto;
+        return this.normalizeJob(job);
       }),
     );
   }
@@ -93,13 +91,13 @@ export class JobService {
           const jobsArray = this.jobs.value.filter((j) => j.id !== id);
           this.jobs.next(jobsArray);
         },
-        error: (err) => {
-          console.error('Delete failed.', err);
+        error: () => {
+          throw new Error('Delete failed.');
         },
       });
   }
 
-  updateJob(id: string, dto: JobCreateDto): void {
+  updateJob(id: string, dto: JobCreateDto): Observable<JobViewDto> {
     const payload = {
       ...dto,
       tags: JSON.stringify(dto.tags),
@@ -108,19 +106,16 @@ export class JobService {
     const token = localStorage.getItem('skillProof_token');
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
 
-    this.http.put<JobViewDto>(`${this.apiUrl}/${id}`, payload, { headers }).subscribe({
-      next: (updatedJob) => {
+    return this.http.put<JobViewDto>(`${this.apiUrl}/${id}`, payload, { headers }).pipe(
+      tap((updatedJob) => {
         const jobsArray = this.jobs.value;
         const index = jobsArray.findIndex((j) => j.id === updatedJob.id);
         if (index !== -1) {
           jobsArray[index] = updatedJob;
           this.jobs.next([...jobsArray]);
         }
-      },
-      error: (err) => {
-        console.error('Update failed.', err);
-      },
-    });
+      }),
+    );
   }
 
   private normalizeTags(tags: unknown): string[] {
@@ -143,13 +138,88 @@ export class JobService {
         if (Array.isArray(parsed)) {
           return parsed.map((t) => String(t).trim()).filter((t) => t.length > 0);
         }
-      } catch {
-      }
+      } catch {}
     }
 
     return trimmed
       .split(',')
       .map((t) => t.trim())
       .filter((t) => t.length > 0);
+  }
+
+  getTestUsers(jobId: string): Observable<JobApplicationStatusDto[]> {
+    return this.http.get<JobApplicationStatusDto[]>(`${environment.apiUrl}/Tests/GetTestUsers`, {
+      params: { jobId: jobId },
+    });
+  }
+
+  applyForJob(jobId: string) {
+    const token = localStorage.getItem('skillProof_token');
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+
+    return this.http.post(`${this.apiUrl}/${jobId}/apply`, {}, { headers });
+  }
+
+  loadCompanyJobs(userId: string): void {
+    this.http
+      .get<Job[]>(`${environment.apiUrls.getJobsOfCompany}/${userId}`)
+      .pipe(map((jobs) => jobs.map((job) => this.normalizeJob(job))))
+      .subscribe({
+        next: (jobs) => {
+          this._currentCompanyJobs$.next(jobs);
+        },
+        error: () => {
+          this._currentCompanyJobs$.next(null);
+        },
+      });
+  }
+
+  acceptCandidate(userId: string, jobId: string){
+    const token = localStorage.getItem('skillProof_token');
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    
+    return this.http.put(`${this.apiUrl}/${jobId}/accept`, {}, { 
+      headers: headers,
+      params: { userId: userId } 
+    });
+  }
+
+  rejectCandidate(userId: string, jobId: string){
+    const token = localStorage.getItem('skillProof_token');
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    
+    return this.http.put(`${this.apiUrl}/${jobId}/reject`, {}, { 
+      headers: headers,
+      params: { userId: userId } 
+    });
+  }
+
+  private normalizeJob(job: any): JobViewDto {
+    return {
+      id: job.id,
+      companyId: job.companyId,
+      title: job.title,
+      description: job.description,
+      shortDescription: job.shortDescription,
+      location: job.location,
+      salary: job.salary,
+      createdAt: job.createdAt,
+      employmentType: job.employmentType ?? null,
+      assessmentIds: job.assessmentIds || job.assessments?.map((a: any) => a.id) || [],
+      assessments: job.assessments || [],
+      tags: this.normalizeTags(job.tags),
+    } as JobViewDto;
+  }
+
+  getNotifications(): Observable<JobNotificationDto[]> {
+    const token = localStorage.getItem('skillProof_token');
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    return this.http.get<JobNotificationDto[]>(`${this.apiUrl}/notifications`, { headers });
+  }
+
+  markNotificationAsRead(applicationId: string): Observable<JobNotificationDto> {
+    const token = localStorage.getItem('skillProof_token');
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    return this.http.put<JobNotificationDto>(`${this.apiUrl}/notifications/${applicationId}/read`, {}, { headers });
   }
 }

@@ -1,11 +1,12 @@
 import { ChangeDetectorRef, Component, NgZone, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Subscription } from 'rxjs';
+import { Subscription, take } from 'rxjs';
 import { JobViewDto } from '../../Models/Dtos/Job/JobView-dto';
 import { EmploymentType } from '../../Models/Enums/EmploymentType';
 import { AuthService } from '../../services/auth-service';
 import { JobService } from '../../services/job-service';
 import { ModalService } from '../../services/modal-service';
+import { ProfileService } from '../../services/profile-service';
 
 @Component({
   selector: 'app-job-detail',
@@ -17,9 +18,12 @@ export class JobDetail implements OnInit, OnDestroy {
   job: JobViewDto | null = null;
   isLoading = true;
   errorMessage: string | null = null;
+  isSaved = false;
+  hasApplied = false;
 
   private routeSubscription: Subscription | null = null;
   private loadSubscription: Subscription | null = null;
+  private profileSub: Subscription | null = null;
 
   constructor(
     private route: ActivatedRoute,
@@ -27,6 +31,7 @@ export class JobDetail implements OnInit, OnDestroy {
     private jobService: JobService,
     private modalService: ModalService,
     private authService: AuthService,
+    private profileService: ProfileService,
     private ngZone: NgZone,
     private cdr: ChangeDetectorRef,
   ) {}
@@ -34,27 +39,99 @@ export class JobDetail implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.routeSubscription = this.route.paramMap.subscribe((params) => {
       const id = params.get('id');
-
       if (!id) {
-        this.ngZone.run(() => {
-          this.isLoading = false;
-          this.job = null;
-          this.errorMessage = 'Invalid job id.';
-          this.cdr.detectChanges();
-        });
+        this.handleError('Invalid job id.');
         return;
       }
-
       this.loadJob(id);
+    });
+
+    this.profileSub = this.profileService.currentProfile$.subscribe((profile) => {
+      this.updateUIStatus(profile);
+      this.profileService.loadProfile(profile!.id!)
+    });
+    this.checkUserJobStatus()
+  }
+
+  private updateUIStatus(profile: any | null): void {
+    if (profile && this.job) {
+      this.isSaved = profile.savedJobIds?.includes(this.job.id) || false;
+
+      const appliedIds = profile.appliedJobIds || [];
+      this.hasApplied = appliedIds.includes(this.job.id);
+
+      this.cdr.detectChanges();
+    }
+  }
+
+  private handleError(msg: string): void {
+    this.ngZone.run(() => {
+      this.isLoading = false;
+      this.job = null;
+      this.errorMessage = msg;
+      this.cdr.detectChanges();
     });
   }
 
   ngOnDestroy(): void {
     this.routeSubscription?.unsubscribe();
     this.loadSubscription?.unsubscribe();
+    this.profileSub?.unsubscribe();
+  }
+
+  checkUserJobStatus(): void {
+    if (!this.job) return;
+
+    this.profileService.currentProfile$.pipe(take(1)).subscribe((profile) => {
+      if (profile) {
+        if (profile.savedJobIds) {
+          this.isSaved = profile.savedJobIds.includes(this.job!.id);
+        }
+
+        if ((profile as any).appliedJobIds) {
+          this.hasApplied = (profile as any).appliedJobIds.includes(this.job!.id);
+        }
+
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  toggleSave(): void {
+    if (!this.job) return;
+
+    if (!this.authService.isLoggedIn()) {
+      this.modalService.open({
+        type: 'warning',
+        message: 'Please log in to save jobs.',
+      });
+      return;
+    }
+
+    const originalState = this.isSaved;
+    this.isSaved = !this.isSaved;
+
+    this.profileService.toggleSavedJob(this.job.id).subscribe({
+      next: () => {},
+      error: () => {
+        this.isSaved = originalState;
+        this.modalService.open({
+          type: 'error',
+          message: 'Failed to update saved jobs.',
+        });
+      },
+    });
   }
 
   applyNow(): void {
+    if (this.hasApplied) {
+      this.modalService.open({
+        type: 'info',
+        message: 'You have already applied for this job.',
+      });
+      return;
+    }
+
     if (!this.authService.isLoggedIn()) {
       this.modalService.open({
         type: 'warning',
@@ -64,10 +141,7 @@ export class JobDetail implements OnInit, OnDestroy {
     }
 
     const roles = this.authService.getRoles().map((r) => r.toLowerCase());
-    const isEmployer = roles.includes('employer');
-    const isAdmin = roles.includes('admin');
-
-    if (isEmployer || isAdmin) {
+    if (roles.includes('employer') || roles.includes('admin')) {
       this.modalService.open({
         type: 'warning',
         message: 'Only Job Seeker accounts can submit an application.',
@@ -75,11 +149,35 @@ export class JobDetail implements OnInit, OnDestroy {
       return;
     }
 
-    if (!this.job?.id) {
-      return;
-    }
+    if (!this.job?.id) return;
 
-    this.router.navigate(['/job', this.job.id, 'test']);
+    const hasTest = this.job.assessments && this.job.assessments.length > 0;
+
+    if (hasTest) {
+      this.router.navigate(['/job', this.job.id, 'test']);
+    } else {
+      this.profileService.applyToJob(this.job.id).subscribe({
+        next: () => {
+          this.modalService.open({
+            type: 'success',
+            message: 'Application submitted successfully!',
+            autoClose: true,
+          });
+
+          const userId = this.authService.getUserId();
+          if (userId) {
+            this.profileService.loadProfile(userId);
+          }
+          this.hasApplied = true
+        },
+        error: () => {
+          this.modalService.open({
+            type: 'error',
+            message: 'Failed to submit application.',
+          });
+        },
+      });
+    }
   }
 
   shareJob(): void {
@@ -112,7 +210,9 @@ export class JobDetail implements OnInit, OnDestroy {
   }
 
   getTimeAgo(dateStr: string): string {
-    const date = new Date(dateStr);
+    const formattedDateStr =
+      dateStr.includes('Z') || dateStr.includes('+') ? dateStr : `${dateStr.replace(' ', 'T')}Z`;
+    const date = new Date(formattedDateStr);
     const time = date.getTime();
 
     if (!dateStr || Number.isNaN(time)) {
@@ -142,6 +242,9 @@ export class JobDetail implements OnInit, OnDestroy {
   }
 
   getEmploymentTypeLabel(type: EmploymentType | null | undefined): string {
+    const name = type === undefined || null ? 'Unknown' : type?.toString()
+    return name as string
+    /*
     switch (type) {
       case EmploymentType.FullTime:
         return 'Full-time';
@@ -154,6 +257,7 @@ export class JobDetail implements OnInit, OnDestroy {
       default:
         return 'Unknown';
     }
+    */
   }
 
   private loadJob(id: string): void {
@@ -162,23 +266,53 @@ export class JobDetail implements OnInit, OnDestroy {
     this.errorMessage = null;
     this.job = null;
 
-    this.loadSubscription = this.jobService
-      .getJobById(id)
-      .subscribe({
-        next: (job) => {
-          this.ngZone.run(() => {
-            this.job = job;
-            this.isLoading = false;
-            this.cdr.detectChanges();
-          });
-        },
-        error: () => {
-          this.ngZone.run(() => {
-            this.errorMessage = 'Job not found or unavailable.';
-            this.isLoading = false;
-            this.cdr.detectChanges();
-          });
-        },
-      });
+    this.loadSubscription = this.jobService.getJobById(id).subscribe({
+      next: (job) => {
+        this.ngZone.run(() => {
+          this.job = this.parseJobTags(job);
+          this.checkUserJobStatus();
+          this.isLoading = false;
+          this.cdr.detectChanges();
+        });
+      },
+      error: () => {
+        this.ngZone.run(() => {
+          this.errorMessage = 'Job not found or unavailable.';
+          this.isLoading = false;
+          this.cdr.detectChanges();
+        });
+      },
+    });
+  }
+
+  private parseJobTags(job: JobViewDto): JobViewDto {
+    const parsedJob = { ...job }
+
+    if (typeof parsedJob.tags === 'string') {
+      const tagString = parsedJob.tags as unknown as string
+
+      parsedJob.tags = tagString
+        .split(',')
+        .map((t) =>
+          t
+            .trim()
+            .replace(/[\[\]"']/g, '')
+        )
+        .filter((t) => t !== '')
+    }
+
+    if (Array.isArray(parsedJob.tags)) {
+      parsedJob.tags = parsedJob.tags.map((t) =>
+        typeof t === 'string'
+          ? t.replace(/[\[\]"']/g, '').trim()
+          : t
+      );
+    }
+
+    if (!Array.isArray(parsedJob.tags)) {
+      parsedJob.tags = [];
+    }
+
+    return parsedJob
   }
 }

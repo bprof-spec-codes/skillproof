@@ -1,0 +1,110 @@
+$bg-color: #f7eedf;
+$card-bg: #ffffff;
+$text-main: #1a2b3c;
+$text-muted: #5e6c79;
+$btn-blue: #002b49;
+$btn-blue-hover: #001f36;
+$border-color: #002b49;
+$input-bg: #ffffff;
+$red-accent: #b91c22;
+
+.radius {
+    border-radius: 16px;
+}
+
+.background-color {
+    background-color: rgba(rgb(110, 107, 133), 0.2);
+}
+
+.job-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+
+    .form-row {
+        display: flex;
+        gap: 20px;
+        width: 100%;
+
+        .form-group {
+            flex: 1 1 50%;
+            min-width: 0;
+        }
+
+        @media (max-width: 600px) {
+            flex-direction: column;
+        }
+    }
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    label {
+        font-weight: 600;
+        font-size: 14px;
+        color: $btn-blue;
+    }
+
+    input[type="text"],
+    input[type="number"],
+    select,
+    textarea {
+        width: 100%;
+        padding: 12px 16px;
+        border: 1px solid $border-color;
+        border-radius: 8px;
+        background-color: $input-bg;
+        font-size: 16px;
+        color: $text-main;
+        outline: none;
+        transition: border-color 0.2s;
+
+        -webkit-appearance: none;
+        appearance: none;
+
+        &::placeholder {
+            color: #a0aab2;
+        }
+
+        &:focus {
+            border-color: $red-accent;
+        }
+    }
+
+    select {
+        background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23002b49' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right 1rem center;
+        background-size: 1em;
+        padding-right: 40px;
+        cursor: pointer;
+    }
+
+    textarea {
+        resize: vertical;
+    }
+
+    .preview-textarea {
+        padding-bottom: 35px;
+    }
+}
+
+.submit-btn {
+    background-color: $btn-blue;
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    padding: 14px 24px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    margin-top: 10px;
+
+    &:hover {
+        background-color: $btn-blue-hover;
+    }
+}

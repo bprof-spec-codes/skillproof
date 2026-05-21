@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using SkillProof.Data;
 using SkillProof.Data.Repositorys;
 using SkillProof.Entities.Dtos.Assesment;
 using SkillProof.Entities.Dtos.Questions;
@@ -12,15 +13,21 @@ namespace SkillProof.Logic.Assessments
         private readonly IRepository<Entities.Models.Assessments> _assessmentRepository;
         private readonly IRepository<Entities.Models.Questions> _questionRepository;
         private readonly IRepository<Entities.Models.Job> _jobRepository;
+        private readonly IRepository<Entities.Models.SkillModel> _skillRepository;
+        private readonly SkillProofDbContext _ctx;
 
         public AssessmentLogic(
             IRepository<Entities.Models.Assessments> assessmentRepository,
             IRepository<Entities.Models.Questions> questionRepository,
-            IRepository<Entities.Models.Job> jobRepository)
+            IRepository<Entities.Models.Job> jobRepository,
+            IRepository<Entities.Models.SkillModel> skillRepository,
+            SkillProofDbContext ctx)
         {
             _assessmentRepository = assessmentRepository;
             _questionRepository = questionRepository;
             _jobRepository = jobRepository;
+            _skillRepository = skillRepository;
+            _ctx = ctx;
         }
 
         public async Task<AssessmentViewDto> CreateAssessmentAsync(CreateAssessmentDto model, string userId)
@@ -179,6 +186,31 @@ namespace SkillProof.Logic.Assessments
             assessment.Jobs.Add(job);
 
             await _assessmentRepository.Update(assessment);
+        }
+
+        public async Task AddAssessmentToSkill(AddAssesmentsToSkillDto dto)
+        {
+            var skill = await _skillRepository.GetOne(dto.SkillId);
+            if (skill == null)
+            {
+                throw new KeyNotFoundException("Skill not found.");
+
+            }
+            foreach (var assessmentId in dto.AssessmentIds)
+            {
+                var assessment = await _assessmentRepository.GetOne(assessmentId);
+                if (assessment == null)
+                {
+                    throw new KeyNotFoundException($"Assessment with ID {assessmentId} not found.");
+                }
+                skill.Assessments.Add(assessment);
+            }
+            await _skillRepository.Update(skill);
+        }
+
+        public Task<ICollection<AssessmentViewDto>> GetAssessmentBySkill(string skillId)
+        {
+            throw new NotImplementedException();
         }
     }
 }

@@ -1,6 +1,6 @@
 <section class="job-detail-page py-4">
   <div class="container">
-    <a class="back-link" routerLink="/home">&larr; Back to jobs</a>
+    <a class="back-link" routerLink="/search">&larr; Back to jobs</a>
 
     <div class="job-detail-card mt-3">
       <div *ngIf="isLoading" class="state-block">
@@ -9,12 +9,13 @@
 
       <div *ngIf="!isLoading && errorMessage" class="state-block state-error">
         <p class="mb-3">{{ errorMessage }}</p>
-        <a class="btn btn-outline-secondary" routerLink="/home">Back to Home</a>
+        <a class="btn btn-outline-secondary" routerLink="/search">Back to Home</a>
       </div>
 
       <ng-container *ngIf="!isLoading && !errorMessage && job">
-        <div class="bookmark-wrap">
-          <i class="bi bi-bookmark bookmark-icon" aria-hidden="true"></i>
+        
+        <div class="bookmark-wrap" (click)="toggleSave()" style="cursor: pointer;" title="Save to favorites">
+          <i class="bi bookmark-icon" [ngClass]="isSaved ? 'bi-bookmark-fill text-primary' : 'bi-bookmark'" aria-hidden="true"></i>
         </div>
 
         <h1 class="job-title mb-3">{{ job.title }}</h1>
@@ -24,7 +25,7 @@
         <div class="tags-row mb-4">
           <span class="tag-pill employment-pill">
             <i class="bi bi-briefcase"></i>
-            {{ getEmploymentTypeLabel(job.EmploymentType) }}
+            {{ getEmploymentTypeLabel(job.employmentType) }}
           </span>
 
           <span *ngFor="let tag of job.tags" class="tag-pill">
@@ -42,8 +43,13 @@
           </div>
 
           <div class="actions">
-            <button class="submit-btn" type="button" (click)="applyNow()">
-              Submit your application
+            <button 
+              class="submit-btn" 
+              type="button" 
+              (click)="applyNow()" 
+              [disabled]="hasApplied"
+              [ngStyle]="hasApplied ? {'opacity': '0.6', 'cursor': 'not-allowed', 'background-color': '#6c757d'} : {}">
+              {{ hasApplied ? 'Already Applied' : 'Submit your application' }}
             </button>
             <button class="share-btn" type="button" (click)="shareJob()" aria-label="Share job">
               <i class="bi bi-share"></i>

@@ -1,3 +1,278 @@
 :host {
   display: block;
 }
+
+.qbf-shell {
+  width: 100%;
+}
+
+.qbf-card {
+  max-width: 1100px;
+  margin: 1rem auto;
+  background: #fff;
+  border-radius: 18px;
+  border: 1px solid rgba(0, 48, 73, 0.18);
+  box-shadow: 0 8px 26px rgba(0, 48, 73, 0.08);
+  overflow: hidden;
+}
+
+.qbf-card-modal {
+  margin: 0;
+  max-width: min(1200px, calc(100vw - 2rem));
+  max-height: calc(100vh - 3rem);
+  overflow-y: auto;
+}
+
+.qbf-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.2rem 1.45rem;
+  border-bottom: 1px solid rgba(0, 48, 73, 0.2);
+}
+
+.qbf-header h2 {
+  margin: 0;
+  color: #003049;
+  font-size: clamp(1.4rem, 1.1rem + 1.2vw, 2.2rem);
+  font-weight: 800;
+}
+
+.qbf-close {
+  border: 0;
+  background: transparent;
+  color: #003049;
+  font-size: 2rem;
+  line-height: 1;
+  width: 40px;
+  height: 40px;
+}
+
+.qbf-form {
+  padding: 1.2rem 1.45rem 1.5rem;
+}
+
+.qbf-main-fields,
+.qbf-type-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.qbf-label {
+  color: #003049;
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.qbf-input {
+  width: 100%;
+  border: 2px solid #003049;
+  border-radius: 14px;
+  padding: 0.68rem 0.85rem;
+  color: #003049;
+  font-size: 1.04rem;
+  background: #fff;
+}
+
+.qbf-input:focus {
+  outline: 3px solid rgba(0, 48, 73, 0.2);
+  border-color: #003049;
+}
+
+.qbf-tags-box {
+  border: 2px solid #003049;
+  border-radius: 14px;
+  padding: 0.55rem 0.7rem;
+}
+
+.qbf-tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-bottom: 0.35rem;
+}
+
+.qbf-tag-pill {
+  border: 1px solid rgba(0, 48, 73, 0.25);
+  border-radius: 999px;
+  background: rgba(102, 155, 188, 0.2);
+  color: #003049;
+  font-weight: 700;
+  font-size: 0.84rem;
+  padding: 0.2rem 0.55rem;
+}
+
+.qbf-tag-input {
+  border: 0;
+  width: 100%;
+  color: #003049;
+  font-size: 1rem;
+  background: transparent;
+}
+
+.qbf-tag-input:focus {
+  outline: none;
+}
+
+.qbf-row.two-col {
+  display: grid;
+  grid-template-columns: 1.8fr 1fr;
+  gap: 1rem;
+}
+
+.qbf-type-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.qbf-type-grid.disabled {
+  opacity: 0.65;
+}
+
+.qbf-type-item {
+  border: 2px solid rgba(0, 48, 73, 0.35);
+  border-radius: 12px;
+  background: #fff;
+  color: #003049;
+  font-weight: 600;
+  padding: 0.5rem 0.7rem;
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  text-align: left;
+}
+
+.qbf-type-item.active {
+  border-color: #003049;
+  background: rgba(0, 48, 73, 0.05);
+}
+
+.qbf-type-square {
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  border: 2px solid #003049;
+  background: #d9d9d9;
+  flex-shrink: 0;
+}
+
+.qbf-type-item.active .qbf-type-square {
+  background: #003049;
+}
+
+.qbf-divider {
+  border-top: 1px solid rgba(0, 48, 73, 0.2);
+  margin: 1.2rem -1.45rem;
+}
+
+.qbf-option-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.qbf-option-row {
+  display: grid;
+  grid-template-columns: 130px 1fr 52px;
+  gap: 0.55rem;
+  align-items: center;
+}
+
+.qbf-correct-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: #003049;
+  font-weight: 600;
+}
+
+.qbf-remove-btn {
+  border: 2px solid #003049;
+  border-radius: 12px;
+  background: #fff;
+  color: #003049;
+  height: 44px;
+  font-size: 1.55rem;
+  line-height: 1;
+}
+
+.qbf-helper-row {
+  margin-top: 0.35rem;
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.qbf-helper-row small {
+  color: rgba(0, 48, 73, 0.84);
+}
+
+.qbf-secondary-btn {
+  border: 2px solid #003049;
+  border-radius: 12px;
+  background: #fff;
+  color: #003049;
+  font-weight: 700;
+  padding: 0.45rem 0.75rem;
+}
+
+.qbf-actions {
+  display: flex;
+  justify-content: center;
+  gap: 0.8rem;
+}
+
+.qbf-submit,
+.qbf-cancel {
+  min-width: 180px;
+  border-radius: 14px;
+  font-weight: 700;
+  padding: 0.65rem 1rem;
+  border: 2px solid #003049;
+}
+
+.qbf-submit {
+  background: #003049;
+  color: #fff;
+}
+
+.qbf-cancel {
+  background: #fff;
+  color: #003049;
+}
+
+.qbf-loading {
+  padding: 1.2rem 1.45rem;
+  color: #003049;
+  font-weight: 600;
+}
+
+.mt-3 {
+  margin-top: 0.75rem;
+}
+
+@media (max-width: 900px) {
+  .qbf-row.two-col {
+    grid-template-columns: 1fr;
+  }
+
+  .qbf-type-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .qbf-option-row {
+    grid-template-columns: 1fr;
+  }
+
+  .qbf-actions {
+    flex-direction: column;
+  }
+
+  .qbf-submit,
+  .qbf-cancel {
+    width: 100%;
+  }
+}

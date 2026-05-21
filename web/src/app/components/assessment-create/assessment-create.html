@@ -1,101 +1,280 @@
-<main class="container mt-4">
-  <div class="form-card p-4 shadow-sm bg-white rounded">
-    <h2 class="fw-bold mb-1">Create Test Template</h2>
-    <p class="text-muted mb-4">Group questions together to create a reusable assessment.</p>
-
-    <form (ngSubmit)="onSubmit()">
-      <div class="mb-3">
-        <label class="form-label fw-bold">Assessment Title</label>
-        <input type="text" class="form-control" [(ngModel)]="title" name="title" placeholder="e.g., Senior .NET Developer Test">
+<section class="ac-page">
+  <div class="ac-shell">
+    <header class="ac-header">
+      <div>
+        <h2>Create Test Template</h2>
+        <p>Build a reusable assessment from fixed questions and randomized tag groups.</p>
       </div>
+    </header>
 
-      <div class="mb-3">
-        <label class="form-label fw-bold">Description</label>
-        <textarea class="form-control" [(ngModel)]="description" name="description" rows="3"></textarea>
-      </div>
+    <form class="ac-layout" (ngSubmit)="onSubmit()">
+      <section class="ac-form-panel">
+        <label class="ac-field">
+          <span>Assessment Title</span>
+          <input
+            type="text"
+            [(ngModel)]="title"
+            name="title"
+            placeholder="e.g., Senior .NET Developer Test"
+          />
+        </label>
 
-      <div class="mb-4">
-        <label class="form-label fw-bold">Target Difficulty</label>
-        <select class="form-select" [(ngModel)]="difficultyLevel" name="difficulty">
-          <option [value]="0">Junior</option>
-          <option [value]="1">Medior</option>
-          <option [value]="2">Senior</option>
-        </select>
-      </div>
+        <label class="ac-field">
+          <span>Description</span>
+          <textarea [(ngModel)]="description" name="description" rows="5"></textarea>
+        </label>
 
-      <div class="border-top pt-4">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-          <h5 class="mb-0">Selected Questions ({{ selectedQuestions.length }})</h5>
-          <button type="button" class="btn btn-primary btn-sm" (click)="openQuestionModal()">
-            <i class="bi bi-search me-1"></i> Browse Question Bank
+        <label class="ac-field">
+          <span>Target Difficulty</span>
+          <select [(ngModel)]="difficultyLevel" name="difficulty" (ngModelChange)="onTargetDifficultyChange()">
+            <option [value]="0">Junior</option>
+            <option [value]="1">Medior</option>
+            <option [value]="2">Senior</option>
+          </select>
+        </label>
+
+        @if (error) {
+          <div class="ac-alert">{{ error }}</div>
+        }
+
+        <div class="ac-submit-row">
+          <button class="ac-save-btn" type="submit" [disabled]="loading">
+            {{ loading ? 'Saving...' : 'Save Assessment Template' }}
           </button>
+          <button class="ac-secondary-btn" type="button" routerLink="/profile">Cancel</button>
+        </div>
+      </section>
+
+      <aside class="ac-selection-panel">
+        <div class="ac-panel-heading">
+          <div>
+            <h3>Selected Questions</h3>
+            <p>{{ totalQuestionCount }} question{{ totalQuestionCount === 1 ? '' : 's' }} planned</p>
+          </div>
+          <button class="ac-secondary-btn compact" type="button" (click)="openQuestionModal()">Browse Question Bank</button>
         </div>
 
-        @if (selectedQuestions.length > 0) {
-          <div class="list-group">
-            @for (q of selectedQuestions; track q.id) {
-              <div class="list-group-item d-flex justify-content-between align-items-center border-start-0 border-end-0 px-0">
-                <div>
-                  <span class="badge bg-light text-dark border me-2">{{ q.type }}</span>
-                  <strong>{{ q.title }}</strong>
-                </div>
-                <button type="button" class="btn btn-link text-danger p-0" (click)="removeQuestion(q.id)">
-                  <i class="bi bi-trash"></i>
-                </button>
-              </div>
-            }
+        <section class="ac-selection-block">
+          <div class="ac-block-title">
+            <h4>Questions</h4>
+            <span>{{ plannedQuestions.length }}</span>
           </div>
-        } @else {
-          <div class="text-center py-4 border rounded bg-light">
-            <p class="text-muted mb-0">Your assessment is empty. Add questions from the bank.</p>
-          </div>
-        }
-      </div>
 
-      @if (error) {
-        <div class="alert alert-danger mt-4">{{ error }}</div>
-      }
-
-      <div class="mt-5 d-flex gap-2">
-        <button type="submit" class="btn btn-success px-4" [disabled]="loading">
-          {{ loading ? 'Saving...' : 'Save Assessment Template' }}
-        </button>
-        <button type="button" class="btn btn-light" routerLink="/profile">Cancel</button>
-      </div>
+          @if (plannedQuestions.length > 0) {
+            <div class="ac-selected-list">
+              @for (entry of plannedQuestions; track entry.source + '-' + entry.question.id + '-' + (entry.randomTag ?? '')) {
+                <article class="ac-selected-item" [class.random-source]="entry.source === 'random'">
+                  <div>
+                    <strong>{{ entry.question.title }}</strong>
+                    <p>{{ getQuestionPreview(entry.question) }}</p>
+                    <div class="ac-meta-line">
+                      <span>{{ getQuestionTypeLabel(entry.question.type) }}</span>
+                      <span>{{ getDifficultyLabel(entry.question.difficulty) }}</span>
+                    </div>
+                  </div>
+                  <button type="button" class="ac-icon-btn danger" (click)="removePlannedQuestion(entry)" aria-label="Remove question">
+                    &times;
+                  </button>
+                  @if (entry.source === 'random' && entry.randomTag) {
+                    <span class="ac-selection-source-badge">From tag: {{ entry.randomTag }}</span>
+                  }
+                </article>
+              }
+            </div>
+          } @else {
+            <div class="ac-empty-box">No questions selected.</div>
+          }
+        </section>
+      </aside>
     </form>
   </div>
-</main>
+</section>
 
 @if (showQuestionModal) {
-  <div class="modal-backdrop fade show" style="background-color: rgba(0,0,0,0.5);"></div>
-  <div class="modal fade show d-block" tabindex="-1">
-    <div class="modal-dialog modal-lg modal-dialog-scrollable">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">Question Bank</h5>
-          <button type="button" class="btn-close" (click)="closeQuestionModal()"></button>
+  <div class="ac-modal-backdrop" (click)="closeQuestionModal()">
+    <section class="ac-modal-dialog" (click)="onModalDialogClick($event)">
+      <header class="ac-modal-header">
+        <div>
+          <h3>Question Bank</h3>
+          <p>{{ filteredQuestions.length }} of {{ availableQuestions.length }} active questions shown</p>
         </div>
-        <div class="modal-body">
-          <div class="row g-3">
-            @for (q of availableQuestions; track q.id) {
-              <div class="col-12">
-                <div class="card card-hover" (click)="addQuestion(q)">
-                  <div class="card-body d-flex justify-content-between align-items-center">
-                    <div>
-                      <h6 class="mb-1 fw-bold">{{ q.title }}</h6>
-                      <small class="text-muted">{{ q.difficulty }} • {{ q.language }}</small>
-                    </div>
-                    <i class="bi bi-plus-circle fs-4 text-success"></i>
-                  </div>
-                </div>
+        <button type="button" class="ac-close-btn" (click)="closeQuestionModal()" aria-label="Close question picker">
+          &times;
+        </button>
+      </header>
+
+      <section class="ac-picker-filters">
+        <label class="ac-filter-field">
+          <span>Type</span>
+          <select [(ngModel)]="filterType" (ngModelChange)="onFilterChange()">
+            <option value="">All</option>
+            <option *ngFor="let option of questionTypeOptions" [value]="option.value">{{ option.label }}</option>
+          </select>
+        </label>
+
+        <label class="ac-filter-field">
+          <span>Difficulty</span>
+          <select [(ngModel)]="filterDifficulty" (ngModelChange)="onFilterChange()">
+            <option value="">All</option>
+            <option *ngFor="let option of difficultyOptions" [value]="option.value">{{ option.label }}</option>
+          </select>
+        </label>
+
+        <div class="ac-filter-field ac-tag-filter">
+          <span>Tags</span>
+          <div class="ac-tag-input-shell">
+            <div class="ac-tag-chip-list" *ngIf="selectedFilterTags.length > 0">
+              <button
+                class="ac-tag-chip"
+                type="button"
+                *ngFor="let tag of selectedFilterTags"
+                (click)="removeFilterTag(tag)"
+                [attr.aria-label]="'Remove tag ' + tag"
+              >
+                {{ tag }} <strong>&times;</strong>
+              </button>
+            </div>
+
+            <input
+              type="text"
+              [ngModel]="tagQuery"
+              [ngModelOptions]="{ standalone: true }"
+              (ngModelChange)="onTagInputChange($event)"
+              (focus)="onTagInputFocus()"
+              (keydown)="onTagInputKeydown($event)"
+              placeholder="Start typing a tag..."
+            />
+
+            <div class="ac-tag-dropdown" *ngIf="showTagDropdown">
+              <button
+                class="ac-tag-option"
+                type="button"
+                *ngFor="let tag of filteredTagSuggestions"
+                (mousedown)="$event.preventDefault(); selectFilterTag(tag)"
+              >
+                {{ tag }}
+              </button>
+
+              <div class="ac-tag-empty" *ngIf="filteredTagSuggestions.length === 0">
+                No matching tags
               </div>
-            }
+            </div>
           </div>
         </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" (click)="closeQuestionModal()">Done</button>
-        </div>
+
+        <button type="button" class="ac-clear-btn" (click)="clearFilters()">Clear filters</button>
+      </section>
+
+      @if (questionPickerError) {
+        <div class="ac-picker-alert">{{ questionPickerError }}</div>
+      }
+
+      <div class="ac-picker-layout">
+        <section class="ac-question-results">
+          @if (questionsLoading) {
+            <div class="ac-empty-box">Loading questions...</div>
+          } @else if (filteredQuestions.length > 0) {
+            @for (question of filteredQuestions; track question.id) {
+              <article
+                class="ac-question-card"
+                [class.selected]="isQuestionSelected(question.id)"
+                [class.random-preview]="isQuestionInRandomPreview(question.id)"
+              >
+                <button type="button" class="ac-question-body" (click)="toggleQuestion(question)">
+                  <div class="ac-question-copy">
+                    <div class="ac-question-title-row">
+                      <h4>{{ question.title }}</h4>
+                      <div class="ac-question-badges">
+                        <span class="ac-selected-badge" *ngIf="isQuestionSelected(question.id)">Selected</span>
+                        <span class="ac-random-badge" *ngIf="!isQuestionSelected(question.id) && isQuestionInRandomPreview(question.id)">
+                          {{ getRandomPreviewLabel(question.id) }}
+                        </span>
+                      </div>
+                    </div>
+                    <p>{{ getQuestionPreview(question) }}</p>
+                    <div class="ac-card-meta">
+                      <span>{{ getQuestionTypeLabel(question.type) }}</span>
+                      <span>{{ getDifficultyLabel(question.difficulty) }}</span>
+                      @if (question.tags.length > 0) {
+                        @for (tag of question.tags; track tag) {
+                          <span class="ac-tag-pill">{{ tag }}</span>
+                        }
+                      }
+                    </div>
+                  </div>
+                  <span class="ac-add-indicator">{{ isQuestionSelected(question.id) ? 'Remove' : 'Add' }}</span>
+                </button>
+              </article>
+            }
+          } @else {
+            <div class="ac-empty-box">No active questions match the selected filters.</div>
+          }
+        </section>
+
+        <aside class="ac-tag-groups">
+          <div class="ac-side-heading">
+            <h4>Select by tags</h4>
+            <p>Choose how many questions should be picked when saving.</p>
+          </div>
+
+          @if (tagGroups.length > 0) {
+            <div class="ac-tag-group-list">
+              @for (group of tagGroups; track group.key) {
+                <article class="ac-tag-group-card" [class.reserved]="group.reserved > 0">
+                  <div>
+                    <strong>{{ group.tag }}</strong>
+                    <p>{{ group.available }} unreserved of {{ group.total }} active</p>
+                    @if (group.reserved > 0) {
+                      <span>{{ group.reserved }} selected from this tag</span>
+                    }
+                  </div>
+                  <div class="ac-tag-group-actions">
+                    <label>
+                      <span>Total</span>
+                      <input
+                        type="number"
+                        [min]="hasRandomRule(group.tag) ? 0 : 1"
+                        [max]="getRandomGroupMaxCount(group.tag)"
+                        [ngModel]="getRandomGroupDraftCount(group.tag)"
+                        [ngModelOptions]="{ standalone: true }"
+                        (ngModelChange)="setRandomGroupDraftCount(group.tag, $event)"
+                      />
+                    </label>
+                    @if (!hasRandomRule(group.tag)) {
+                      <button
+                        type="button"
+                        class="ac-secondary-btn compact"
+                        [disabled]="getRandomGroupMaxCount(group.tag) <= 0"
+                        (click)="addRandomRule(group.tag, getRandomGroupDraftCount(group.tag))"
+                      >
+                        Add
+                      </button>
+                    } @else {
+                      <button
+                        type="button"
+                        class="ac-secondary-btn compact danger-outline"
+                        (click)="removeRandomRule(group.tag)"
+                      >
+                        Remove all
+                      </button>
+                    }
+                  </div>
+                </article>
+              }
+            </div>
+          } @else {
+            <div class="ac-empty-box">No tags found on active questions.</div>
+          }
+        </aside>
       </div>
-    </div>
+
+      <footer class="ac-modal-footer">
+        <div>
+          <strong>{{ selectedQuestions.length }}</strong> fixed,
+          <strong>{{ randomTagRules.length }}</strong> from tag{{ randomTagRules.length === 1 ? '' : 's' }}
+        </div>
+        <button type="button" class="ac-primary-btn" (click)="closeQuestionModal()">Done</button>
+      </footer>
+    </section>
   </div>
 }

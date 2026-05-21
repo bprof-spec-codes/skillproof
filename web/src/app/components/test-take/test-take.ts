@@ -9,6 +9,7 @@ import { TestSubmitDto } from '../../Models/Dtos/Test/test-submit-dto';
 import { QuestionType } from '../../Models/Enums/QuestionType';
 import { ModalService } from '../../services/modal-service';
 import { TestService } from '../../services/test-service';
+import { TestSubmitSkillDto } from '../../Models/Dtos/Test/test-submit-skill-dto';
 
 @Component({
   selector: 'app-test-take',
@@ -20,6 +21,7 @@ export class TestTake implements OnInit, OnDestroy {
   readonly QuestionType = QuestionType;
 
   jobId: string | null = null;
+  skillId: string | null = null;
   assessment: CandidateAssessmentDto | null = null;
   currentIndex = 0;
   answers = new Map<string, TestAnswerSubmitDto>();
@@ -41,21 +43,27 @@ export class TestTake implements OnInit, OnDestroy {
     private modalService: ModalService,
     private ngZone: NgZone,
     private cdr: ChangeDetectorRef,
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.routeSubscription = this.route.paramMap.subscribe((params) => {
       const id = params.get('id');
-      if (!id) {
+      const skillId = params.get('skillId');
+      const assessmentId = params.get('assessmentId');
+      const jobId = params.get('id');
+      if (jobId) {
+        this.jobId = jobId;
+        this.loadTest(jobId);
+      } else if (skillId && assessmentId) {
+        this.skillId = skillId;
+        this.loadTestForSkill(skillId, assessmentId);
+      } else {
         this.ngZone.run(() => {
+          this.errorMessage = 'No Job ID or Skill ID provided in the route.';
           this.isLoading = false;
-          this.errorMessage = 'Invalid job id.';
           this.cdr.detectChanges();
         });
-        return;
       }
-      this.jobId = id;
-      this.loadTest(id);
     });
   }
 
@@ -101,38 +109,50 @@ export class TestTake implements OnInit, OnDestroy {
   }
 
   onSubmit(): void {
-    if (!this.assessment || !this.jobId || this.isSubmitting) {
+    if (!this.assessment || this.isSubmitting) {
       return;
     }
 
-    const dto: TestSubmitDto = {
-      jobId: this.jobId,
-      answers: this.assessment.questions.map((q) => this.buildAnswerFor(q)),
-    };
-
     this.isSubmitting = true;
     this.submitSubscription?.unsubscribe();
-    this.submitSubscription = this.testService.submitTest(dto).subscribe({
-      next: (result) => {
-        this.ngZone.run(() => {
-          this.result = result;
-          this.isSubmitting = false;
-          this.cdr.detectChanges();
-        });
-      },
-      error: () => {
-        this.ngZone.run(() => {
-          this.isSubmitting = false;
-          this.modalService.open({
-            message: 'Failed to submit the test. Please try again.',
-            autoClose: true,
-            duration: 3000,
-            type: 'error',
+
+    const answerList = this.assessment.questions.map((q) => this.buildAnswerFor(q));
+
+    if (this.jobId) {
+      const dto: TestSubmitDto = {
+        jobId: this.jobId,
+        answers: answerList,
+      };
+
+      this.submitSubscription = this.testService.submitTest(dto).subscribe({
+        next: (result) => {
+          this.ngZone.run(() => {
+            this.result = result;
+            this.isSubmitting = false;
+            this.cdr.detectChanges();
           });
-          this.cdr.detectChanges();
-        });
-      },
-    });
+        },
+        error: () => this.handleSubmitError()
+      });
+
+    } else if (this.skillId) {
+      const dto: TestSubmitSkillDto = {
+        skillId: this.skillId,
+        assessmentId: this.assessment!.id,
+        answers: answerList,
+      };
+
+      this.submitSubscription = this.testService.submitSkillTest(dto).subscribe({
+        next: (result) => {
+          this.ngZone.run(() => {
+            this.result = result;
+            this.isSubmitting = false;
+            this.cdr.detectChanges();
+          });
+        },
+        error: () => this.handleSubmitError()
+      });
+    }
   }
 
   private buildAnswerFor(question: CandidateQuestionDto): TestAnswerSubmitDto {
@@ -150,6 +170,10 @@ export class TestTake implements OnInit, OnDestroy {
     } else {
       this.router.navigate(['/home']);
     }
+  }
+
+  backToProfile(): void {
+    this.router.navigate(['/viewProfile'])
   }
 
   private loadTest(jobId: string): void {
@@ -175,6 +199,40 @@ export class TestTake implements OnInit, OnDestroy {
           this.cdr.detectChanges();
         });
       },
+    });
+  }
+
+  private loadTestForSkill(skillId: string, assessmentId: string) {
+    this.isLoading = true;
+    this.errorMessage = null;
+
+    this.loadSubscription = this.testService.getCandidateTestForSkill(skillId, assessmentId).subscribe({
+      next: (data) => {
+        this.assessment = data;
+        this.answers.clear();
+        this.currentIndex = 0;
+        this.isLoading = false;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error(err);
+        this.errorMessage = 'Failed to load test. Please try again.';
+        this.isLoading = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  private handleSubmitError(): void {
+    this.ngZone.run(() => {
+      this.isSubmitting = false;
+      this.modalService.open({
+        message: 'Failed to submit the test. Please try again.',
+        autoClose: true,
+        duration: 3000,
+        type: 'error',
+      });
+      this.cdr.detectChanges();
     });
   }
 }

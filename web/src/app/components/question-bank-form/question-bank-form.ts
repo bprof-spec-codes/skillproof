@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, NgZone, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, EventEmitter, Input, NgZone, OnInit, Output } from '@angular/core';
 import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { finalize } from 'rxjs';
@@ -6,8 +6,8 @@ import { CreateQuestionRequestDto } from '../../Models/Dtos/Question/create-ques
 import { UpdateQuestionRequestDto } from '../../Models/Dtos/Question/update-question-request-dto';
 import {
   CodeCompletionQuestionPayloadDto,
-  FillInTheBlankQuestionPayloadDto,
   MultipleChoiceQuestionPayloadDto,
+  OpenEndedQuestionPayloadDto,
   TrueFalseQuestionPayloadDto,
 } from '../../Models/Dtos/Question/question-type-payload-dtos';
 import { DifficultyLevel } from '../../Models/Enums/DifficultyLevel';
@@ -23,19 +23,25 @@ import { QuestionBankService } from '../../services/question-bank-service';
   styleUrl: './question-bank-form.scss',
 })
 export class QuestionBankForm implements OnInit {
+  @Input() isModalMode = false;
+  @Input() questionId: string | null = null;
+  @Output() closed = new EventEmitter<void>();
+  @Output() saved = new EventEmitter<string>();
+
   readonly QuestionType = QuestionType;
   form: FormGroup;
 
   loading = false;
   saving = false;
   isEditMode = false;
-  questionId: string | null = null;
+  tagInputText = '';
+  tags: string[] = [];
 
   readonly questionTypeOptions = [
     { label: 'Multiple Choice', value: QuestionType.MultipleChoice },
     { label: 'Code Completion', value: QuestionType.CodeCompletion },
     { label: 'True / False', value: QuestionType.TrueFalse },
-    { label: 'Fill In The Blank', value: QuestionType.FillInTheBlank },
+    { label: 'Open-Ended', value: QuestionType.OpenEnded },
   ];
 
   readonly difficultyOptions = [
@@ -56,7 +62,6 @@ export class QuestionBankForm implements OnInit {
   ) {
     this.form = this.fb.group({
       type: [QuestionType.MultipleChoice, Validators.required],
-      language: ['', [Validators.required, Validators.maxLength(20)]],
       difficulty: [DifficultyLevel.Junior, Validators.required],
       title: ['', [Validators.required, Validators.maxLength(255)]],
       questionText: ['', Validators.required],
@@ -75,7 +80,6 @@ export class QuestionBankForm implements OnInit {
       acceptedAnswersText: [''],
 
       fillInAnswer: [''],
-      fillInManualFeedback: [''],
 
       trueFalseCorrectAnswer: [false],
       trueFalseExplanation: [''],
@@ -83,7 +87,7 @@ export class QuestionBankForm implements OnInit {
   }
 
   ngOnInit(): void {
-    const id = this.route.snapshot.paramMap.get('id');
+    const id = this.questionId ?? this.route.snapshot.paramMap.get('id');
     this.isEditMode = !!id;
     this.questionId = id;
 
@@ -107,15 +111,13 @@ export class QuestionBankForm implements OnInit {
           this.ngZone.run(() => {
             this.form.patchValue({
               type: question.type,
-              language: question.language,
-              difficulty: question.difficulty,
+              difficulty: this.coerceDifficultyLevel(question.difficulty),
               title: question.title,
               questionText: question.questionText,
               isActive: question.isActive,
               codeSnippet: question.codeCompletion?.codeSnippet ?? '',
               acceptedAnswersText: question.codeCompletion?.acceptedAnswers?.join('\n') ?? '',
-              fillInAnswer: question.fillInTheBlank?.answer ?? '',
-              fillInManualFeedback: question.fillInTheBlank?.manualFeedback ?? '',
+              fillInAnswer: question.openEnded?.answer ?? '',
               trueFalseCorrectAnswer: question.trueFalse?.correctAnswer ?? false,
               trueFalseExplanation: question.trueFalse?.explanation ?? '',
             });
@@ -124,6 +126,7 @@ export class QuestionBankForm implements OnInit {
               question.multipleChoice?.options ?? [],
               question.multipleChoice?.correctOptionIndexes ?? []
             );
+            this.tags = this.normalizeTags(question.tags ?? []);
 
             this.form.get('type')?.disable();
             this.cdr.detectChanges();
@@ -150,6 +153,14 @@ export class QuestionBankForm implements OnInit {
     return this.form.get('multipleChoiceCorrectFlags') as FormArray<FormControl<boolean>>;
   }
 
+  selectType(type: QuestionType): void {
+    if (this.isEditMode) {
+      return;
+    }
+
+    this.form.patchValue({ type });
+  }
+
   addMultipleChoiceOption(): void {
     this.multipleChoiceOptionsArray.push(this.createMultipleChoiceOptionControl());
     this.multipleChoiceCorrectFlagsArray.push(this.createMultipleChoiceCorrectControl());
@@ -165,6 +176,8 @@ export class QuestionBankForm implements OnInit {
   }
 
   onSubmit(): void {
+    this.commitPendingTag();
+
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
@@ -204,6 +217,12 @@ export class QuestionBankForm implements OnInit {
                 duration: 2500,
                 type: 'success',
               });
+              if (this.isModalMode) {
+                this.saved.emit(updated.id);
+                this.closed.emit();
+                return;
+              }
+
               this.router.navigate(['/question-bank', updated.id]);
             });
           },
@@ -234,22 +253,33 @@ export class QuestionBankForm implements OnInit {
           });
         })
       )
-      .subscribe({
-        next: (created) => {
-          this.ngZone.run(() => {
+        .subscribe({
+          next: (created) => {
+            this.ngZone.run(() => {
             this.modalService.open({
               message: 'Question created successfully.',
               autoClose: true,
               duration: 2500,
               type: 'success',
             });
-            this.router.navigate(['/question-bank', created.id]);
-          });
-        },
-      });
+              if (this.isModalMode) {
+                this.saved.emit(created.id);
+                this.closed.emit();
+                return;
+              }
+
+              this.router.navigate(['/question-bank', created.id]);
+            });
+          },
+        });
   }
 
   cancel(): void {
+    if (this.isModalMode) {
+      this.closed.emit();
+      return;
+    }
+
     if (this.questionId) {
       this.router.navigate(['/question-bank', this.questionId]);
       return;
@@ -262,11 +292,11 @@ export class QuestionBankForm implements OnInit {
     const value = this.form.getRawValue();
     const dto = new CreateQuestionRequestDto();
     dto.type = value.type as QuestionType;
-    dto.language = value.language.trim();
-    dto.difficulty = Number(value.difficulty) as DifficultyLevel;
+    dto.difficulty = this.coerceDifficultyLevel(value.difficulty);
     dto.title = value.title.trim();
     dto.questionText = value.questionText.trim();
     dto.createdBy = createdBy;
+    dto.tags = [...this.tags];
 
     this.attachTypePayload(dto, dto.type);
 
@@ -278,11 +308,11 @@ export class QuestionBankForm implements OnInit {
     const dto = new UpdateQuestionRequestDto();
     const selectedType = value.type as QuestionType;
 
-    dto.language = value.language.trim();
-    dto.difficulty = Number(value.difficulty) as DifficultyLevel;
+    dto.difficulty = this.coerceDifficultyLevel(value.difficulty);
     dto.title = value.title.trim();
     dto.questionText = value.questionText.trim();
     dto.isActive = !!value.isActive;
+    dto.tags = [...this.tags];
 
     this.attachTypePayload(dto, selectedType);
 
@@ -300,8 +330,11 @@ export class QuestionBankForm implements OnInit {
       return;
     }
 
-    if (type === QuestionType.FillInTheBlank) {
-      target.fillInTheBlank = this.buildFillInTheBlankPayload();
+    if (type === QuestionType.OpenEnded) {
+      const payload = this.buildOpenEndedPayload();
+      target.openEnded = payload;
+      // TODO(OpenEnded-cleanup): remove legacy write field after backend contract rename.
+      target.fillInTheBlank = payload;
       return;
     }
 
@@ -345,11 +378,10 @@ export class QuestionBankForm implements OnInit {
     return payload;
   }
 
-  private buildFillInTheBlankPayload(): FillInTheBlankQuestionPayloadDto {
+  private buildOpenEndedPayload(): OpenEndedQuestionPayloadDto {
     const value = this.form.getRawValue();
-    const payload = new FillInTheBlankQuestionPayloadDto();
+    const payload = new OpenEndedQuestionPayloadDto();
     payload.answer = value.fillInAnswer.trim();
-    payload.manualFeedback = value.fillInManualFeedback?.trim() || undefined;
     return payload;
   }
 
@@ -391,9 +423,9 @@ export class QuestionBankForm implements OnInit {
       return null;
     }
 
-    if (type === QuestionType.FillInTheBlank) {
+    if (type === QuestionType.OpenEnded) {
       if (!value.fillInAnswer || value.fillInAnswer.trim() === '') {
-        return 'Fill in the blank requires an answer.';
+        return 'Open-ended question requires an answer.';
       }
 
       return null;
@@ -407,6 +439,26 @@ export class QuestionBankForm implements OnInit {
       .split(/\r?\n/)
       .map((item) => item.trim())
       .filter((item) => item !== '');
+  }
+
+  private coerceDifficultyLevel(value: unknown): DifficultyLevel {
+    if (typeof value === 'number' && DifficultyLevel[value] !== undefined) {
+      return value as DifficultyLevel;
+    }
+
+    if (typeof value === 'string') {
+      const mapped = DifficultyLevel[value as keyof typeof DifficultyLevel];
+      if (typeof mapped === 'number') {
+        return mapped as DifficultyLevel;
+      }
+
+      const numeric = Number(value);
+      if (!Number.isNaN(numeric) && DifficultyLevel[numeric] !== undefined) {
+        return numeric as DifficultyLevel;
+      }
+    }
+
+    return DifficultyLevel.Junior;
   }
 
   private createMultipleChoiceOptionControl(value = ''): FormControl<string> {
@@ -432,5 +484,77 @@ export class QuestionBankForm implements OnInit {
       this.multipleChoiceOptionsArray.push(this.createMultipleChoiceOptionControl());
       this.multipleChoiceCorrectFlagsArray.push(this.createMultipleChoiceCorrectControl());
     }
+  }
+
+  onTagInputKeydown(event: KeyboardEvent): void {
+    if (event.key === ',' || event.key === 'Enter') {
+      event.preventDefault();
+      this.commitPendingTag();
+      return;
+    }
+
+    if (event.key === 'Backspace' && this.tagInputText.trim() === '' && this.tags.length > 0) {
+      this.removeTag(this.tags[this.tags.length - 1]);
+    }
+  }
+
+  onTagInputChange(raw: string): void {
+    this.tagInputText = raw;
+
+    if (!raw.includes(',')) {
+      return;
+    }
+
+    const parts = raw.split(',');
+    const completed = parts.slice(0, -1);
+    const trailing = parts[parts.length - 1] ?? '';
+
+    completed.forEach((part) => this.addTag(part));
+    this.tagInputText = trailing;
+  }
+
+  removeTag(tag: string): void {
+    const normalized = this.normalizeTag(tag);
+    this.tags = this.tags.filter((item) => this.normalizeTag(item) !== normalized);
+  }
+
+  private commitPendingTag(): void {
+    this.addTag(this.tagInputText);
+    this.tagInputText = '';
+  }
+
+  private addTag(rawTag: string): void {
+    const trimmed = rawTag.trim();
+    if (trimmed === '') {
+      return;
+    }
+
+    const normalized = this.normalizeTag(trimmed);
+    const exists = this.tags.some((tag) => this.normalizeTag(tag) === normalized);
+    if (exists) {
+      return;
+    }
+
+    this.tags = [...this.tags, trimmed];
+  }
+
+  private normalizeTags(rawTags: string[]): string[] {
+    const unique = new Map<string, string>();
+
+    rawTags.forEach((tag) => {
+      const trimmed = String(tag).trim();
+      const normalized = this.normalizeTag(trimmed);
+      if (normalized === '' || unique.has(normalized)) {
+        return;
+      }
+
+      unique.set(normalized, trimmed);
+    });
+
+    return Array.from(unique.values());
+  }
+
+  private normalizeTag(value: string): string {
+    return value.trim().toLocaleLowerCase();
   }
 }

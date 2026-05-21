@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SkillProof.Entities.Dtos.Assesment;
 using SkillProof.Entities.Dtos.Job;
@@ -5,6 +6,7 @@ using SkillProof.Entities.Dtos.Jobs;
 using SkillProof.Entities.Dtos.Questions;
 using SkillProof.Entities.Models;
 using SkillProof.Logic.Jobs;
+using System.Security.Claims;
 
 namespace SkillProof.Api.Controllers;
 [Route("api/[controller]")]
@@ -63,6 +65,7 @@ public class JobsController : ControllerBase
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdateJob(string id, [FromBody] JobViewDto dto)
     {
+
         var companyId = User.Claims.FirstOrDefault(c => 
             c.Type == "CompanyId" || 
             c.Type.EndsWith("CompanyId", StringComparison.OrdinalIgnoreCase))?.Value;
@@ -101,5 +104,101 @@ public class JobsController : ControllerBase
         }
         return Ok(candidateTest);
     }
+
+    [HttpPost("{id}/apply")]
+    public async Task<IActionResult> ApplyForJob(string id)
+    {
+        var userId = User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(userId))
+        {
+            return Unauthorized(new { message = "You must be logged in to apply." });
+        }
+
+        try
+        {
+            var applicationId = await _jobLogic.ApplyForJobAsync(id, userId);
+            return Ok(new { ApplicationId = applicationId, message = "Application submitted successfully." });
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new { message = ex.Message });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Conflict(new { message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = "An error occurred while submitting the application.", details = ex.Message });
+        }
+    }
+
+    [HttpPut("{id}/accept")]
+    public async Task<IActionResult> AcceptCandidate([FromQuery] string userId, string id)
+    {
+        var companyId = User.Claims.FirstOrDefault(c =>
+            c.Type == "CompanyId" ||
+            c.Type.EndsWith("CompanyId", StringComparison.OrdinalIgnoreCase))?.Value;
+
+        if (string.IsNullOrEmpty(companyId))
+        {
+            return BadRequest(new { message = "Company ID is missing from the authentication token." });
+        }
+
+        await _jobLogic.AcceptCandidateAsync(userId, id);
+        return Ok();
+    }
+
+    [HttpPut("{id}/reject")]
+    public async Task<IActionResult> RejectCandidate([FromQuery] string userId, string id)
+    {
+        var companyId = User.Claims.FirstOrDefault(c =>
+            c.Type == "CompanyId" ||
+            c.Type.EndsWith("CompanyId", StringComparison.OrdinalIgnoreCase))?.Value;
+
+        if (string.IsNullOrEmpty(companyId))
+        {
+            return BadRequest(new { message = "Company ID is missing from the authentication token." });
+        }
+
+        await _jobLogic.RejectCandidateAsync(userId, id);
+        return Ok();
+    }
+
+    [HttpGet("notifications")]
+    [Authorize]
+    public async Task<IActionResult> GetNotifications()
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(userId))
+        {
+            return Unauthorized();
+        }
+
+        var notifications = await _jobLogic.GetNotificationsAsync(userId);
+        return Ok(notifications);
+    }
+
+    [HttpPut("notifications/{id}/read")]
+    [Authorize]
+    public async Task<IActionResult> MarkAsRead(string id)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(userId))
+        {
+            return Unauthorized();
+        }
+
+        try
+        {
+            await _jobLogic.MarkNotificationAsReadAsync(id, userId);
+            return Ok();
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new { message = ex.Message });
+        }
+    }
+
 
 }

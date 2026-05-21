@@ -1,0 +1,97 @@
+<div class="d-flex align-items-center justify-content-center">
+  <div class="container text-center">
+    <div class="d-flex justify-content-between gap-4">
+      <button class="login-btn button-medium mb-4" routerLink="/job-upload">Create an advertisement <i class="bi bi-plus"></i></button>
+      <button class="login-btn button-medium mb-4" routerLink="/assessments/create">
+        <i class="bi bi-layers me-1"></i>Build Test
+      </button>
+      <button class="login-btn button-medium mb-4" routerLink="/question-bank/create">
+        <i class="bi bi-patch-question me-1"></i>Create Question
+      </button>
+    </div>
+    
+
+    <div class="row text-start pb-5 mt-4">
+      <!-- Left Column: Master List of Jobs -->
+      <div class="col-lg-7 col-md-6 mb-4 d-flex flex-column gap-3">
+        @if (companyJobs$ | async; as jobs) {
+          @if (jobs.length > 0) {
+            @for (job of jobs; track job.id) {
+              <div class="card border-0 radius" [class.border-0]="selectedJob?.id !== job.id"
+                [class.border]="selectedJob?.id === job.id" [class.border-highlight]="selectedJob?.id === job.id"
+                [class.shadow-sm]="selectedJob?.id === job.id" (click)="selectJob(job)">
+                <div class="card-body p-4">
+
+                  <h4 class="fw-bold color mb-3">{{job.title}}</h4>
+                  
+                  <!-- DISPLAY TAGS HERE -->
+                  <div class="d-flex gap-2 mb-3">
+                    @for(tag of job.tags; track $index){
+                      <span class="badge-primary text-dark">
+                          <i class="bi bi-briefcase text-danger"></i> {{tag}}
+                      </span>
+                    }
+                  </div>
+
+                  <p class="text-muted small mb-3">{{job.shortDescription}}</p>
+
+                  <div class="text-secondary small d-flex flex-column gap-1">
+                    <span><i class="bi bi-geo-alt text-danger"></i> {{job.location}}</span>
+                    <span><i class="bi bi-clock text-danger"></i> {{ getTimeAgo(job.createdAt) }}</span>
+                  </div>
+                </div>
+              </div>
+            }
+          }
+        }
+      </div>
+
+      <!-- Right Column: Detail View for Selected Job -->
+      <div class="col-lg-5 col-md-6">
+        @if (selectedJob) {
+          <div class="card border-0 shadow-sm" style="border-radius: 16px; position: sticky; top: 20px;">
+            <div class="card-body p-4">
+
+              <!-- Edit button placed right next to title -->
+              <div class="d-flex justify-content-between align-items-start mb-2">
+                <h2 class="fw-bold color mb-0">{{selectedJob.title}}</h2>
+                <a class="btn btn-link text-danger p-0" [routerLink]="['/editJob', selectedJob.id]" aria-label="Edit Job">
+                  <i class="bi bi-pencil fs-4"></i>
+                </a>
+              </div>
+
+              <div class="small mt-3">
+                <p class="weight mb-2">{{selectedJob.shortDescription}}</p>
+              </div>
+
+              <hr class="divider">
+              <h6 class="fw-bold mb-3">Job characteristics</h6>
+              <div class="d-flex gap-2 mb-4">
+                <span class="badge-primary text-dark">
+                  <i class="bi bi-briefcase text-danger"></i> {{selectedJob.employmentType}}
+                </span>
+                @for(tag of selectedJob.tags; track $index){
+                  <span class="badge-primary text-dark">
+                    <i class="bi bi-briefcase text-danger"></i> {{tag}}
+                  </span>
+                }
+              </div>
+
+              <hr class="divider">
+              <h6 class="fw-bold mb-2">Office location</h6>
+              <p class="small text-muted mb-0">{{selectedJob.location}}</p>
+
+            </div>
+          </div>
+        } @else {
+          <!-- Fallback when nothing is selected -->
+          <div class="text-center p-5 text-muted h-100 d-flex flex-column justify-content-center align-items-center bg-white" style="border-radius: 16px;">
+            <i class="bi bi-hand-index display-4 mb-3"></i>
+            <h5>Select a job to see details</h5>
+          </div>
+        }
+      </div>
+
+    </div>
+  </div>
+</div>

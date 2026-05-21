@@ -1,11 +1,16 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, tap } from 'rxjs';
+import { BehaviorSubject, map, Observable, tap } from 'rxjs';
 import { QuestionListFilterDto } from '../Models/Dtos/Question/question-list-filter-dto';
 import { QuestionResponseDto } from '../Models/Dtos/Question/question-response-dto';
 import { CreateQuestionRequestDto } from '../Models/Dtos/Question/create-question-request-dto';
 import { UpdateQuestionRequestDto } from '../Models/Dtos/Question/update-question-request-dto';
 import { environment } from '../../environments/environment.development';
+import {
+  normalizeQuestionResponse,
+  normalizeQuestionResponses,
+  withLegacyOpenEndedWrite,
+} from './open-ended-compat';
 
 @Injectable({
   providedIn: 'root',
@@ -22,6 +27,7 @@ export class QuestionBankService {
     const params = this.buildFilterParams(filter);
 
     return this.http.get<QuestionResponseDto[]>(this.apiUrl, { params }).pipe(
+      map((questions) => normalizeQuestionResponses(questions)),
       tap((questions) => {
         this.questionsSubject.next(questions);
       })
@@ -29,11 +35,14 @@ export class QuestionBankService {
   }
 
   getById(id: string): Observable<QuestionResponseDto> {
-    return this.http.get<QuestionResponseDto>(`${this.apiUrl}/${id}`);
+    return this.http.get<QuestionResponseDto>(`${this.apiUrl}/${id}`).pipe(
+      map((question) => normalizeQuestionResponse(question))
+    );
   }
 
   create(dto: CreateQuestionRequestDto): Observable<QuestionResponseDto> {
-    return this.http.post<QuestionResponseDto>(this.apiUrl, dto).pipe(
+    return this.http.post<QuestionResponseDto>(this.apiUrl, withLegacyOpenEndedWrite(dto)).pipe(
+      map((created) => normalizeQuestionResponse(created)),
       tap((created) => {
         this.questionsSubject.next([created, ...this.questionsSubject.value]);
       })
@@ -41,7 +50,8 @@ export class QuestionBankService {
   }
 
   update(id: string, dto: UpdateQuestionRequestDto): Observable<QuestionResponseDto> {
-    return this.http.put<QuestionResponseDto>(`${this.apiUrl}/${id}`, dto).pipe(
+    return this.http.put<QuestionResponseDto>(`${this.apiUrl}/${id}`, withLegacyOpenEndedWrite(dto)).pipe(
+      map((updated) => normalizeQuestionResponse(updated)),
       tap((updated) => {
         const next = this.questionsSubject.value.map((question) =>
           question.id === updated.id ? updated : question

@@ -11,9 +11,13 @@ using SkillProof.Entities.Helper;
 using SkillProof.Entities.Models;
 using SkillProof.Logic.Assesments;
 using SkillProof.Logic.Assessments;
+using SkillProof.Logic.Education;
+using SkillProof.Logic.Experience;
+using SkillProof.Logic.Gemini;
 using SkillProof.Logic.Helper;
 using SkillProof.Logic.Jobs;
 using SkillProof.Logic.Questions;
+using SkillProof.Logic.Skill;
 using SkillProof.Logic.Tests;
 using SkillProof.Logic.User;
 using System.IdentityModel.Tokens.Jwt;
@@ -70,7 +74,11 @@ namespace SkillProof.Api
                 });
             });
             builder.Services.AddTransient(typeof(Repository<>));
+            builder.Services.AddTransient<SkillLogic>();
+            builder.Services.AddTransient<IEducationLogic,EducationLogic>();
+            builder.Services.AddTransient<IExperienceLogic,ExperienceLogic>();
             builder.Services.AddScoped<IMarkdownService, MarkdownService>();
+            builder.Services.AddScoped<IGeminiService, GeminiService>();
 
             builder.Services.AddCors(option =>
             {
@@ -208,16 +216,16 @@ namespace SkillProof.Api
             using (var scope = app.Services.CreateScope())
             {
                 var services = scope.ServiceProvider;
-                try
-                {
+                //try
+                //{
                     var context = services.GetRequiredService<SkillProofDbContext>();
                     context.Database.Migrate();
                     DbInitializer.Seed(context);
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Database seeding failed: {ex.Message}");
-                }
+                //}
+                //catch (Exception ex)
+                //{
+                //    Console.WriteLine($"Database seeding failed: {ex.Message}");
+                //}
             }
 
             app.Run();

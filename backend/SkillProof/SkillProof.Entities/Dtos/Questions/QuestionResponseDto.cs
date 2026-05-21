@@ -8,6 +8,7 @@ namespace SkillProof.Entities.Dtos.Questions
         public QuestionType Type { get; set; }
         public string Language { get; set; } = string.Empty;
         public DifficultyLevel Difficulty { get; set; }
+        public List<string> Tags { get; set; } = new();
         public string Title { get; set; } = string.Empty;
         public string QuestionText { get; set; } = string.Empty;
         public string CreatedBy { get; set; } = string.Empty;
