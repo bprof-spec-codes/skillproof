@@ -51,21 +51,16 @@
       </div>
 
       <div class="card-list mb-5">
-        @if(educations.length > 0) {
-          @for (skill of userSkills; track skill.id) {
-          <div class="skill-chip">
-            <span>{{ skill.name }}</span>
-            <button type="button" class="btn btn-sm text-danger" (click)="removeSkill($index, skill.id)">
-              <i class="bi bi-x-circle fs-5"></i>
-            </button>
-          </div>
-          }
-        } @else {
-        <p class="text-center mt-3 text-muted"><strong>Add a skill</strong></p>
+        @for (skill of userSkills; track skill.id) {
+        <div class="skill-chip">
+          <span>{{ skill.name }}</span>
+          <button type="button" class="btn btn-sm text-danger" (click)="removeSkill($index, skill.id)">
+            <i class="bi bi-x-circle fs-5"></i>
+          </button>
+        </div>
         }
-
       </div>
-
+        <p class="text-center mt-3 text-muted"><strong>Add a skill</strong></p>
       <div class="add-skill-control d-flex gap-2 align-items-center">
         <select class="form-control" (change)="onSkillSelected($event)">
           <option value="">-- Choose a skill to add --</option>

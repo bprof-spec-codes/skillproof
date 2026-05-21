@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { ProfileService } from '../../services/profile-service';
 import { AuthService } from '../../services/auth-service';
 import { HttpClient } from '@angular/common/http';
@@ -29,6 +29,7 @@ export class EditProfile implements OnInit {
     private skillService: SkillService,
     private educationService: EducationService,
     private experienceService: ExperienceService,
+    private cdr: ChangeDetectorRef,
   ) {}
 
   form!: FormGroup;
@@ -73,13 +74,6 @@ export class EditProfile implements OnInit {
       description: [''],
     });
 
-    this.getAllSkills();
-
-    const userId = this.authService.getUserId();
-    if (userId) {
-      this.profileService.loadProfile(userId);
-    }
-
     this.profileService.currentProfile$.subscribe((profile) => {
       if (!profile) return;
 
@@ -98,12 +92,17 @@ export class EditProfile implements OnInit {
             : ([...profile.skills] as any);
       }
 
-      const uid = this.authService.getUserId();
-      if (uid) {
-        this.loadEducations();
-        this.loadExperiences();
-      }
+      this.cdr.detectChanges();
     });
+
+    this.getAllSkills();
+
+    const userId = this.authService.getUserId();
+    if (userId) {
+      this.loadEducations();
+      this.loadExperiences();
+      this.profileService.loadProfile(userId);
+    }
   }
 
   onFileSelected(event: any) {
@@ -177,6 +176,7 @@ export class EditProfile implements OnInit {
       this.userSkills.push({ id: skillObj.id, name: skillObj.name });
       this.pendingSkillAdditions.add(skillObj.id);
     }
+    this.cdr.detectChanges();
   }
 
   removeSkill(index: number, skillId: string): void {
@@ -195,6 +195,7 @@ export class EditProfile implements OnInit {
         error: (err) => console.error(`Failed to remove skill ${skillId}`, err),
       });
     }
+    this.cdr.detectChanges();
   }
 
   saveSkills(): void {
@@ -214,6 +215,7 @@ export class EditProfile implements OnInit {
       },
       error: (err) => console.error(`Failed to assign skills`, err),
     });
+    this.cdr.detectChanges();
   }
 
   getAllSkills(): void {
@@ -262,6 +264,7 @@ export class EditProfile implements OnInit {
         }
       },
     });
+    this.cdr.detectChanges();
   }
 
   saveExperience(): void {
@@ -283,6 +286,7 @@ export class EditProfile implements OnInit {
       },
       error: (err) => console.error('Failed to create experience', err),
     });
+    this.cdr.detectChanges();
   }
 
   loadEducations(): void {
@@ -291,10 +295,11 @@ export class EditProfile implements OnInit {
 
     this.educationService.getEducationsByUserId(userId).subscribe({
       next: (items) => {
-        this.educations = items;
+        this.educations = items ? [...items] : [];
+        this.cdr.detectChanges();
       },
       error: (err) => {
-        console.error('Error while loading in skills', err);
+        console.error('Failed to load educations', err);
       },
     });
   }
@@ -305,9 +310,12 @@ export class EditProfile implements OnInit {
 
     this.experienceService.getExperiencesByUserId(userId).subscribe({
       next: (items) => {
-        this.experiences = items;
+        this.experiences = items ? [...items] : [];
+        this.cdr.detectChanges();
       },
-      error: (err) => console.error('Failed to load experiences', err),
+      error: (err) => {
+        console.error('Failed to load experiences', err);
+      },
     });
   }
 

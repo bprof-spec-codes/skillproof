@@ -69,11 +69,13 @@ ng serve
 
 ### 3. Pályázói funkciók
 
-- **Profilkezelés:** Szakmai tapasztalatok, készségek és személyes adatok szerkesztése.
+- **Profilkezelés:**
+  - Szakmai tapasztalatok, készségek és személyes adatok szerkesztése.
+  - Skillek hozzárendelése a profilhoz, vannak olyan skillek amelyeket teszt kitöltésével érhet el a felhasználó
 - **Álláskeresés:**
   - Elérhető pozíciók listázása és részleteik megtekintése.
   - Állások kedvencekhez adása (könyvjelzőzés későbbi megtekintésre).
 - **Jelentkezési folyamat:**
   - Pályázás indítása a felületen keresztül.
-  - **Kompetenciateszt kitöltése:** Amennyiben a munkáltató tesztet rendelt az álláshoz, annak integrált kitöltése a jelentkezési folyamat részeként.
+  - Kompetenciateszt kitöltése: Amennyiben a munkáltató tesztet rendelt az álláshoz, annak integrált kitöltése a jelentkezési folyamat részeként.
   - Sikeres jelentkezés véglegesítése és visszajelzés a felhasználónak.
