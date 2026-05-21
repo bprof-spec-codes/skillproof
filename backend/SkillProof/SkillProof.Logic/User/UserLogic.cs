@@ -232,7 +232,7 @@ namespace SkillProof.Logic.User
                 Id = user.Id,
                 FullName = $"{user.FirstName} {user.LastName}",
                 Email = user.Email,
-                Image = Convert.ToBase64String(user.ProfilePicture),
+                Image = user.ProfilePicture != null ? Convert.ToBase64String(user.ProfilePicture) : null,
                 Bio = user.Bio,
                 Headline = user.Headline,
                 CompanyId = user.CompanyId,
