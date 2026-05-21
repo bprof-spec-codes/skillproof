@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using SkillProof.Entities.Enums;
 using SkillProof.Entities.Models;
@@ -68,7 +69,20 @@ namespace SkillProof.Data
                     .ThenInclude(q => q.TrueFalseQuestion)
                 .FirstOrDefault(a => a.Title == SeedAssessmentTitle);
 
-            var existingUser = context.Set<Users>().FirstOrDefault();
+            var adminRole = context.Set<IdentityRole>().FirstOrDefault(r => r.NormalizedName == "ADMIN");
+
+            if (adminRole == null)
+            {
+                adminRole = new IdentityRole
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    Name = "Admin",
+                    NormalizedName = "ADMIN"
+                };
+                context.Set<IdentityRole>().Add(adminRole);
+            }
+
+            var existingUser = context.Set<Users>().FirstOrDefault(u => u.NormalizedUserName == "SYSTEMADMIN");
             string adminUserId;
 
             if (existingUser != null)
@@ -88,8 +102,23 @@ namespace SkillProof.Data
                     SecurityStamp = Guid.NewGuid().ToString()
                 };
 
+                var passwordHasher = new PasswordHasher<Users>();
+                newUser.PasswordHash = passwordHasher.HashPassword(newUser, "AdminPassword123!");
+
                 context.Set<Users>().Add(newUser);
                 adminUserId = newUser.Id;
+            }
+
+            var userRoleExists = context.Set<IdentityUserRole<string>>()
+                .Any(ur => ur.UserId == adminUserId && ur.RoleId == adminRole.Id);
+
+            if (!userRoleExists)
+            {
+                context.Set<IdentityUserRole<string>>().Add(new IdentityUserRole<string>
+                {
+                    UserId = adminUserId,
+                    RoleId = adminRole.Id
+                });
             }
 
             var seedFilePath = Path.Combine(AppContext.BaseDirectory, "seed-questions.json");

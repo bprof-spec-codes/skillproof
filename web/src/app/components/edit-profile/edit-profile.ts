@@ -20,7 +20,6 @@ import { ExperienceViewDto } from '../../Models/Dtos/Experience/ExperienceViewDt
   styleUrl: './edit-profile.scss',
 })
 export class EditProfile implements OnInit {
-
   constructor(
     private fb: FormBuilder,
     private profileService: ProfileService,
@@ -29,8 +28,8 @@ export class EditProfile implements OnInit {
     private router: Router,
     private skillService: SkillService,
     private educationService: EducationService,
-    private experienceService: ExperienceService
-  ) { }
+    private experienceService: ExperienceService,
+  ) {}
 
   form!: FormGroup;
   selectedImageBase64: string | null = null;
@@ -49,21 +48,20 @@ export class EditProfile implements OnInit {
   experienceForm!: FormGroup;
   educationForm!: FormGroup;
 
-
   ngOnInit(): void {
     this.form = this.fb.group({
       email: ['', Validators.required],
       firstName: ['', Validators.required],
       lastName: ['', Validators.required],
       headline: [''],
-      bio: ['']
+      bio: [''],
     });
 
     this.experienceForm = this.fb.group({
       jobTitle: ['', Validators.required],
       companyName: ['', Validators.required],
       startDate: ['', Validators.required],
-      endDate: ['']
+      endDate: [''],
     });
 
     this.educationForm = this.fb.group({
@@ -72,7 +70,7 @@ export class EditProfile implements OnInit {
       fieldOfStudy: ['', Validators.required],
       startDate: ['', Validators.required],
       endDate: [''],
-      description: ['']
+      description: [''],
     });
 
     this.getAllSkills();
@@ -82,7 +80,7 @@ export class EditProfile implements OnInit {
       this.profileService.loadProfile(userId);
     }
 
-    this.profileService.currentProfile$.subscribe(profile => {
+    this.profileService.currentProfile$.subscribe((profile) => {
       if (!profile) return;
 
       this.form.patchValue({
@@ -90,13 +88,14 @@ export class EditProfile implements OnInit {
         firstName: profile.fullName?.split(' ')[0] || '',
         lastName: profile.fullName?.split(' ')[1] || '',
         headline: profile.headline,
-        bio: profile.bio
+        bio: profile.bio,
       });
 
       if (this.userSkills.length === 0 && profile.skills) {
-        this.userSkills = typeof profile.skills[0] === 'string'
-          ? (profile.skills as any as string[]).map(s => ({ id: s, name: s }))
-          : [...profile.skills] as any;
+        this.userSkills =
+          typeof profile.skills[0] === 'string'
+            ? (profile.skills as any as string[]).map((s) => ({ id: s, name: s }))
+            : ([...profile.skills] as any);
       }
 
       const uid = this.authService.getUserId();
@@ -153,32 +152,31 @@ export class EditProfile implements OnInit {
       dto.profilePicture = this.selectedImageBase64;
     }
 
-    this.http.put(`${environment.apiUrls.updateUser}/${userId}`, dto)
-      .subscribe({
-        next: () => {
-          this.profileService.loadProfile(userId);
-          this.router.navigate(['/viewProfile']);
-        },
-        error: (err) => {
-          console.error(err);
-        }
-      });
+    this.http.put(`${environment.apiUrls.updateUser}/${userId}`, dto).subscribe({
+      next: () => {
+        this.profileService.loadProfile(userId);
+        this.router.navigate(['/viewProfile']);
+      },
+      error: (err) => {
+        console.error(err);
+      },
+    });
   }
 
   onSkillSelected(event: Event): void {
     const selectElement = event.target as HTMLSelectElement;
     const selectedId = selectElement.value;
 
-    if (!selectedId) return;
+    if (!selectedId) {
+      return;
+    }
 
-    const skillObj = this.availableSkills.find(s => s.id === selectedId);
+    const skillObj = this.availableSkills.find((s) => s.id === selectedId);
 
-    if (skillObj && !this.userSkills.some(s => s.id === skillObj.id)) {
+    if (skillObj && !this.userSkills.some((s) => s.id === skillObj.id)) {
       this.userSkills.push({ id: skillObj.id, name: skillObj.name });
       this.pendingSkillAdditions.add(skillObj.id);
     }
-
-    selectElement.value = "";
   }
 
   removeSkill(index: number, skillId: string): void {
@@ -194,17 +192,19 @@ export class EditProfile implements OnInit {
           this.userSkills.splice(index, 1);
           console.log('Skill removed successfully');
         },
-        error: (err) => console.error(`Failed to remove skill ${skillId}`, err)
+        error: (err) => console.error(`Failed to remove skill ${skillId}`, err),
       });
     }
   }
 
   saveSkills(): void {
     const userId = this.authService.getUserId();
+    console.log(this.pendingSkillAdditions);
     if (!userId || this.pendingSkillAdditions.size === 0) return;
 
     const newSkillsArray = Array.from(this.pendingSkillAdditions);
-    console.log("SENDING NEW SKILLS:", newSkillsArray);
+
+    console.log('SENDING NEW SKILLS:', newSkillsArray);
 
     this.profileService.addSkillsToUser(userId, newSkillsArray).subscribe({
       next: () => {
@@ -212,20 +212,21 @@ export class EditProfile implements OnInit {
         this.pendingSkillAdditions.clear();
         this.profileService.loadProfile(userId);
       },
-      error: (err) => console.error(`Failed to assign skills`, err)
+      error: (err) => console.error(`Failed to assign skills`, err),
     });
   }
+
   getAllSkills(): void {
     this.skillService.skills$.subscribe({
       next: (skills) => {
         this.availableSkills = skills;
-        console.log('skills', skills)
-      }
+        console.log('skills', skills);
+      },
     });
 
     if (this.availableSkills.length === 0) {
       this.skillService.getAllSkills().subscribe({
-        error: (err) => console.error('Failed to load skills list', err)
+        error: (err) => console.error('Failed to load skills list', err),
       });
     }
   }
@@ -259,7 +260,7 @@ export class EditProfile implements OnInit {
         } else {
           alert('Something went wrong on the server. Check the IDE terminal.');
         }
-      }
+      },
     });
   }
 
@@ -280,7 +281,7 @@ export class EditProfile implements OnInit {
         this.loadExperiences();
         this.experienceForm.reset();
       },
-      error: (err) => console.error('Failed to create experience', err)
+      error: (err) => console.error('Failed to create experience', err),
     });
   }
 
@@ -293,9 +294,9 @@ export class EditProfile implements OnInit {
         this.educations = items;
       },
       error: (err) => {
-        console.error('Error while loading in skills', err)
-      }
-    })
+        console.error('Error while loading in skills', err);
+      },
+    });
   }
 
   loadExperiences(): void {
@@ -306,7 +307,7 @@ export class EditProfile implements OnInit {
       next: (items) => {
         this.experiences = items;
       },
-      error: (err) => console.error('Failed to load experiences', err)
+      error: (err) => console.error('Failed to load experiences', err),
     });
   }
 
@@ -320,7 +321,7 @@ export class EditProfile implements OnInit {
         this.loadEducations();
         this.profileService.loadProfile(userId);
       },
-      error: (err) => console.error('Failed to delete education', err)
+      error: (err) => console.error('Failed to delete education', err),
     });
   }
 
@@ -334,10 +335,7 @@ export class EditProfile implements OnInit {
         this.loadExperiences();
         this.profileService.loadProfile(userId);
       },
-      error: (err) => console.error('Failed to delete experience', err)
+      error: (err) => console.error('Failed to delete experience', err),
     });
   }
-
-
-
 }
